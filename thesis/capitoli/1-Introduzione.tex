@@ -1,0 +1,36 @@
+\chapter{Introduzione}
+\label{cap:Introduzione}
+\thispagestyle{empty}
+
+\begin{quotation}
+{\footnotesize
+\noindent{\emph{Doc: Sai sono stati gli scritti di Giulio Verne ad influenzare profondamente la mia esistenza. Avevo 11 anni quando ho letto per la prima volta ``Ventimila leghe sotto i mari''. E' stato allora che ho capito che dovevo dedicare la mia vita alla scienza!
+}
+}
+\begin{flushright}
+Ritorno al Futuro, parte III
+\end{flushright}
+}
+\end{quotation}
+\vspace{0.5cm}
+
+Uno dei problemi chiave della robotica è la localizzazione di un robot in un ambiente sconosciuto. Questo problema è noto come ``SLAM'', Simultaneus localization and Mapping, ed è attualmente una delle aree più importanti della ricerca riguardante i robot autonomi. 
+In particolare, questo problema risulta ancora più difficile se applicato a robot dotati di sensori a basso costo, quali webcam e unità di misura inerziale economiche, restrizione fondamentale per la diffusione di applicazioni di robotica autonoma nel mondo reale. \\
+Attualmente questo problema è affrontato attraverso tecniche probabilistiche, che sono ottime per analizzare ambienti statici e per ottenere una localizzazione precisa. Le mappe create sono utilizzabili principalmente per la navigazione.
+I sensori più usati sono gli scanner laser, che tuttavia sono molto costosi, i sensori RGB-D, sensori economici che nascono per applicazioni videoludiche commerciali e hanno alcune limitazioni se applicati alla robotica, le telecamere stereo. \\
+Lo scopo della tesi è di sviluppare un framework per risolvere il problema della localizzazione di robot autonomi dotati di sensori a basso costo, quali ad esempio i quadricotteri. L'idea è di sviluppare una metodologia che non solo permetta al robot di localizzarsi nella mappa in maniera efficiente, ma anche di interagire con l'ambiente in maniera avanzata, di compiere ragionamenti, di adattarsi a eventuali cambiamenti ed agli eventi che possono occorrere, quali la presenza di persone o altri agenti. \\
+Basandosi principalmente sulle informazioni provenienti da una videocamera monoculare, è stato sviluppato un sistema che è in grado di processare informazioni provenienti da un esperto, espresse in un linguaggio formale, di estrarre feature di basso livello e aggregarle, grazie alla base di conoscenza, per riconoscere e tracciare feature di alto livello, quali porte e armadi, e di basare conseguentemente su di essi il processo di localizzazione.
+Per permettere all'esperto di trasmettere la sua conoscenza all'agente, è stato sviluppato un linguaggio formale, basato sulla logica fuzzy, che permetta sia di esprimere regole fuzzy linguistiche, sia di definire un classificatore fuzzy ad albero in grado di definire una gerarchia di modelli e le relazioni tra di essi. \\
+Infine si utilizzano tecniche avanzate di fusione multisensoriale e localizzazione per estrarre la posizione del robot e degli oggetti nell'ambiente esplorato.
+
+\noindent
+La tesi è strutturata nel modo seguente: \\
+Nel \autoref{cap:statoArte} si illustra lo stato dell'arte. \\ 
+Nel \autoref{cap:architettura} si descrive l'architettura generale del sistema. \\
+Nel \autoref{cap:reasoning} si parla del reasoner e del linguaggio formale utilizzato. \\
+Nel \autoref{cap:riconoscimento} si descrive il riconoscimento degli oggetti \\
+Nel \autoref{cap:tracking} si mostra come gli oggetti riconosciuti sono tracciati. \\
+Nel \autoref{cap:mapping} si illustra la creazione della mappa e la localizzazione. \\
+Nel \autoref{cap:risultati} si analizzano i risultati sperimentali del sistema proposto. \\
+Nel \autoref{cap:sviluppi} si riassumono gli scopi, le valutazioni di questi e le prospettive future. 
+
