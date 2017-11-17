@@ -4,38 +4,43 @@ from hierarchical_core import HierarchicalCore
 from computational_graph import ComputationalGraph
 from M_block import MBlock
 from control_block import ControlBlock
+
+from mushroom.algorithms.value.td import QLearning
 from mushroom.environments import *
 from mushroom.policy import EpsGreedy
 from mushroom.utils.parameters import Parameter
-from mushroom.algorithms.value.td import QLearning
+from mushroom.utils.callbacks import CollectDataset
+from mushroom.core.core import Core
+from mushroom.environments import *
+
+
 
 
 def experiment():
-    np.random.seed()
-
+    np.random.seed(3)
+    print 'hierarchical     :'
     # MDP
     mdp = generate_simple_chain(state_n=5, goal_states=[2], prob=.8, rew=1,
                                 gamma=.9)
+
     # Model Block
     model_block = MBlock(env= mdp, render= False)
 
-
+    # Policy
+    epsilon = Parameter(value=.15)
+    pi = EpsGreedy(epsilon=epsilon)
 
     # Agent
-
-    epsilon = Parameter(value=.15)
-    pi = EpsGreedy(epsilon=epsilon, observation_space=mdp.observation_space,
-                   action_space=mdp.action_space)
-    shape = mdp.observation_space.size + mdp.action_space.size
     learning_rate = Parameter(value=.2)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
                     'fit_params': fit_params}
-    agent = QLearning(shape, pi, mdp.gamma, agent_params)
+    agent = QLearning(pi, mdp.info, agent_params)
+
 
     # Control Block
-    control_block = ControlBlock(wake_time = 1, agent=agent, episode_length=8,fit_time = 5 )
+    control_block = ControlBlock(wake_time = 1, agent=agent, n_eps_per_fit=None, n_steps_per_fit=1, horizon=8 )
 
     # Algorithm
     blocks = [model_block, control_block]
@@ -46,9 +51,45 @@ def experiment():
     computational_graph = ComputationalGraph(blocks=blocks, order=order)
     core = HierarchicalCore(computational_graph)
 
+
     # Train
-    core.learn(n_iterations=100)
+    core.learn(n_steps=100)
+    print agent.Q.table
+
+
+def experiment2():
+    np.random.seed(3)
+    print 'mushroom     :'
+
+    # MDP
+    mdp = generate_simple_chain(state_n=5, goal_states=[2], prob=.8, rew=1,
+                                gamma=.9)
+
+    # Policy
+    epsilon = Parameter(value=.15)
+    pi = EpsGreedy(epsilon=epsilon,)
+
+    # Agent
+    learning_rate = Parameter(value=.2)
+    algorithm_params = dict(learning_rate=learning_rate)
+    fit_params = dict()
+    agent_params = {'algorithm_params': algorithm_params,
+                    'fit_params': fit_params}
+    agent = QLearning(pi, mdp.info, agent_params)
+
+    # Algorithm
+    collect_dataset = CollectDataset()
+    callbacks = [collect_dataset]
+    core = Core(agent, mdp, callbacks)
+
+    # Train
+    core.learn(n_steps=100, n_steps_per_fit=1)
+    dataset=collect_dataset.get(),
+    print dataset
+    print agent.Q.table
 
 
 if __name__ == '__main__':
     experiment()
+    experiment2()
+

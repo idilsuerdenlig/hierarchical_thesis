@@ -21,18 +21,7 @@ class ComputationalGraph(object):
         self._blocks = blocks
         self._order = order
         self._model = self._blocks[self._order[0]]
-
-    def initialize(self):
-
-        for block in self._blocks:
-            if isinstance(block, ControlBlock):
-                block.agent.initialize(self._model.environment.get_info())
-
-    def episode_start(self):
-
-        for block in self._blocks:
-            if isinstance(block, ControlBlock):
-                block.agent.episode_start()
+        self.absorbing = False
 
 
     def call_blocks(self, learn_flag):
@@ -40,17 +29,17 @@ class ComputationalGraph(object):
         executes the blocks in the diagram in the provided order. Always starts from the model.
 
         """
+
         for index in self._order:
             block = self._blocks[index]
             inputs = list()
             for input_block in block.input_connections:
-                a=np.array(input_block.last_output != None)
-                if a.any(): inputs.append(input_block.last_output)
+                if input_block.last_output is not None:
+                    inputs.append(input_block.last_output)
             if block.reward_connection == None:
                 reward = None
             else:
                 reward = block.reward_connection.get_reward()
-            if index == 0: absorbing = False
-            absorbing = block(inputs=inputs, reward=reward, absorbing=absorbing, learn_flag=learn_flag)
+            self.absorbing, last = block(inputs=inputs, reward=reward, absorbing=self.absorbing, learn_flag=learn_flag)
 
-        return absorbing
+        return last

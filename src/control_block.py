@@ -1,95 +1,81 @@
 from block import Block
 from J_block import JBlock
 from M_block import MBlock
-from mushroom.algorithms import agent
-
+from mushroom.algorithms.agent import *
+import numpy as np
 class ControlBlock(Block):
     """
     This class implements the functions to initialize and move the agent drawing
     actions from its policy.
 
     """
-    def __init__(self, wake_time, agent, episode_length, fit_time, n_iterations=1):
-        """
-        Constructor.
+    def __init__(self, wake_time, agent, n_eps_per_fit, n_steps_per_fit, horizon):
 
-        Args:
-            policy (object): the policy to use for the agent;
-            gamma (float): discount factor;
-            params (dict): other parameters of the algorithm.
-            n_iterations: number of iterations for the fit of the agent
-        """
 
         self.agent = agent
         self.step_counter = 0
-        self.episode_counter = 0
+        self.curr_step_counter = 0
+        self.curr_episode_counter = 0
+        self.n_eps_per_fit = n_eps_per_fit
+        self.n_steps_per_fit = n_steps_per_fit
         self.dataset = list()
-        self.n_iterations = n_iterations
-        self.episode_length = episode_length
-        self.fit_time = fit_time
+        self.horizon = horizon
         self.last_input = None
         self.last_reward = None
         self.last_output = None
         self.last_abs = False
         self.last_last = False
-        self.fit_flag = False
 
         super(ControlBlock, self).__init__(wake_time=wake_time)
 
 
     def __call__(self, inputs, reward, absorbing, learn_flag):
-        """
-        Draw action: Returns the action to execute. It is the action returned by the policy
-        or the action set by the algorithm (e.g. SARSA).
 
-        Args:
-            r state (np.array): the state where the agent is.
-            absorbing: state bein absorbing for the subtask or for the mdp
-            wake: wake_time of the block
-            fit: fit time of the block
+        self.clock_counter += 1
 
-        Returns:
-            The action to be executed.
+        if learn_flag and \
+            (self.curr_step_counter == self.n_steps_per_fit or self.curr_episode_counter == self.n_eps_per_fit):
+            self.fit(self.dataset)
+            print self.dataset
+            self.dataset = list()
 
-        """
-        self.clock_counter+=1
-
-        if learn_flag and self.episode_counter == self.fit_time:
-            self.fit(self.dataset, self.n_iterations)
-
-        if absorbing or self.step_counter == self.episode_length :
+        if absorbing or self.step_counter == self.horizon :
             self.agent.episode_start()
-            self.dataset.append((self.last_input, self.last_output, self.last_reward, inputs, True))
+            state = np.concatenate(inputs, axis = 0)
+            sample = self.last_input, self.last_output, self.last_reward, state, self.last_abs
+            self.dataset.append(sample)
             self.last_output = None
             self.last_reward = None
             self.last_input = None
             self.last_abs = False
             self.last_last = False
             self.clock_counter = 0
-            self.episode_counter+=1
+            self.step_counter = 0
+            self.curr_step_counter = len(self.dataset)-1
+            self.curr_episode_counter+=1
 
         elif self.wake_time == self.clock_counter:
-             print'control block draw action'
-             action = self.agent.draw_action(state=inputs)
+             state = np.concatenate(inputs, axis=0)
+             action = self.agent.draw_action(state=state)
              self.clock_counter=0
-             if not self.fit_flag:
-                 self.dataset.append((self.last_input, self.last_output, self.last_reward,
-                                      inputs , self.last_last))
-             else:
-                 self.fit_flag = False
+             if self.last_reward is not None:
+                sample = self.last_input, self.last_output, self.last_reward, state, self.last_abs
+                self.dataset.append(sample)
              self.last_output = action
-             self.last_input = inputs
+             self.last_input = state
              self.last_reward = reward
              self.last_abs = absorbing
-             self.step_counter+=1
-             self.last_last = self.last_abs or self.step_counter == self.episode_length
+             self.curr_step_counter = len(self.dataset)
+             self.step_counter += 1
+             self.last_last = self.last_abs or self.step_counter == self.horizon
 
-        return absorbing
+        return absorbing, self.last_last
 
-    def fit(self, dataset, n_iterations):
+    def fit(self, dataset):
 
-        self.agent.fit(dataset, n_iterations)
-        self.episode_counter=0
+        self.agent.fit(dataset)
+        self.curr_episode_counter = 0
+        self.curr_step_counter = 0
 
 
     def add_reward(self, reward_block):
