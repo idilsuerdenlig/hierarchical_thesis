@@ -1,0 +1,10 @@
+\select@language {italian}
+\select@language {italian}
+\contentsline {chapter}{Indice}{iii}{chapter*.1}
+\contentsline {chapter}{Elenco delle figure}{v}{chapter*.2}
+\contentsline {chapter}{\numberline {1}State of the Art}{1}{chapter.1}
+\contentsline {section}{\numberline {1.1}Hierarchical Policy Search Algorithms}{1}{section.1.1}
+\contentsline {section}{\numberline {1.2}Rappresentazione del Mondo}{3}{section.1.2}
+\contentsline {section}{\numberline {1.3}Riconoscimento di Oggetti}{4}{section.1.3}
+\contentsline {section}{\numberline {1.4}Reasoning}{5}{section.1.4}
+\contentsline {chapter}{Bibliografia}{I}{chapter*.3}

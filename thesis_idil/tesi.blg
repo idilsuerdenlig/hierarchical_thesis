@@ -1,0 +1,85 @@
+This is BibTeX, Version 0.99d (TeX Live 2015/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: tesi.aux
+A level-1 auxiliary file: chapters/Introduction.aux
+A level-1 auxiliary file: chapters/StateoftheArt.aux
+The style file: plain.bst
+I couldn't open database file altro/bibliografia.bib
+---line 32 of file tesi.aux
+ : \bibdata{altro/bibliografia
+ :                            }
+I'm skipping whatever remains of this command
+I found no database files---while reading file tesi.aux
+Warning--I didn't find a database entry for "Montemerlo02a"
+Warning--I didn't find a database entry for "klein07parallel"
+Warning--I didn't find a database entry for "klein08improving"
+Warning--I didn't find a database entry for "conf/iccv/NewcombeLD11"
+Warning--I didn't find a database entry for "Forster2014ICRA"
+Warning--I didn't find a database entry for "izadi2011kinectfusion"
+Warning--I didn't find a database entry for "henry2012rgb"
+Warning--I didn't find a database entry for "sturm2012benchmark"
+Warning--I didn't find a database entry for "30724"
+Warning--I didn't find a database entry for "herbert1989terrain"
+Warning--I didn't find a database entry for "pfaff2007efficient"
+Warning--I didn't find a database entry for "4058725"
+Warning--I didn't find a database entry for "hornung13auro"
+Warning--I didn't find a database entry for "6630614"
+Warning--I didn't find a database entry for "blumenthal2014towards"
+Warning--I didn't find a database entry for "710772"
+Warning--I didn't find a database entry for "Viola01rapidobject"
+Warning--I didn't find a database entry for "Lienhart02anextended"
+Warning--I didn't find a database entry for "journals/ijista/AbramsonSG07"
+Warning--I didn't find a database entry for "1467360"
+Warning--I didn't find a database entry for "lsvm-pami"
+Warning--I didn't find a database entry for "NIPS2012_4824"
+Warning--I didn't find a database entry for "lai2012detection"
+Warning--I didn't find a database entry for "buchanan1984rule"
+Warning--I didn't find a database entry for "davis1977production"
+Warning--I didn't find a database entry for "joseph1994riley"
+Warning--I didn't find a database entry for "owl2-overview"
+Warning--I didn't find a database entry for "owl2-primer"
+Warning--I didn't find a database entry for "Zadeh1965338"
+Warning--I didn't find a database entry for "DBLP:journals/ivc/MaillotT08"
+Warning--I didn't find a database entry for "DBLP:journals/corr/abs-1301-4991"
+You've used 0 entries,
+            2118 wiz_defined-function locations,
+            540 strings with 4735 characters,
+and the built_in function-call counts, 18 in all, are:
+= -- 0
+> -- 0
+< -- 0
++ -- 0
+- -- 0
+* -- 2
+:= -- 7
+add.period$ -- 0
+call.type$ -- 0
+change.case$ -- 0
+chr.to.int$ -- 0
+cite$ -- 0
+duplicate$ -- 0
+empty$ -- 1
+format.name$ -- 0
+if$ -- 1
+int.to.chr$ -- 0
+int.to.str$ -- 0
+missing$ -- 0
+newline$ -- 3
+num.names$ -- 0
+pop$ -- 0
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 1
+stack$ -- 0
+substring$ -- 0
+swap$ -- 0
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 0
+while$ -- 0
+width$ -- 0
+write$ -- 2
+(There were 2 error messages)

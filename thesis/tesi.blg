@@ -1,0 +1,54 @@
+This is BibTeX, Version 0.99d (TeX Live 2015/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: tesi.aux
+A level-1 auxiliary file: altro/dedica.aux
+A level-1 auxiliary file: altro/sommario.aux
+A level-1 auxiliary file: altro/ringraziamenti.aux
+A level-1 auxiliary file: capitoli/1-Introduction.aux
+A level-1 auxiliary file: capitoli/2-StateoftheArt.aux
+The style file: plain.bst
+Database file #1: altro/bibliografia.bib
+Warning--empty publisher in joseph1994riley
+Warning--empty booktitle in Viola01rapidobject
+You've used 32 entries,
+            2118 wiz_defined-function locations,
+            703 strings with 10586 characters,
+and the built_in function-call counts, 13282 in all, are:
+= -- 1298
+> -- 642
+< -- 16
++ -- 253
+- -- 216
+* -- 915
+:= -- 2076
+add.period$ -- 106
+call.type$ -- 32
+change.case$ -- 194
+chr.to.int$ -- 0
+cite$ -- 34
+duplicate$ -- 541
+empty$ -- 1038
+format.name$ -- 216
+if$ -- 2900
+int.to.chr$ -- 0
+int.to.str$ -- 32
+missing$ -- 35
+newline$ -- 166
+num.names$ -- 69
+pop$ -- 244
+preamble$ -- 1
+purify$ -- 166
+quote$ -- 0
+skip$ -- 413
+stack$ -- 0
+substring$ -- 851
+swap$ -- 182
+text.length$ -- 16
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 120
+warning$ -- 2
+while$ -- 113
+width$ -- 34
+write$ -- 361
+(There were 2 warnings)

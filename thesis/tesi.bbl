@@ -1,0 +1,202 @@
+\begin{thebibliography}{10}
+
+\bibitem{journals/ijista/AbramsonSG07}
+Yotam Abramson, Bruno Steux, and Hicham Ghorayeb.
+\newblock Yet even faster (yef) real-time object detection.
+\newblock {\em IJISTA}, 2(2/3):102--112, 2007.
+
+\bibitem{6630614}
+S.~Blumenthal, H.~Bruyninckx, W.~Nowak, and E.~Prassler.
+\newblock A scene graph based shared 3d world model for robotic applications.
+\newblock In {\em Robotics and Automation (ICRA), 2013 IEEE International
+  Conference on}, pages 453--460, May 2013.
+
+\bibitem{blumenthal2014towards}
+Sebastian Blumenthal and Herman Bruyninckx.
+\newblock Towards a domain specific language for a scene graph based robotic
+  world model.
+\newblock {\em arXiv preprint arXiv:1408.0200}, 2014.
+
+\bibitem{buchanan1984rule}
+Bruce~G Buchanan, Edward~Hance Shortliffe, et~al.
+\newblock {\em Rule-based expert systems}, volume~3.
+\newblock Addison-Wesley Reading, MA, 1984.
+
+\bibitem{1467360}
+N.~Dalal and B.~Triggs.
+\newblock Histograms of oriented gradients for human detection.
+\newblock In {\em Computer Vision and Pattern Recognition, 2005. CVPR 2005.
+  IEEE Computer Society Conference on}, volume~1, pages 886--893 vol. 1, June
+  2005.
+
+\bibitem{davis1977production}
+Randall Davis, Bruce Buchanan, and Edward Shortliffe.
+\newblock Production rules as a representation for a knowledge-based
+  consultation program.
+\newblock {\em Artificial intelligence}, 8(1):15--45, 1977.
+
+\bibitem{lsvm-pami}
+P.~F. Felzenszwalb, R.~B. Girshick, D.~McAllester, and D.~Ramanan.
+\newblock Object detection with discriminatively trained part based models.
+\newblock {\em IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  32(9):1627--1645, 2010.
+
+\bibitem{Forster2014ICRA}
+Christian Forster, Matia Pizzoli, and Davide Scaramuzza.
+\newblock {SVO}: Fast semi-direct monocular visual odometry.
+\newblock In {\em IEEE International Conference on Robotics and Automation
+  (ICRA)}, 2014.
+
+\bibitem{henry2012rgb}
+Peter Henry, Michael Krainin, Evan Herbst, Xiaofeng Ren, and Dieter Fox.
+\newblock Rgb-d mapping: Using kinect-style depth cameras for dense 3d modeling
+  of indoor environments.
+\newblock {\em The International Journal of Robotics Research}, 31(5):647--663,
+  2012.
+
+\bibitem{herbert1989terrain}
+M~Herbert, C~Caillas, Eric Krotkov, In~So Kweon, and Takeo Kanade.
+\newblock Terrain mapping for a roving planetary explorer.
+\newblock In {\em Robotics and Automation, 1989. Proceedings., 1989 IEEE
+  International Conference on}, pages 997--1002. IEEE, 1989.
+
+\bibitem{owl2-primer}
+Pascal Hitzler, Markus Kr\"{o}tzsch, Bijan Parsia, Peter~F. Patel-Schneider,
+  and Sebastian Rudolph, editors.
+\newblock {\em {OWL~2 Web Ontology Language: Primer}}.
+\newblock W3C Recommendation, 27 October 2009.
+\newblock Available at \url{http://www.w3.org/TR/owl2-primer/}.
+
+\bibitem{DBLP:journals/corr/abs-1301-4991}
+Helmi~Ben Hmida, Christophe Cruz, Frank Boochs, and Christophe Nicolle.
+\newblock Knowledge base approach for 3d objects detection in point clouds
+  using 3d processing and specialists knowledge.
+\newblock {\em CoRR}, abs/1301.4991, 2013.
+
+\bibitem{hornung13auro}
+Armin Hornung, Kai~M. Wurm, Maren Bennewitz, Cyrill Stachniss, and Wolfram
+  Burgard.
+\newblock {OctoMap}: An efficient probabilistic {3D} mapping framework based on
+  octrees.
+\newblock {\em Autonomous Robots}, 2013.
+\newblock Software available at \url{http://octomap.github.com}.
+
+\bibitem{izadi2011kinectfusion}
+Shahram Izadi, David Kim, Otmar Hilliges, David Molyneaux, Richard Newcombe,
+  Pushmeet Kohli, Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison,
+  et~al.
+\newblock Kinectfusion: real-time 3d reconstruction and interaction using a
+  moving depth camera.
+\newblock In {\em Proceedings of the 24th annual ACM symposium on User
+  interface software and technology}, pages 559--568. ACM, 2011.
+
+\bibitem{joseph1994riley}
+Gary D.~Riley Joseph C.~Giarratano.
+\newblock {\em Expert Systems Principles and Programming}.
+\newblock 1994.
+
+\bibitem{klein07parallel}
+Georg Klein and David Murray.
+\newblock Parallel tracking and mapping for small {AR} workspaces.
+\newblock In {\em Proc. Sixth {IEEE} and {ACM} International Symposium on Mixed
+  and Augmented Reality {(ISMAR'07)}}, Nara, Japan, November 2007.
+
+\bibitem{klein08improving}
+Georg Klein and David Murray.
+\newblock Improving the agility of keyframe-based {SLAM}.
+\newblock In {\em Proc. 10th European Conference on Computer Vision (ECCV'08)},
+  pages 802--815, Marseille, October 2008.
+
+\bibitem{NIPS2012_4824}
+Alex Krizhevsky, Ilya Sutskever, and Geoffrey~E. Hinton.
+\newblock Imagenet classification with deep convolutional neural networks.
+\newblock In F.~Pereira, C.J.C. Burges, L.~Bottou, and K.Q. Weinberger,
+  editors, {\em Advances in Neural Information Processing Systems 25}, pages
+  1097--1105. Curran Associates, Inc., 2012.
+
+\bibitem{lai2012detection}
+Kevin Lai, Liefeng Bo, Xiaofeng Ren, and Dieter Fox.
+\newblock Detection-based object labeling in 3d scenes.
+\newblock In {\em Robotics and Automation (ICRA), 2012 IEEE International
+  Conference on}, pages 1330--1337. IEEE, 2012.
+
+\bibitem{174711}
+J.J. Leonard and H.F. Durrant-Whyte.
+\newblock Simultaneous map building and localization for an autonomous mobile
+  robot.
+\newblock In {\em Intelligent Robots and Systems '91. 'Intelligence for
+  Mechanical Systems, Proceedings IROS '91. IEEE/RSJ International Workshop
+  on}, pages 1442--1447 vol.3, Nov 1991.
+
+\bibitem{Lienhart02anextended}
+Rainer Lienhart and Jochen Maydt.
+\newblock An extended set of haar-like features for rapid object detection.
+\newblock In {\em IEEE ICIP 2002}, pages 900--903, 2002.
+
+\bibitem{DBLP:journals/ivc/MaillotT08}
+Nicolas Maillot and Monique Thonnat.
+\newblock Ontology based complex object recognition.
+\newblock {\em Image Vision Comput.}, 26(1):102--113, 2008.
+
+\bibitem{Montemerlo02a}
+M.~Montemerlo, S.~Thrun, D.~Koller, and B.~Wegbreit.
+\newblock {FastSLAM}: {A} factored solution to the simultaneous localization
+  and mapping problem.
+\newblock In {\em Proceedings of the AAAI National Conference on Artificial
+  Intelligence}, Edmonton, Canada, 2002. AAAI.
+
+\bibitem{conf/iccv/NewcombeLD11}
+Richard~A. Newcombe, Steven Lovegrove, and Andrew~J. Davison.
+\newblock Dtam: Dense tracking and mapping in real-time.
+\newblock In Dimitris~N. Metaxas, Long Quan, Alberto Sanfeliu, and Luc J.~Van
+  Gool, editors, {\em ICCV}, pages 2320--2327. IEEE, 2011.
+
+\bibitem{owl2-overview}
+W3C {OWL Working Group}.
+\newblock {\em {OWL~2 Web Ontology Language: Document Overview}}.
+\newblock W3C Recommendation, 27 October 2009.
+\newblock Available at \url{http://www.w3.org/TR/owl2-overview/}.
+
+\bibitem{710772}
+C.P. Papageorgiou, M.~Oren, and T.~Poggio.
+\newblock A general framework for object detection.
+\newblock In {\em Computer Vision, 1998. Sixth International Conference on},
+  pages 555--562, Jan 1998.
+
+\bibitem{pfaff2007efficient}
+Patrick Pfaff, Rudolph Triebel, and Wolfram Burgard.
+\newblock An efficient extension to elevation maps for outdoor terrain mapping
+  and loop closing.
+\newblock {\em The International Journal of Robotics Research}, 26(2):217--230,
+  2007.
+
+\bibitem{30724}
+Y.~Roth-Tabak and R.~Jain.
+\newblock Building an environment model using depth information.
+\newblock {\em Computer}, 22(6):85--90, June 1989.
+
+\bibitem{sturm2012benchmark}
+J{\"u}rgen Sturm, Nikolas Engelhard, Felix Endres, Wolfram Burgard, and Daniel
+  Cremers.
+\newblock A benchmark for the evaluation of rgb-d slam systems.
+\newblock In {\em Intelligent Robots and Systems (IROS), 2012 IEEE/RSJ
+  International Conference on}, pages 573--580. IEEE, 2012.
+
+\bibitem{4058725}
+R.~Triebel, P.~Pfaff, and W.~Burgard.
+\newblock Multi-level surface maps for outdoor terrain mapping and loop
+  closing.
+\newblock In {\em Intelligent Robots and Systems, 2006 IEEE/RSJ International
+  Conference on}, pages 2276--2282, Oct 2006.
+
+\bibitem{Viola01rapidobject}
+Paul Viola and Michael Jones.
+\newblock Rapid object detection using a boosted cascade of simple features.
+\newblock pages 511--518, 2001.
+
+\bibitem{Zadeh1965338}
+L.A. Zadeh.
+\newblock Fuzzy sets.
+\newblock {\em Information and Control}, 8(3):338 -- 353, 1965.
+
+\end{thebibliography}
