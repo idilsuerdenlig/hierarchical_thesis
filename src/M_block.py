@@ -24,11 +24,11 @@ class MBlock(Block):
 
     def __call__(self, inputs, reward, absorbing, learn_flag):
 
+        self.clock_counter+=1
+
         if inputs == None or len(inputs) == 0:
-            self._state = self.environment.reset()
-            print self._state
+            self.last_output = self.environment.reset()
             absorbing = False
-            self.last_output = self._state
 
         else:
             self._state = np.concatenate(inputs, axis=0)

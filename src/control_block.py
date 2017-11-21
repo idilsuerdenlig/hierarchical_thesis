@@ -9,7 +9,7 @@ class ControlBlock(Block):
     actions from its policy.
 
     """
-    def __init__(self, wake_time, agent, n_eps_per_fit, n_steps_per_fit, horizon):
+    def __init__(self, wake_time, agent, horizon, n_eps_per_fit=None, n_steps_per_fit=None):
 
 
         self.agent = agent
@@ -21,10 +21,8 @@ class ControlBlock(Block):
         self.dataset = list()
         self.horizon = horizon
         self.last_input = None
-        self.last_reward = None
         self.last_output = None
-        self.last_abs = False
-        self.last_last = False
+        self.last = True
 
         super(ControlBlock, self).__init__(wake_time=wake_time)
 
@@ -32,47 +30,44 @@ class ControlBlock(Block):
     def __call__(self, inputs, reward, absorbing, learn_flag):
 
         self.clock_counter += 1
+        if absorbing or self.step_counter == self.horizon :
+            self.agent.episode_start()
+            state = np.concatenate(inputs, axis = 0)
+            sample = self.last_input, self.last_output, reward, state, absorbing, True
+            self.dataset.append(sample)
+            self.last_output = None
+            self.last_input = state
+            self.last = True
+            self.clock_counter = 0
+            self.step_counter = 0
+            self.curr_step_counter += 1
+            self.curr_episode_counter += 1
+
+        elif self.wake_time == self.clock_counter:
+            state = np.concatenate(inputs, axis=0)
+            if not self.last:
+                sample = self.last_input, self.last_output, reward, state, False, False
+                self.dataset.append(sample)
+                self.curr_step_counter += 1
+                self.step_counter += 1
+            self.last_input = state
+            self.last_reward = reward
+            self.last = False
 
         if learn_flag and \
             (self.curr_step_counter == self.n_steps_per_fit or self.curr_episode_counter == self.n_eps_per_fit):
             self.fit(self.dataset)
-            print self.dataset
             self.dataset = list()
 
-        if absorbing or self.step_counter == self.horizon :
-            self.agent.episode_start()
-            state = np.concatenate(inputs, axis = 0)
-            sample = self.last_input, self.last_output, self.last_reward, state, self.last_abs
-            self.dataset.append(sample)
-            self.last_output = None
-            self.last_reward = None
-            self.last_input = None
-            self.last_abs = False
-            self.last_last = False
+        if self.wake_time == self.clock_counter:
+            action = self.agent.draw_action(state=state)
+            self.last_output = action
             self.clock_counter = 0
-            self.step_counter = 0
-            self.curr_step_counter = len(self.dataset)-1
-            self.curr_episode_counter+=1
 
-        elif self.wake_time == self.clock_counter:
-             state = np.concatenate(inputs, axis=0)
-             action = self.agent.draw_action(state=state)
-             self.clock_counter=0
-             if self.last_reward is not None:
-                sample = self.last_input, self.last_output, self.last_reward, state, self.last_abs
-                self.dataset.append(sample)
-             self.last_output = action
-             self.last_input = state
-             self.last_reward = reward
-             self.last_abs = absorbing
-             self.curr_step_counter = len(self.dataset)
-             self.step_counter += 1
-             self.last_last = self.last_abs or self.step_counter == self.horizon
 
-        return absorbing, self.last_last
+        return absorbing, self.last
 
     def fit(self, dataset):
-
         self.agent.fit(dataset)
         self.curr_episode_counter = 0
         self.curr_step_counter = 0

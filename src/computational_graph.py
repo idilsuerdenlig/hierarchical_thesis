@@ -29,14 +29,13 @@ class ComputationalGraph(object):
         executes the blocks in the diagram in the provided order. Always starts from the model.
 
         """
-
         for index in self._order:
             block = self._blocks[index]
             inputs = list()
             for input_block in block.input_connections:
                 if input_block.last_output is not None:
                     inputs.append(input_block.last_output)
-            if block.reward_connection == None:
+            if block.reward_connection is None:
                 reward = None
             else:
                 reward = block.reward_connection.get_reward()
