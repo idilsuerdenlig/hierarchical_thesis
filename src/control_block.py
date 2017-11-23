@@ -9,7 +9,7 @@ class ControlBlock(Block):
     actions from its policy.
 
     """
-    def __init__(self, wake_time, agent, horizon, n_eps_per_fit=None, n_steps_per_fit=None):
+    def __init__(self, wake_time, agent, horizon=None, n_eps_per_fit=None, n_steps_per_fit=None):
 
 
         self.agent = agent
@@ -19,7 +19,10 @@ class ControlBlock(Block):
         self.n_eps_per_fit = n_eps_per_fit
         self.n_steps_per_fit = n_steps_per_fit
         self.dataset = list()
-        self.horizon = horizon
+        if horizon is None:
+            self.horizon = self.agent.horizon
+        else:
+            self.horizon = horizon
         self.last_input = None
         self.last_output = None
         self.last = True
@@ -29,23 +32,25 @@ class ControlBlock(Block):
 
     def __call__(self, inputs, reward, absorbing, learn_flag):
 
-        self.clock_counter += 1
+
         if absorbing or self.step_counter == self.horizon :
+            print 'self.step_counter == horizon'
             self.agent.episode_start()
             state = np.concatenate(inputs, axis = 0)
             sample = self.last_input, self.last_output, reward, state, absorbing, True
             self.dataset.append(sample)
-            self.last_output = None
-            self.last_input = state
+            if absorbing:
+                self.last_output = None
+                self.last_input = state
+                self.clock_counter = self.wake_time-1
             self.last = True
-            self.clock_counter = 0
             self.step_counter = 0
             self.curr_step_counter += 1
             self.curr_episode_counter += 1
 
         elif self.wake_time == self.clock_counter:
             state = np.concatenate(inputs, axis=0)
-            if not self.last:
+            if self.last_output is not None:
                 sample = self.last_input, self.last_output, reward, state, False, False
                 self.dataset.append(sample)
                 self.curr_step_counter += 1
@@ -64,10 +69,11 @@ class ControlBlock(Block):
             self.last_output = action
             self.clock_counter = 0
 
-
-        return absorbing, self.last
+        self.clock_counter += 1
+        return absorbing
 
     def fit(self, dataset):
+        print dataset
         self.agent.fit(dataset)
         self.curr_episode_counter = 0
         self.curr_step_counter = 0

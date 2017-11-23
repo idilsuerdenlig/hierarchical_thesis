@@ -39,6 +39,7 @@ class ComputationalGraph(object):
                 reward = None
             else:
                 reward = block.reward_connection.get_reward()
-            self.absorbing, last = block(inputs=inputs, reward=reward, absorbing=self.absorbing, learn_flag=learn_flag)
+            self.absorbing = block(inputs=inputs, reward=reward, absorbing=self.absorbing, learn_flag=learn_flag)
+        last = self._blocks[index].last_output is None
 
         return last

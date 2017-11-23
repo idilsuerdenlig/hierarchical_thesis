@@ -5,10 +5,11 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/M_block.py" afterPath="$PROJECT_DIR$/src/M_block.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/block.py" afterPath="$PROJECT_DIR$/src/block.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/computational_graph.py" afterPath="$PROJECT_DIR$/src/computational_graph.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/control_block.py" afterPath="$PROJECT_DIR$/src/control_block.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/hierarchical_core.py" afterPath="$PROJECT_DIR$/src/hierarchical_core.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/simple_example.py" afterPath="$PROJECT_DIR$/src/simple_example.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/simple_agent.py" afterPath="$PROJECT_DIR$/src/simple_agent.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/trystuff.py" afterPath="$PROJECT_DIR$/src/trystuff.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -19,21 +20,23 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="td.py" pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/mushroom/mushroom/algorithms/value/td.py">
+      <file leaf-file-name="hierarchical_controller.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/hierarchical_controller.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="399">
-              <caret line="68" column="8" lean-forward="true" selection-start-line="68" selection-start-column="8" selection-end-line="68" selection-end-column="8" />
-              <folding />
+            <state relative-caret-position="216">
+              <caret line="12" column="0" lean-forward="false" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="simple_example.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="simple_example.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/simple_example.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1692">
-              <caret line="94" column="11" lean-forward="false" selection-start-line="94" selection-start-column="11" selection-end-line="94" selection-end-column="11" />
+            <state relative-caret-position="36">
+              <caret line="15" column="0" lean-forward="false" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -44,11 +47,29 @@
       <file leaf-file-name="grid_world_hierarchical_example.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/grid_world_hierarchical_example.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1584">
+            <state relative-caret-position="1314">
               <caret line="88" column="27" lean-forward="false" selection-start-line="88" selection-start-column="27" selection-end-line="88" selection-end-column="27" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="finite_mdp.py" pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/mushroom/mushroom/environments/finite_mdp.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="666">
+              <caret line="40" column="0" lean-forward="false" selection-start-line="40" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="simple_agent.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/simple_agent.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1134">
+              <caret line="63" column="31" lean-forward="false" selection-start-line="63" selection-start-column="31" selection-end-line="63" selection-end-column="31" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -56,8 +77,8 @@
       <file leaf-file-name="hierarchical_core.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/hierarchical_core.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="594">
-              <caret line="33" column="37" lean-forward="true" selection-start-line="33" selection-start-column="37" selection-end-line="33" selection-end-column="37" />
+            <state relative-caret-position="540">
+              <caret line="33" column="29" lean-forward="false" selection-start-line="33" selection-start-column="29" selection-end-line="33" selection-end-column="29" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -68,8 +89,8 @@
       <file leaf-file-name="computational_graph.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/computational_graph.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
-              <caret line="19" column="11" lean-forward="false" selection-start-line="19" selection-start-column="11" selection-end-line="19" selection-end-column="11" />
+            <state relative-caret-position="720">
+              <caret line="42" column="43" lean-forward="false" selection-start-line="42" selection-start-column="43" selection-end-line="42" selection-end-column="43" />
               <folding>
                 <element signature="e#0#38#0" expanded="true" />
               </folding>
@@ -80,8 +101,8 @@
       <file leaf-file-name="block.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/block.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-7">
-              <caret line="9" column="13" lean-forward="false" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+            <state relative-caret-position="252">
+              <caret line="14" column="38" lean-forward="false" selection-start-line="14" selection-start-column="38" selection-end-line="14" selection-end-column="38" />
               <folding />
             </state>
           </provider>
@@ -90,8 +111,8 @@
       <file leaf-file-name="control_block.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/control_block.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1260">
-              <caret line="70" column="0" lean-forward="false" selection-start-line="70" selection-start-column="0" selection-end-line="70" selection-end-column="0" />
+            <state relative-caret-position="720">
+              <caret line="44" column="53" lean-forward="false" selection-start-line="44" selection-start-column="53" selection-end-line="44" selection-end-column="53" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
@@ -102,31 +123,11 @@
       <file leaf-file-name="M_block.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/M_block.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="154">
-              <caret line="30" column="0" lean-forward="false" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
+            <state relative-caret-position="738">
+              <caret line="43" column="24" lean-forward="false" selection-start-line="43" selection-start-column="24" selection-end-line="43" selection-end-column="24" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="finite_mdp.py" pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/mushroom/mushroom/environments/finite_mdp.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="702">
-              <caret line="42" column="0" lean-forward="false" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="f_block.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/f_block.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="126">
-              <caret line="7" column="32" lean-forward="false" selection-start-line="7" selection-start-column="32" selection-end-line="7" selection-end-column="32" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -148,7 +149,6 @@
       <find>phi</find>
       <find>ini</find>
       <find>_episode_steps</find>
-      <find>print</find>
       <find>last_reward</find>
       <find>t</find>
       <find>abs</find>
@@ -160,6 +160,7 @@
       <find>GOAL</find>
       <find>true</find>
       <find>mu</find>
+      <find>print</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -178,22 +179,23 @@
         <option value="$PROJECT_DIR$/src/visualize_ship_steering.py" />
         <option value="$PROJECT_DIR$/src/ship_steering.py" />
         <option value="$PROJECT_DIR$/src/ship_steering_tiles.py" />
-        <option value="$PROJECT_DIR$/src/trystuff.py" />
         <option value="$PROJECT_DIR$/src/J.py" />
         <option value="$PROJECT_DIR$/src/hierarchical_algorithm.py" />
         <option value="$PROJECT_DIR$/src/mux_block.py" />
         <option value="$PROJECT_DIR$/src/f_block.py" />
         <option value="$PROJECT_DIR$/src/J_block.py" />
-        <option value="$PROJECT_DIR$/src/block.py" />
-        <option value="$PROJECT_DIR$/src/simple_agent.py" />
         <option value="$PROJECT_DIR$/src/simple_mushroom_example.py" />
-        <option value="$PROJECT_DIR$/src/simple_example.py" />
         <option value="$PROJECT_DIR$/src/hierarchical_core.py" />
-        <option value="$PROJECT_DIR$/src/computational_graph.py" />
-        <option value="$PROJECT_DIR$/src/M_block.py" />
-        <option value="$PROJECT_DIR$/src/control_block.py" />
         <option value="$USER_HOME$/mushroom/mushroom/algorithms/value/td.py" />
         <option value="$PROJECT_DIR$/src/grid_world_hierarchical_example.py" />
+        <option value="$PROJECT_DIR$/src/simple_example.py" />
+        <option value="$PROJECT_DIR$/src/trystuff.py" />
+        <option value="$PROJECT_DIR$/src/block.py" />
+        <option value="$PROJECT_DIR$/src/simple_agent.py" />
+        <option value="$PROJECT_DIR$/src/hierarchical_controller.py" />
+        <option value="$PROJECT_DIR$/src/M_block.py" />
+        <option value="$PROJECT_DIR$/src/computational_graph.py" />
+        <option value="$PROJECT_DIR$/src/control_block.py" />
       </list>
     </option>
   </component>
@@ -252,24 +254,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.simple_example">
-    <configuration name="computational_graph" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="hierarchical_thesis" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/computational_graph.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-    </configuration>
+  <component name="RunManager" selected="Python.grid_world_hierarchical_example">
     <configuration name="grid_world_hierarchical_example" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -287,7 +272,7 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
     </configuration>
-    <configuration name="hierarchical_core" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="hierarchical_controller" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -299,7 +284,24 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="hierarchical_thesis" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/hierarchical_core.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/hierarchical_controller.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+    </configuration>
+    <configuration name="simple_agent" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="hierarchical_thesis" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/simple_agent.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -339,18 +341,18 @@
       <option name="EMULATE_TERMINAL" value="false" />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python.trystuff" />
-      <item index="1" class="java.lang.String" itemvalue="Python.simple_example" />
-      <item index="2" class="java.lang.String" itemvalue="Python.computational_graph" />
-      <item index="3" class="java.lang.String" itemvalue="Python.hierarchical_core" />
-      <item index="4" class="java.lang.String" itemvalue="Python.grid_world_hierarchical_example" />
+      <item index="0" class="java.lang.String" itemvalue="Python.simple_example" />
+      <item index="1" class="java.lang.String" itemvalue="Python.grid_world_hierarchical_example" />
+      <item index="2" class="java.lang.String" itemvalue="Python.simple_agent" />
+      <item index="3" class="java.lang.String" itemvalue="Python.hierarchical_controller" />
+      <item index="4" class="java.lang.String" itemvalue="Python.trystuff" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.simple_example" />
-        <item index="1" class="java.lang.String" itemvalue="Python.grid_world_hierarchical_example" />
-        <item index="2" class="java.lang.String" itemvalue="Python.hierarchical_core" />
-        <item index="3" class="java.lang.String" itemvalue="Python.computational_graph" />
+        <item index="0" class="java.lang.String" itemvalue="Python.grid_world_hierarchical_example" />
+        <item index="1" class="java.lang.String" itemvalue="Python.simple_example" />
+        <item index="2" class="java.lang.String" itemvalue="Python.hierarchical_controller" />
+        <item index="3" class="java.lang.String" itemvalue="Python.simple_agent" />
         <item index="4" class="java.lang.String" itemvalue="Python.trystuff" />
       </list>
     </recent_temporary>
@@ -362,21 +364,21 @@
     <frame x="65" y="-4" width="1535" height="904" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29751512" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31027535" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329602" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329602" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24751244" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39945653" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975152" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24751244" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329602" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39945653" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
@@ -384,32 +386,17 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="16" />
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/grid_world_hierarchical_example.py</url>
+          <option name="timeStamp" value="25" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="26" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/parsing.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="936">
-          <caret line="52" column="0" lean-forward="true" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/check.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="522">
-          <caret line="31" column="16" lean-forward="false" selection-start-line="31" selection-start-column="16" selection-end-line="31" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/ship_steering.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="540">
-          <caret line="35" column="0" lean-forward="false" selection-start-line="35" selection-start-column="0" selection-end-line="41" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/ship_r_medium.log">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1980054">
@@ -586,13 +573,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/trystuff.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="11" column="17" lean-forward="false" selection-start-line="11" selection-start-column="17" selection-end-line="11" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/visualize_ship_steering.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="774">
@@ -636,13 +616,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/simple_agent.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="47" column="0" lean-forward="false" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/mushroom/mushroom/algorithms/agent.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="936">
@@ -651,19 +624,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/mushroom/mushroom/environments/finite_mdp.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="702">
-          <caret line="42" column="0" lean-forward="false" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/f_block.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="126">
           <caret line="7" column="32" lean-forward="false" selection-start-line="7" selection-start-column="32" selection-end-line="7" selection-end-column="32" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -681,18 +645,55 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/block.py">
+    <entry file="file://$USER_HOME$/mushroom/mushroom/algorithms/value/td.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-7">
-          <caret line="9" column="13" lean-forward="false" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+        <state relative-caret-position="0">
+          <caret line="68" column="8" lean-forward="false" selection-start-line="68" selection-start-column="8" selection-end-line="68" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/trystuff.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="6" column="0" lean-forward="true" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/mushroom/mushroom/utils/spaces.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-206">
+          <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/mushroom/mushroom/environments/finite_mdp.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="666">
+          <caret line="40" column="0" lean-forward="false" selection-start-line="40" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/simple_agent.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1134">
+          <caret line="63" column="31" lean-forward="false" selection-start-line="63" selection-start-column="31" selection-end-line="63" selection-end-column="31" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/mushroom/mushroom/environments/environment.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="342">
+          <caret line="19" column="0" lean-forward="false" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/M_block.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="154">
-          <caret line="30" column="0" lean-forward="false" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
+        <state relative-caret-position="738">
+          <caret line="43" column="24" lean-forward="false" selection-start-line="43" selection-start-column="24" selection-end-line="43" selection-end-column="24" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>
@@ -701,8 +702,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/hierarchical_core.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="594">
-          <caret line="33" column="37" lean-forward="true" selection-start-line="33" selection-start-column="37" selection-end-line="33" selection-end-column="37" />
+        <state relative-caret-position="540">
+          <caret line="33" column="29" lean-forward="false" selection-start-line="33" selection-start-column="29" selection-end-line="33" selection-end-column="29" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
@@ -711,46 +712,54 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/computational_graph.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="19" column="11" lean-forward="false" selection-start-line="19" selection-start-column="11" selection-end-line="19" selection-end-column="11" />
+        <state relative-caret-position="720">
+          <caret line="42" column="43" lean-forward="false" selection-start-line="42" selection-start-column="43" selection-end-line="42" selection-end-column="43" />
           <folding>
             <element signature="e#0#38#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/block.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="14" column="38" lean-forward="false" selection-start-line="14" selection-start-column="38" selection-end-line="14" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/control_block.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1260">
-          <caret line="70" column="0" lean-forward="false" selection-start-line="70" selection-start-column="0" selection-end-line="70" selection-end-column="0" />
+        <state relative-caret-position="720">
+          <caret line="44" column="53" lean-forward="false" selection-start-line="44" selection-start-column="53" selection-end-line="44" selection-end-column="53" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/mushroom/mushroom/algorithms/value/td.py">
+    <entry file="file://$PROJECT_DIR$/src/simple_example.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="399">
-          <caret line="68" column="8" lean-forward="true" selection-start-line="68" selection-start-column="8" selection-end-line="68" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/grid_world_hierarchical_example.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1584">
-          <caret line="88" column="27" lean-forward="false" selection-start-line="88" selection-start-column="27" selection-end-line="88" selection-end-column="27" />
+        <state relative-caret-position="36">
+          <caret line="15" column="0" lean-forward="false" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/simple_example.py">
+    <entry file="file://$PROJECT_DIR$/src/grid_world_hierarchical_example.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1692">
-          <caret line="94" column="11" lean-forward="false" selection-start-line="94" selection-start-column="11" selection-end-line="94" selection-end-column="11" />
+        <state relative-caret-position="1314">
+          <caret line="88" column="27" lean-forward="false" selection-start-line="88" selection-start-column="27" selection-end-line="88" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/hierarchical_controller.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="12" column="0" lean-forward="false" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>

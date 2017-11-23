@@ -1,10 +1,11 @@
+import numpy as np
 class SimpleAgent(object):
     """
     This class implements the functions to initialize and move the agent drawing
     actions from its policy.
 
     """
-    def __init__(self, action_space, params=None, features=None):
+    def __init__(self, name, mdp_info, params=None, features=None):
         """
         Constructor.
 
@@ -16,11 +17,12 @@ class SimpleAgent(object):
                 approximator.
 
         """
-        self.action_space = action_space
+        self.name = name
+        self.action_space = mdp_info.action_space
+        self.observation_space = mdp_info.observation_space
+        self.gamma = mdp_info.gamma
+        self.horizon = mdp_info.horizon
         self.params = params
-
-        self.mdp_info = dict()
-
         self.phi = features
 
         self._next_action = None
@@ -36,7 +38,7 @@ class SimpleAgent(object):
         for k, v in mdp_info.iteritems():
             self.mdp_info[k] = v
 
-    def fit(self, dataset, n_iterations):
+    def fit(self, dataset):
         """
         Fit step.
 
@@ -45,7 +47,7 @@ class SimpleAgent(object):
             n_iterations (int): number of fit steps of the approximator.
 
         """
-        print('I am fitting!')
+        print 'FIT', self.name
     def draw_action(self, state):
         """
         Return the action to execute. It is the action returned by the policy
@@ -58,9 +60,9 @@ class SimpleAgent(object):
             The action to be executed.
 
         """
-        action = self.action_space.sample()
-        print 'drawing action', action
-        return action
+        action = np.random.choice(self.action_space.n)
+        print 'DRAW', self.name
+        return np.array([action])
 
 
     def episode_start(self):

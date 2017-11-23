@@ -12,7 +12,7 @@ class Block(object):
         """
         self.input_connections = list()
         self.reward_connection = None
-        self.clock_counter = 0
+        self.clock_counter = wake_time
         self.last_output = None
         self.wake_time= wake_time
 

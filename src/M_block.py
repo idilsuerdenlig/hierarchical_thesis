@@ -28,10 +28,12 @@ class MBlock(Block):
 
         if inputs == None or len(inputs) == 0:
             self.last_output = self.environment.reset()
+            print 'RESET'
             absorbing = False
 
         else:
             self._state = np.concatenate(inputs, axis=0)
+            print 'STEP'
             self.last_output, self._reward, absorbing, _ = self.environment.step(self._state)
 
             if self._render:
@@ -39,7 +41,7 @@ class MBlock(Block):
 
         self._last = not(self.clock_counter < self.environment.info.horizon and not absorbing)
 
-        return absorbing, self._last
+        return absorbing
 
     def get_reward(self):
         return self._reward
