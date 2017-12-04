@@ -23,7 +23,6 @@ class ComputationalGraph(object):
         self._model = self._blocks[self._order[0]]
         self.absorbing = False
 
-
     def call_blocks(self, learn_flag):
         """
         executes the blocks in the diagram in the provided order. Always starts from the model.
@@ -39,7 +38,14 @@ class ComputationalGraph(object):
                 reward = None
             else:
                 reward = block.reward_connection.get_reward()
-            self.absorbing = block(inputs=inputs, reward=reward, absorbing=self.absorbing, learn_flag=learn_flag)
-        last = self._blocks[index].last_output is None
+            self.absorbing = block(inputs=np.array(inputs), reward=reward, absorbing=self.absorbing, learn_flag=learn_flag)
+        return self.absorbing
 
-        return last
+    def reset(self):
+        for index in self._order:
+            block = self._blocks[index]
+            inputs = list()
+            for input_block in block.input_connections:
+                if input_block.last_output is not None:
+                    inputs.append(input_block.last_output)
+            block.reset(inputs=np.array(inputs))

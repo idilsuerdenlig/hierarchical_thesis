@@ -7,6 +7,9 @@ from control_block import ControlBlock
 from simple_agent import SimpleAgent
 from mushroom.utils import spaces
 from mushroom.environments import *
+from mushroom.utils.table import Table
+from mushroom.utils.parameters import Parameter
+from mushroom.policy import *
 
 
 
@@ -20,16 +23,21 @@ def experiment():
     action_space = mdp._mdp_info.action_space
     observation_space = mdp._mdp_info.observation_space
     gamma = mdp._mdp_info.gamma
-    horizon = mdp._mdp_info.horizon
 
     # Model Block
     model_block = MBlock(env=mdp, render=False)
 
+    #Policy
+    epsilon = Parameter(value=1)
+    pi = EpsGreedy(epsilon=epsilon)
+    table = Table(mdp.info.size)
+    pi.set_q(table)
+
     #Agents
     mdp_info_agent1 = MDPInfo(observation_space=observation_space, action_space=spaces.Discrete(5), gamma=1, horizon=20)
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Discrete(5), action_space=action_space, gamma=gamma, horizon=10)
-    agent1 = SimpleAgent(name='HIGH', mdp_info=mdp_info_agent1)
-    agent2 = SimpleAgent(name='LOW', mdp_info=mdp_info_agent2)
+    agent1 = SimpleAgent(name='HIGH', mdp_info=mdp_info_agent1, policy=pi)
+    agent2 = SimpleAgent(name='LOW', mdp_info=mdp_info_agent2, policy=pi)
 
 
     # Control Blocks

@@ -17,6 +17,7 @@ class MBlock(Block):
         self.environment = env
         self._render = render
         self._reward = None
+        self.absorbing = False
         self._last = False
         self._state = None
 
@@ -24,25 +25,23 @@ class MBlock(Block):
 
     def __call__(self, inputs, reward, absorbing, learn_flag):
 
-        self.clock_counter+=1
+        self.clock_counter += 1
 
-        if inputs == None or len(inputs) == 0:
-            self.last_output = self.environment.reset()
-            print 'RESET'
-            absorbing = False
+        self._state = np.concatenate(inputs, axis=0)
+        self.last_output, self._reward, self.absorbing, _ = self.environment.step(self._state)
+        print'STEP'
 
-        else:
-            self._state = np.concatenate(inputs, axis=0)
-            print 'STEP'
-            self.last_output, self._reward, absorbing, _ = self.environment.step(self._state)
-
-            if self._render:
-                self.environment.render()
+        if self._render:
+            self.environment.render()
 
         self._last = not(self.clock_counter < self.environment.info.horizon and not absorbing)
 
-        return absorbing
+        return self.absorbing
 
     def get_reward(self):
         return self._reward
 
+    def reset(self,inputs):
+        print 'MODEL RESET'
+        self.last_output = self.environment.reset()
+        self.absorbing = False

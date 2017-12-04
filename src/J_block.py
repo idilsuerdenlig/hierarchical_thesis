@@ -1,4 +1,5 @@
 from block import Block
+import numpy as np
 from mushroom.algorithms.agent import Agent
 
 class JBlock(Block):
@@ -6,7 +7,7 @@ class JBlock(Block):
     This class implements the functions to calculate rewards.
 
     """
-    def __init__(self, wake_time):
+    def __init__(self, wake_time, reward_function):
         """
         Constructor.
 
@@ -16,21 +17,28 @@ class JBlock(Block):
             params (dict): other parameters of the algorithm.
             n_iterations: number of iterations for the fit of the agent
         """
-
+        self.reward_function = reward_function
         super(JBlock, self).__init__(wake_time=wake_time)
 
-    def __call__(self, inputs, reward, absorbing):
+    def __call__(self, inputs, reward, absorbing, learn_flag):
 
-        self.clock_counter+=1
+        self.clock_counter += 1
 
-        if self.wake_time == self.clock_counter:
-           self.clock_counter = 0
-           self.last_output = self.reward_function(inputs)
+        if self.wake_time == self.clock_counter or absorbing:
+            self.clock_counter = 0
+            if inputs.ndim != 1:
+                self.last_output = self.reward_function(np.concatenate(inputs))
+            else:
+                self.last_output = self.reward_function(inputs)
 
-        return self.last_output
+            return absorbing
 
-    def reward_function(self):
-        return reward
+    def reset(self, inputs):
+        self.clock_counter = 0
+        if inputs.ndim != 1:
+            self.last_output = self.reward_function(np.concatenate(inputs))
+        else:
+            self.last_output = self.reward_function(inputs)
 
     def get_reward(self):
         return self.last_output

@@ -1,7 +1,11 @@
 import numpy as np
-import scipy.sparse
-from mushroom.utils import spaces
+from mushroom.utils.spaces import Box
+from mushroom.features.basis import PolynomialBasis
 
-a = spaces.Box(1,7,(1,1))
-print a.shape
 
+
+np.random.seed(988)
+a = np.array([-1, 0, 100])
+print a
+print abs(a[0])
+print np.random.choice(a)

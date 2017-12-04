@@ -5,7 +5,7 @@ class SimpleAgent(object):
     actions from its policy.
 
     """
-    def __init__(self, name, mdp_info, params=None, features=None):
+    def __init__(self, name, mdp_info, params=None, features=None, policy = None):
         """
         Constructor.
 
@@ -24,6 +24,7 @@ class SimpleAgent(object):
         self.horizon = mdp_info.horizon
         self.params = params
         self.phi = features
+        self.policy = policy
 
         self._next_action = None
 
@@ -35,6 +36,7 @@ class SimpleAgent(object):
             mdp_info (dict): MDP information.
 
         """
+        self.counter = 0
         for k, v in mdp_info.iteritems():
             self.mdp_info[k] = v
 
@@ -47,7 +49,8 @@ class SimpleAgent(object):
             n_iterations (int): number of fit steps of the approximator.
 
         """
-        print 'FIT', self.name
+
+
     def draw_action(self, state):
         """
         Return the action to execute. It is the action returned by the policy
@@ -60,9 +63,16 @@ class SimpleAgent(object):
             The action to be executed.
 
         """
-        action = np.random.choice(self.action_space.n)
-        print 'DRAW', self.name
-        return np.array([action])
+        if self.policy is None:
+            action = np.random.choice(self.action_space.n)
+            action = np.array([action])
+        else:
+            action = self.policy.draw_action(state)
+            print 'DRAW', self.name, self.counter
+        self.counter += 1
+
+
+        return action
 
 
     def episode_start(self):
@@ -71,4 +81,30 @@ class SimpleAgent(object):
         some algorithms (e.g. DQN).
 
         """
-        pass
+        print 'RESET', self.name
+        self.counter = 0
+
+
+    def parse(self, sample):
+        """
+        Utility to parse the sample.
+
+        Args:
+             sample (list): the current episode step.
+
+        Returns:
+            A tuple containing state, action, reward, next state, absorbing and
+            last flag. If provided, `state` is preprocessed with the features.
+
+        """
+        state = sample[0]
+        action = sample[1]
+        reward = sample[2]
+        next_state = sample[3]
+        absorbing = sample[4]
+        last = sample[5]
+
+        if self.phi is not None:
+            state = self.phi(state)
+
+        return state, action, reward, next_state, absorbing, last

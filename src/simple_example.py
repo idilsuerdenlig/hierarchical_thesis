@@ -53,7 +53,7 @@ def experiment():
 
 
     # Train
-    core.learn(n_steps=100)
+    core.learn(n_steps=100, quiet=True)
     return agent.Q.table
 
 def experiment2():
@@ -82,7 +82,7 @@ def experiment2():
     core = Core(agent, mdp, callbacks)
 
     # Train
-    core.learn(n_steps=100, n_steps_per_fit=1)
+    core.learn(n_steps=100, n_steps_per_fit=1, quiet=True)
     dataset=collect_dataset.get()
     return agent.Q.table
 

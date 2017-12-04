@@ -25,19 +25,19 @@ class HierarchicalCore(object):
     def _run(self, learn_flag, n_steps, n_episodes, render, quiet):
 
         assert (n_episodes is not None and n_steps is None) or (n_episodes is None and n_steps is not None)
-
         if n_steps is not None:
-            last = True
+            absorbing = True
             for step in tqdm(xrange(n_steps), dynamic_ncols=True,
                                    disable=quiet, leave=False):
-                if last:
-                    self.computational_graph.call_blocks(learn_flag=learn_flag)
+                if absorbing:
+                    self.computational_graph.reset()
 
-                last = self.computational_graph.call_blocks(learn_flag=learn_flag)
+                absorbing = self.computational_graph.call_blocks(learn_flag=learn_flag)
 
         else:
             for episode in tqdm(xrange(n_episodes), dynamic_ncols=True,
                                    disable=quiet, leave=False):
+                self.computational_graph.reset()
                 last = False
                 while not last:
                     last = self.computational_graph.call_blocks(learn_flag=learn_flag)

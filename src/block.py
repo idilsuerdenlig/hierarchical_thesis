@@ -12,12 +12,9 @@ class Block(object):
         """
         self.input_connections = list()
         self.reward_connection = None
-        self.clock_counter = wake_time
+        self.clock_counter = 0
         self.last_output = None
-        self.wake_time= wake_time
-
-
-
+        self.wake_time = wake_time
 
     def __call__(self, inputs, reward, absorbing, learn_flag):
         """
@@ -28,9 +25,10 @@ class Block(object):
 
         raise NotImplementedError('Block is an abstract class')
 
-
-
     def add_input(self, block):
 
         self.input_connections.append(block)
 
+    def reset(self, inputs):
+
+        raise NotImplementedError('Block is an abstract class')
