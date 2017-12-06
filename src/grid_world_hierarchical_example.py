@@ -14,8 +14,7 @@ from mushroom.utils.callbacks import CollectDataset
 from mushroom.core.core import Core
 from mushroom.environments import *
 from mushroom.utils.parameters import ExponentialDecayParameter
-
-
+from visualize_control_block import VisualizeControlBlock
 
 
 
@@ -44,7 +43,7 @@ def experiment():
 
 
     # Control Block
-    control_block = ControlBlock(wake_time=1, agent=agent, n_steps_per_fit=1, horizon=mdp.info.horizon)
+    control_block = ControlBlock(wake_time=1, agent=agent, n_steps_per_fit=1)
 
     # Algorithm
     blocks = [model_block, control_block]
@@ -90,6 +89,7 @@ def experiment2():
 
     # Train
     dataset=collect_dataset.get()
+    VisualizeControlBlock(dataset)
     return agent.Q.table
 
 

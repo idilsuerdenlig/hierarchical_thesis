@@ -17,6 +17,7 @@ class SimpleAgent(object):
                 approximator.
 
         """
+        self.mdp_info = mdp_info
         self.name = name
         self.action_space = mdp_info.action_space
         self.observation_space = mdp_info.observation_space
@@ -49,8 +50,6 @@ class SimpleAgent(object):
             n_iterations (int): number of fit steps of the approximator.
 
         """
-
-
     def draw_action(self, state):
         """
         Return the action to execute. It is the action returned by the policy
@@ -63,17 +62,16 @@ class SimpleAgent(object):
             The action to be executed.
 
         """
-        if self.policy is None:
+        if self.name == 'HIGH':
+            action = np.array([110,110])
+        elif self.policy is None:
             action = np.random.choice(self.action_space.n)
             action = np.array([action])
         else:
             action = self.policy.draw_action(state)
-            print 'DRAW', self.name, self.counter
         self.counter += 1
 
-
         return action
-
 
     def episode_start(self):
         """
@@ -81,7 +79,6 @@ class SimpleAgent(object):
         some algorithms (e.g. DQN).
 
         """
-        print 'RESET', self.name
         self.counter = 0
 
 

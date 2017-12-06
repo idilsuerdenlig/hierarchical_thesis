@@ -29,7 +29,6 @@ class fBlock(Block):
         return absorbing
 
     def reset(self, inputs):
-        print inputs
         self.clock_counter = 0
         self.last_output = self.phi(inputs)
 

@@ -9,7 +9,7 @@ class ControlBlock(Block):
     actions from its policy.
 
     """
-    def __init__(self, wake_time, agent, horizon=None, n_eps_per_fit=None, n_steps_per_fit=None):
+    def __init__(self, wake_time, agent, n_eps_per_fit=None, n_steps_per_fit=None, callbacks=list()):
 
         self.agent = agent
         self.step_counter = 0
@@ -18,12 +18,10 @@ class ControlBlock(Block):
         self.n_eps_per_fit = n_eps_per_fit
         self.n_steps_per_fit = n_steps_per_fit
         self.dataset = list()
-        if horizon is None:
-            self.horizon = self.agent.horizon
-        else:
-            self.horizon = horizon
+        self.horizon = self.agent.mdp_info.horizon
         self.last_input = None
         self.last_output = None
+        self.callbacks = callbacks
 
         super(ControlBlock, self).__init__(wake_time=wake_time)
 
@@ -32,7 +30,6 @@ class ControlBlock(Block):
         last = False
 
         if absorbing:
-            print 'ABSORBING'
             self.curr_episode_counter += 1
             self.step_counter = 0
 
@@ -69,6 +66,9 @@ class ControlBlock(Block):
         self.agent.fit(dataset)
         self.curr_episode_counter = 0
         self.curr_step_counter = 0
+        for c in self.callbacks:
+            callback_pars = dict(dataset=dataset)
+            c(**callback_pars)
 
     def add_reward(self, reward_block):
         assert isinstance(reward_block, JBlock) or isinstance(reward_block, MBlock)

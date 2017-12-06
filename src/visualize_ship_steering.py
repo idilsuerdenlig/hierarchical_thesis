@@ -3,12 +3,21 @@ import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
-def visualizeShipSteering(datalist_eval, J):
+def visualizeShipSteering(datalist_eval, J=None):
 
-    xs=100
-    xe=120
-    ys=120
-    ye=100
+    plt.figure()
+
+    ax1 = plt.subplot2grid((4,3), (0,0), rowspan=4, projection='3d')
+    ax2 = plt.subplot2grid((4,3), (0,1))
+    ax3 = plt.subplot2grid((4,3), (1,1))
+    ax4 = plt.subplot2grid((4,3), (2,1))
+    ax5 = plt.subplot2grid((4,3), (3,1))
+    ax6 = plt.subplot2grid((4,3), (0,2), rowspan=4)
+
+    xs = 100
+    xe = 120
+    ys = 120
+    ye = 100
 
     x_ep = list()
     y_ep = list()
@@ -22,16 +31,11 @@ def visualizeShipSteering(datalist_eval, J):
     theta_list = list()
     thetadot_list = list()
     i = 0
-
-    print 'list to eps...'
     for dataset_step in datalist_eval:
-
         if not dataset_step[-1]:
-
             states_step = dataset_step[0]
             action_step = dataset_step[1]
             reward_step = dataset_step[2]
-
             x_step = states_step[0]
             y_step = states_step[1]
             theta_step = states_step[2]
@@ -48,7 +52,12 @@ def visualizeShipSteering(datalist_eval, J):
         else:
             size_eps.append(i)
             i=0
+            x_ep.append(dataset_step[3][0])
+            y_ep.append(dataset_step[3][1])
+            theta_ep.append(dataset_step[3][2])
+            thetadot_ep.append(dataset_step[3][3])
             x_list.append(x_ep)
+
             y_list.append(y_ep)
             theta_list.append(theta_ep)
             thetadot_list.append(thetadot_ep)
@@ -57,30 +66,23 @@ def visualizeShipSteering(datalist_eval, J):
             theta_ep = []
             thetadot_ep = []
 
-
-    print 'plotting 3d...'
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-    maxt=0
+    maxt = 0
     for episode in xrange(len(x_list)):
         time =np.arange(len(x_list[episode]))
         x = np.array(x_list[episode])
         y = np.array(y_list[episode])
-        plt.plot(x,y,time)
+        ax1.plot(x,y,time)
         maxt = max(maxt,len(x))
 
     xg=[xs, xe, xe, xs]
     yg=[ys, ye, ye, ys]
     zg=[0, 0, maxt, maxt]
     verts = [list(zip(xg,yg,zg))]
-    ax.set_xlim([0,160])
-    ax.set_ylim([0,160])
+    ax1.set_xlim([0,160])
+    ax1.set_ylim([0,160])
 
-    ax.add_collection3d(Poly3DCollection(verts),zs=zg)
+    ax1.add_collection3d(Poly3DCollection(verts),zs=zg)
 
-    print 'plotting 2d state plots'
-    fig3 = plt.figure()
-    axarr = fig3.subplots(4, sharex=True)
 
     for episode in xrange(len(x_list)):
         x_ep = x_list[episode]
@@ -88,31 +90,24 @@ def visualizeShipSteering(datalist_eval, J):
         theta_ep = theta_list[episode]
         thetadot_ep = thetadot_list[episode]
         time =np.arange(len(x_ep))
-        axarr[0].plot(time,x_ep)
-        axarr[0].set_ylabel('x')
-        axarr[1].plot(time,y_ep)
-        axarr[1].set_ylabel('y')
-        axarr[2].plot(time,theta_ep)
-        axarr[2].set_ylabel('theta')
-        axarr[3].plot(time,thetadot_ep)
-        axarr[3].set_ylabel('thetadot')
-        axarr[3].set_xlabel('time')
+        ax2.plot(time,x_ep)
+        ax2.set_ylabel('x')
+        ax3.plot(time,y_ep)
+        ax3.set_ylabel('y')
+        ax4.plot(time,theta_ep)
+        ax4.set_ylabel('theta')
+        ax5.plot(time,thetadot_ep)
+        ax5.set_ylabel('thetadot')
+        ax5.set_xlabel('time')
 
-    print 'plotting length of episodes...'
-    fig2 = plt.figure()
-    plt.plot(size_eps)
-    plt.title('size_eps')
+    ax6.plot(size_eps)
 
-    print 'plotting J for each episode...'
+    if J is not None:
+        fig4=plt.figure()
+        plt.plot(J)
 
-    fig4=plt.figure()
-    plt.plot(J)
+        axes=fig4.gca()
+        axes.set_ylim([-700, -50])
+        plt.title('J')
 
-    axes=fig4.gca()
-    axes.set_ylim([-700, -50])
-    plt.title('J')
-
-    plt.show()
-
-
-
+    plt.tight_layout()

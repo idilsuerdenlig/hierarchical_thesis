@@ -14,6 +14,7 @@ class MuxBlock(Block):
         """
         self.block_lists = list()
 
+        super(MuxBlock, self).__init__(wake_time=1)
 
 
     def __call__(self, inputs, reward, absorbing, learn_flag):

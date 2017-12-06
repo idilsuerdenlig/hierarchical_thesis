@@ -1,5 +1,7 @@
 from block import Block
+import matplotlib.pyplot as plt
 import numpy as np
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mushroom.environments import *
 
 class MBlock(Block):
@@ -17,31 +19,35 @@ class MBlock(Block):
         self.environment = env
         self._render = render
         self._reward = None
-        self.absorbing = False
+        self._absorbing = False
         self._last = False
-        self._state = None
+        self._action = None
 
         super(MBlock, self).__init__(wake_time=1)
 
     def __call__(self, inputs, reward, absorbing, learn_flag):
 
         self.clock_counter += 1
+        if self.wake_time == self.clock_counter:
+            self._action = np.concatenate(inputs, axis=0)
+            self.last_output, self._reward, self._absorbing, _ = self.environment.step(self._action)
+            if self._render:
+                self.environment.render()
 
-        self._state = np.concatenate(inputs, axis=0)
-        self.last_output, self._reward, self.absorbing, _ = self.environment.step(self._state)
-        print'STEP'
-
-        if self._render:
-            self.environment.render()
-
-        self._last = not(self.clock_counter < self.environment.info.horizon and not absorbing)
-
-        return self.absorbing
+            self._last = self.clock_counter >= self.environment.info.horizon or self._absorbing
+            self.clock_counter = 0
+        return self._absorbing
 
     def get_reward(self):
         return self._reward
 
     def reset(self,inputs):
-        print 'MODEL RESET'
         self.last_output = self.environment.reset()
-        self.absorbing = False
+        self._reward = None
+        self._absorbing = False
+        self.clock_counter = 0
+
+
+
+
+

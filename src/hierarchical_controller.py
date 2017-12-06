@@ -41,8 +41,8 @@ def experiment():
 
 
     # Control Blocks
-    control_block1 = ControlBlock(wake_time=10, agent=agent1, n_eps_per_fit=None, n_steps_per_fit=1, horizon=None)
-    control_block2 = ControlBlock(wake_time=1, agent=agent2, n_eps_per_fit=None, n_steps_per_fit=1, horizon=None)
+    control_block1 = ControlBlock(wake_time=10, agent=agent1, n_eps_per_fit=None, n_steps_per_fit=1)
+    control_block2 = ControlBlock(wake_time=1, agent=agent2, n_eps_per_fit=None, n_steps_per_fit=1)
 
     # Algorithm
     blocks = [model_block, control_block1, control_block2]

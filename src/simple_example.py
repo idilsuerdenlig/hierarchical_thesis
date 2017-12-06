@@ -40,7 +40,7 @@ def experiment():
 
 
     # Control Block
-    control_block = ControlBlock(wake_time = 1, agent=agent, n_eps_per_fit=None, n_steps_per_fit=1, horizon=mdp.info.horizon)
+    control_block = ControlBlock(wake_time = 1, agent=agent, n_eps_per_fit=None, n_steps_per_fit=1)
 
     # Algorithm
     blocks = [model_block, control_block]

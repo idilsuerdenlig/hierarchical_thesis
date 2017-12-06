@@ -45,13 +45,13 @@ def experiment():
     #Agents
     mdp_info_agent1 = MDPInfo(observation_space=observation_space, action_space=spaces.Box(0,150,(4,)), gamma=1, horizon=3)
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(0,150,(4,)), action_space=action_space, gamma=gamma, horizon=5)
-    agent1 = SimpleAgent(name='HIGH', mdp_info=mdp_info_agent1, policy = pi1)
-    agent2 = SimpleAgent(name='LOW', mdp_info=mdp_info_agent2, policy = pi2)
+    agent1 = SimpleAgent(name='HIGHLev', mdp_info=mdp_info_agent1, policy = pi1)
+    agent2 = SimpleAgent(name='LOWLev', mdp_info=mdp_info_agent2, policy = pi2)
 
 
     # Control Blocks
-    control_block1 = ControlBlock(wake_time=10, agent=agent1, n_eps_per_fit=None, n_steps_per_fit=1, horizon=None)
-    control_block2 = ControlBlock(wake_time=1, agent=agent2, n_eps_per_fit=None, n_steps_per_fit=1, horizon=None)
+    control_block1 = ControlBlock(wake_time=10, agent=agent1, n_eps_per_fit=None, n_steps_per_fit=1)
+    control_block2 = ControlBlock(wake_time=1, agent=agent2, n_eps_per_fit=None, n_steps_per_fit=1)
 
     # Algorithm
     blocks = [model_block, control_block1, control_block2]

@@ -22,6 +22,7 @@ class ComputationalGraph(object):
         self._order = order
         self._model = self._blocks[self._order[0]]
         self.absorbing = False
+        self.dataset_eval = list()
 
     def call_blocks(self, learn_flag):
         """
@@ -49,3 +50,11 @@ class ComputationalGraph(object):
                 if input_block.last_output is not None:
                     inputs.append(input_block.last_output)
             block.reset(inputs=np.array(inputs))
+
+    def get_sample(self):
+        state = self._model.last_output
+        action = self._blocks[self._order[-1]].last_output
+        rew_last = self._model._reward
+        abs = self._model._absorbing
+        last = self._model._last
+        return state, action, rew_last, abs, last
