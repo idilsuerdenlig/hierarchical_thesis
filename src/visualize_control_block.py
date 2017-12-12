@@ -72,6 +72,7 @@ def VisualizeControlBlock(datalist_control, J=None):
 
 
     ax4.plot(size_eps)
+    ax4.set_title('size_eps')
 
 
     plt.tight_layout()

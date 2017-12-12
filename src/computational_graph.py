@@ -22,6 +22,7 @@ class ComputationalGraph(object):
         self._order = order
         self._model = self._blocks[self._order[0]]
         self.absorbing = False
+        self.last = False
         self.dataset_eval = list()
 
     def call_blocks(self, learn_flag):
@@ -39,8 +40,8 @@ class ComputationalGraph(object):
                 reward = None
             else:
                 reward = block.reward_connection.get_reward()
-            self.absorbing = block(inputs=np.array(inputs), reward=reward, absorbing=self.absorbing, learn_flag=learn_flag)
-        return self.absorbing
+            self.absorbing, self.last = block(inputs=np.array(inputs), reward=reward, absorbing=self.absorbing, last=self.last, learn_flag=learn_flag)
+        return self.absorbing, self.last
 
     def reset(self):
         for index in self._order:

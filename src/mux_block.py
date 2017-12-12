@@ -17,7 +17,7 @@ class MuxBlock(Block):
         super(MuxBlock, self).__init__(wake_time=1)
 
 
-    def __call__(self, inputs, reward, absorbing, learn_flag):
+    def __call__(self, inputs, reward, absorbing, last, learn_flag):
         """
                 whatever the block does when activated by the computational graph.
                 if the state is absorbing, fit is called for controllers
@@ -28,9 +28,9 @@ class MuxBlock(Block):
         selected_block_list = self.block_lists(selector)
 
         for block in selected_block_list:
-            self.last_output, absorbing = block(inputs=inputs, reward=None, absorbing=absorbing, learn_flag=learn_flag)
+            absorbing, last = block(inputs=inputs, reward=None, absorbing=absorbing, learn_flag=learn_flag)
 
-        return absorbing
+        return absorbing, last
 
 
 

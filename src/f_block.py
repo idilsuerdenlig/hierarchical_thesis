@@ -16,7 +16,7 @@ class fBlock(Block):
         self.phi = phi
         super(fBlock, self).__init__(wake_time=wake_time)
 
-    def __call__(self, inputs, reward, absorbing, learn_flag):
+    def __call__(self, inputs, reward, absorbing, last, learn_flag):
         """
                 whatever the block does when activated by the computational graph.
                 if the state is absorbing, fit is called for controllers
@@ -26,7 +26,7 @@ class fBlock(Block):
             self.last_output = self.phi(inputs)
             self.clock_counter = 0
 
-        return absorbing
+        return absorbing, last
 
     def reset(self, inputs):
         self.clock_counter = 0

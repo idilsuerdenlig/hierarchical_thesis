@@ -18,6 +18,7 @@ class MBlock(Block):
         """
         self.environment = env
         self._render = render
+        self.wake_counter = 0
         self._reward = None
         self._absorbing = False
         self._last = False
@@ -25,18 +26,18 @@ class MBlock(Block):
 
         super(MBlock, self).__init__(wake_time=1)
 
-    def __call__(self, inputs, reward, absorbing, learn_flag):
+    def __call__(self, inputs, reward, absorbing, last, learn_flag):
 
         self.clock_counter += 1
         if self.wake_time == self.clock_counter:
+            self.wake_counter += 1
             self._action = np.concatenate(inputs, axis=0)
             self.last_output, self._reward, self._absorbing, _ = self.environment.step(self._action)
             if self._render:
                 self.environment.render()
-
-            self._last = self.clock_counter >= self.environment.info.horizon or self._absorbing
+            self._last = self.wake_counter >= self.environment.info.horizon or self._absorbing
             self.clock_counter = 0
-        return self._absorbing
+        return self._absorbing, self._last
 
     def get_reward(self):
         return self._reward
@@ -46,7 +47,7 @@ class MBlock(Block):
         self._reward = None
         self._absorbing = False
         self.clock_counter = 0
-
+        self.wake_counter = 0
 
 
 

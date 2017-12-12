@@ -16,7 +16,7 @@ class Block(object):
         self.last_output = None
         self.wake_time = wake_time
 
-    def __call__(self, inputs, reward, absorbing, learn_flag):
+    def __call__(self, inputs, reward, absorbing, last, learn_flag):
         """
                 whatever the block does when activated by the computational graph.
                 if the state is absorbing, fit is called for controllers
