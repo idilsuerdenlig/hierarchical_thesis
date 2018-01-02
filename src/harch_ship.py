@@ -38,7 +38,7 @@ def experiment():
     function_block1 = fBlock(wake_time=1, phi=phi)
 
     # Function Block 2
-    function_block2 = dotproductBlock(wake_time=1)
+    function_block2 = squarednormBlock(wake_time=1)
 
     # Function Block 3
     function_block3 = plusBlock(wake_time=1)
@@ -78,12 +78,12 @@ def experiment():
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(wake_time=10, agent=agent1, high=True, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[parameter_callback1])
+    control_block1 = ControlBlock(wake_time=10, agent=agent1, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[parameter_callback1])
 
     # Control Block 2
     dataset_callback = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(wake_time=1, agent=agent2, high=False, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[dataset_callback, parameter_callback2])
+    control_block2 = ControlBlock(wake_time=1, agent=agent2, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[dataset_callback, parameter_callback2])
 
 
     # Algorithm
@@ -104,7 +104,7 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn = core.learn(n_episodes=4000)
+    dataset_learn = core.learn(n_episodes=5000)
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=10)
 
@@ -114,8 +114,10 @@ def experiment():
     parameter_dataset2 = parameter_callback2.get_values()
     VisualizePolicyParams(parameter_dataset1, parameter_dataset2)
     #VisualizeControlBlock(low_level_dataset)
-    visualizeShipSteering(dataset_learn[3950:4000])
+    visualizeShipSteering(dataset_learn, range_eps=xrange(3980,3995))
+    plt.suptitle('learn')
     visualizeShipSteering(dataset_eval)
+    plt.suptitle('evaluate')
     plt.show()
 
     return

@@ -39,8 +39,8 @@ class ControlBlock(Block):
             self.curr_step_counter += 1
             self.step_counter += 1
             self.last = absorbing or last or self.step_counter >= self.horizon
-            if inputs.ndim == 1:
-                state = inputs
+            if len(inputs) == 1:
+                state = np.array(inputs)
             else:
                 state = np.concatenate(inputs, axis=0)
             for index, _reward in enumerate(self.rewardlist):

@@ -3,7 +3,7 @@ import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
-def visualizeShipSteering(datalist_eval, J=None):
+def visualizeShipSteering(datalist_eval, J=None, range_eps=None):
 
     plt.figure()
 
@@ -32,7 +32,6 @@ def visualizeShipSteering(datalist_eval, J=None):
     thetadot_list = list()
     i = 0
     for dataset_step in datalist_eval:
-        print dataset_step
         if not dataset_step[-1]:
             states_step = dataset_step[0]
             action_step = dataset_step[1]
@@ -67,7 +66,10 @@ def visualizeShipSteering(datalist_eval, J=None):
             thetadot_ep = []
 
     maxt = 0
-    for episode in xrange(len(x_list)):
+    if range_eps is None:
+        range_eps = xrange(len(x_list))
+
+    for episode in range_eps:
         time =np.arange(len(x_list[episode]))
         x = x_list[episode]
         y = y_list[episode]
@@ -83,7 +85,7 @@ def visualizeShipSteering(datalist_eval, J=None):
 
     ax1.add_collection3d(Poly3DCollection(verts),zs=zg)
 
-    for episode in xrange(len(x_list)):
+    for episode in range_eps:
         x_ep = x_list[episode]
         y_ep = y_list[episode]
         theta_ep = theta_list[episode]

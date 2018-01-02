@@ -24,11 +24,13 @@ class minusBlock(fBlock):
         super(minusBlock, self).__init__(wake_time=wake_time, phi=extraction)
 
 
-class dotproductBlock(fBlock):
+class squarednormBlock(fBlock):
 
     def __init__(self, wake_time, phi=None):
-        def dot_product(inputs):
-            res = -(inputs.dot(inputs))
+        def squared_norm(inputs):
+            res = 0
+            for input in inputs:
+                res=-input*input
             return res
-        self.phi = dot_product
-        super(dotproductBlock, self).__init__(wake_time=wake_time, phi=dot_product)
+        self.phi = squared_norm
+        super(squarednormBlock, self).__init__(wake_time=wake_time, phi=squared_norm)

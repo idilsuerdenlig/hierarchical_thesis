@@ -38,7 +38,7 @@ class ComputationalGraph(object):
                 reward = None
             else:
                 reward = block.reward_connection.last_output
-            block(inputs=np.array(inputs), reward=reward, absorbing=self.absorbing, last=self.last, learn_flag=learn_flag)
+            block(inputs=inputs, reward=reward, absorbing=self.absorbing, last=self.last, learn_flag=learn_flag)
         return self.absorbing, self.last
 
     def reset(self):
