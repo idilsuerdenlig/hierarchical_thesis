@@ -14,4 +14,4 @@ def phi(ins):
     theta = np.pi/2-theta
     del_theta = theta_ref-theta
     del_theta = (del_theta + np.pi) % (2 * np.pi) - np.pi
-    return np.array([del_theta])
+    return del_theta

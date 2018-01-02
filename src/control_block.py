@@ -7,10 +7,9 @@ class ControlBlock(Block):
     actions from its policy.
 
     """
-    def __init__(self, wake_time, agent, high, n_eps_per_fit=None, n_steps_per_fit=None, callbacks=list()):
+    def __init__(self, wake_time, agent, n_eps_per_fit=None, n_steps_per_fit=None, callbacks=list()):
 
         self.agent = agent
-        self.high = high
         self.step_counter = 0
         self.curr_step_counter = 0
         self.curr_episode_counter = 0
