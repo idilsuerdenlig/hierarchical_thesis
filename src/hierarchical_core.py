@@ -42,7 +42,6 @@ class HierarchicalCore(object):
                                    disable=quiet, leave=False):
                 self.computational_graph.reset()
                 dataset_manager.add_first_sample(self.computational_graph.get_sample(), False)
-
                 last = False
                 while not last:
                     absorbing, last = self.computational_graph.call_blocks(learn_flag=learn_flag)

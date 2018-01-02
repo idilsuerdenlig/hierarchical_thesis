@@ -26,6 +26,7 @@ def VisualizeControlBlock(datalist_control, J=None):
 
     i = 0
     for dataset_step in datalist_control:
+        print dataset_step
         if not dataset_step[-1]:
             state_step = dataset_step[0]
             action_step = dataset_step[1]
@@ -39,7 +40,18 @@ def VisualizeControlBlock(datalist_control, J=None):
             i += 1
 
         else:
+            state_step = dataset_step[0]
+            action_step = dataset_step[1]
+            reward_step = dataset_step[2]
+            next_state_step = dataset_step[3]
+
+            state_ep.append(state_step)
+            reward_ep.append(reward_step)
+            action_ep.append(action_step)
+            next_state_ep.append(next_state_step)
+            i += 1
             size_eps.append(i)
+
             i=0
             state_list.append(state_ep)
             reward_list.append(reward_ep)

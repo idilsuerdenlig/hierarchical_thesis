@@ -32,6 +32,7 @@ def visualizeShipSteering(datalist_eval, J=None):
     thetadot_list = list()
     i = 0
     for dataset_step in datalist_eval:
+        print dataset_step
         if not dataset_step[-1]:
             states_step = dataset_step[0]
             action_step = dataset_step[1]
@@ -48,7 +49,6 @@ def visualizeShipSteering(datalist_eval, J=None):
             reward_ep.append(reward_step)
             action_ep.append(action_step)
             i+=1
-
         else:
             size_eps.append(i)
             i=0
@@ -69,8 +69,8 @@ def visualizeShipSteering(datalist_eval, J=None):
     maxt = 0
     for episode in xrange(len(x_list)):
         time =np.arange(len(x_list[episode]))
-        x = np.array(x_list[episode])
-        y = np.array(y_list[episode])
+        x = x_list[episode]
+        y = y_list[episode]
         ax1.plot(x,y,time)
         maxt = max(maxt,len(x))
 
@@ -82,7 +82,6 @@ def visualizeShipSteering(datalist_eval, J=None):
     ax1.set_ylim([0,160])
 
     ax1.add_collection3d(Poly3DCollection(verts),zs=zg)
-
 
     for episode in xrange(len(x_list)):
         x_ep = x_list[episode]
