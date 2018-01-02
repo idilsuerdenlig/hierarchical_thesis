@@ -1,7 +1,5 @@
 from block import Block
 from J_block import JBlock
-from M_block import MBlock
-from mushroom.algorithms.agent import *
 import numpy as np
 class ControlBlock(Block):
     """
@@ -9,9 +7,10 @@ class ControlBlock(Block):
     actions from its policy.
 
     """
-    def __init__(self, wake_time, agent, n_eps_per_fit=None, n_steps_per_fit=None, callbacks=list()):
+    def __init__(self, wake_time, agent, high, n_eps_per_fit=None, n_steps_per_fit=None, callbacks=list()):
 
         self.agent = agent
+        self.high = high
         self.step_counter = 0
         self.curr_step_counter = 0
         self.curr_episode_counter = 0
@@ -48,7 +47,9 @@ class ControlBlock(Block):
             for index, _reward in enumerate(self.rewardlist):
                 df = self.gamma**index
                 self.discounted_reward += df*_reward
-            sample = self.last_input, self.last_output, self.discounted_reward, state, absorbing, last
+            if not self.high:
+                self.discounted_reward = np.concatenate(self.discounted_reward)
+            sample = self.last_input, self.last_output, self.discounted_reward, state, absorbing, self.last
             self.dataset.append(sample)
             self.rewardlist = list()
             self.discounted_reward = 0
@@ -82,7 +83,6 @@ class ControlBlock(Block):
             c(**callback_pars)
 
     def add_reward(self, reward_block):
-        assert isinstance(reward_block, JBlock) or isinstance(reward_block, MBlock)
         self.reward_connection = reward_block
 
     def reset(self, inputs):

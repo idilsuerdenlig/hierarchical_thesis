@@ -22,13 +22,10 @@ class Block(object):
                 if the state is absorbing, fit is called for controllers
 
         """
-
         raise NotImplementedError('Block is an abstract class')
 
     def add_input(self, block):
-
         self.input_connections.append(block)
 
     def reset(self, inputs):
-
         raise NotImplementedError('Block is an abstract class')
