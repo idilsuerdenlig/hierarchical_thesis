@@ -20,6 +20,7 @@ from feature_angle_diff_ship_steering import phi
 from basic_operation_block import *
 from model_placeholder import PlaceHolder
 from collect_J import CollectJ
+from pick_last_ep_dataset import PickLastEp
 
 
 def experiment():
@@ -59,7 +60,7 @@ def experiment():
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
-    learning_rate = AdaptiveParameter(value=10)
+    learning_rate = Parameter(value=10)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
@@ -68,7 +69,7 @@ def experiment():
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params, features=features)
 
     # Agent 2
-    learning_rate = AdaptiveParameter(value=.001)
+    learning_rate = AdaptiveParameter(value=.005)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
@@ -105,7 +106,13 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn = core.learn(n_episodes=3000)
+    dataset_learn_visual = core.learn(n_episodes=5000)
+    '''dataset_learn_visual = list()
+    for n in xrange(7):
+        dataset_learn = core.learn(n_episodes=1000)
+        last_ep_dataset=PickLastEp(dataset_learn)
+        dataset_learn_visual.append(last_ep_dataset)
+    '''
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=10)
 
@@ -115,7 +122,7 @@ def experiment():
     parameter_dataset2 = parameter_callback2.get_values()
     VisualizePolicyParams(parameter_dataset1, parameter_dataset2)
     #VisualizeControlBlock(low_level_dataset)
-    visualizeShipSteering(dataset_learn, range_eps=xrange(2980,2995))
+    visualizeShipSteering(dataset_learn_visual, range_eps=xrange(4980,4995))
     plt.suptitle('learn')
     visualizeShipSteering(dataset_eval)
     plt.suptitle('evaluate')

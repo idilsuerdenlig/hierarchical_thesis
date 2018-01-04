@@ -34,7 +34,6 @@ def visualizeShipSteering(datalist_eval, J=None, range_eps=None):
     n_eps = 0
 
     for dataset_step in datalist_eval:
-        print dataset_step
         if not dataset_step[-1]:
             states_step = dataset_step[0]
             action_step = dataset_step[1]
@@ -66,6 +65,8 @@ def visualizeShipSteering(datalist_eval, J=None, range_eps=None):
             y_ep = []
             theta_ep = []
             thetadot_ep = []
+            action_ep = []
+            reward_ep = []
             n_eps += 1
 
         if range_eps is not None and n_eps == range_eps:
