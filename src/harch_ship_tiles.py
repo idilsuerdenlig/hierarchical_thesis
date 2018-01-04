@@ -19,7 +19,8 @@ from visualize_policy_params import VisualizePolicyParams
 from feature_angle_diff_ship_steering import phi
 from basic_operation_block import *
 from model_placeholder import PlaceHolder
-from collect_J import CollectJ
+from mushroom.features.tiles import Tiles
+
 
 
 def experiment():
@@ -44,8 +45,26 @@ def experiment():
     # Function Block 3
     function_block3 = plusBlock(wake_time=1)
 
+    #Tiles
+
+    low = [0, 0, -np.pi, -np.pi/12]
+    high = [150, 150, np.pi, np.pi/12]
+    n_tiles = [20, 20, 36, 5]
+    low = np.array(low, dtype=np.float)
+    high = np.array(high, dtype=np.float)
+    n_tilings = 9
+
+    tilings = list()
+    offset = (high - low) / (np.array(n_tiles) * n_tilings - n_tilings + 1.)
+
+    for i in xrange(n_tilings):
+        x_min = low - (n_tilings - 1 - i) * offset
+        x_max = high + i * offset
+        x_range = [[x, y] for x, y in zip(x_min, x_max)]
+        tilings.append(Tiles(x_range, n_tiles))
+
     #Features
-    features = Features(basis_list=[PolynomialBasis()])
+    features = Features(tilings=tilings)
 
     # Policy 1
     sigma1 = np.array([40, 40])
@@ -54,9 +73,10 @@ def experiment():
     pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
 
     # Policy 2
-    sigma2 = Parameter(value=.01)
+    sigma2 = Parameter(value=.05)
     approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
+    #pi2.set_weights(np.array([-0.01]))
 
     # Agent 1
     learning_rate = AdaptiveParameter(value=10)
@@ -78,13 +98,12 @@ def experiment():
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    #dataset_gradient = CollectJ(agent1, kwargs1='dataset')
-    control_block1 = ControlBlock(wake_time=10, agent=agent1, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[parameter_callback1])
+    control_block1 = ControlBlock(wake_time=10, agent=agent1, high=True, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[parameter_callback1])
 
     # Control Block 2
     dataset_callback = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(wake_time=1, agent=agent2, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[dataset_callback, parameter_callback2])
+    control_block2 = ControlBlock(wake_time=1, agent=agent2, high=False, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[dataset_callback, parameter_callback2])
 
 
     # Algorithm
@@ -105,7 +124,7 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn = core.learn(n_episodes=3000)
+    dataset_learn = core.learn(n_episodes=4000)
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=10)
 
@@ -116,9 +135,7 @@ def experiment():
     VisualizePolicyParams(parameter_dataset1, parameter_dataset2)
     #VisualizeControlBlock(low_level_dataset)
     visualizeShipSteering(dataset_learn, range_eps=xrange(2980,2995))
-    plt.suptitle('learn')
     visualizeShipSteering(dataset_eval)
-    plt.suptitle('evaluate')
     plt.show()
 
     return

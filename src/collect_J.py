@@ -1,17 +1,14 @@
 import numpy as np
 
 class CollectJ:
-    """
-    This callback can be used to collect the values of a parameter
-    (e.g. learning rate) during a run of the agent.
 
-    """
-    def __init__(self, gpomdp):
+    def __init__(self, gpomdp, **kwargs):
 
         self._gpomdp = gpomdp
         self._p = list()
+        self.dataset = kwargs
 
-    def __call__(self, **kwargs):
+    def __call__(self, ):
         """
         Add the parameter value to the parameter values list.
 
@@ -20,7 +17,7 @@ class CollectJ:
 
         """
         J = list()
-        for sample in dataset:
+        for sample in self.dataset:
             _, _, r, _, _, last = self._parse(sample)
             if last:
                 J.append(r)
@@ -34,18 +31,8 @@ class CollectJ:
         return self._p
 
 
-   def _parse(self, sample):
-        """
-        Utility to parse the sample.
+    def _parse(self, sample):
 
-        Args:
-             sample (list): the current episode step.
-
-        Returns:
-            A tuple containing state, action, reward, next state, absorbing and
-            last flag. If provided, `state` is preprocessed with the features.
-
-        """
         state = sample[0]
         action = sample[1]
         reward = sample[2]

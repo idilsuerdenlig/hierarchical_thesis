@@ -19,7 +19,9 @@ from visualize_policy_params import VisualizePolicyParams
 from feature_angle_diff_ship_steering import phi
 from basic_operation_block import *
 from model_placeholder import PlaceHolder
-from collect_J import CollectJ
+from mux_block import MuxBlock
+from mushroom.algorithms.value.td import QLearning
+from mushroom.policy import EpsGreedy
 
 
 def experiment():
@@ -35,51 +37,49 @@ def experiment():
     #Reward Placeholder
     reward_ph = PlaceHolder()
 
-    # Function Block 1
-    function_block1 = fBlock(wake_time=1, phi=phi)
+    #Mux_Block
+    mux_block = MuxBlock(wake_time = 1)
 
-    # Function Block 2
-    function_block2 = squarednormBlock(wake_time=1)
+    #FeaturesH
+    featuresH = Features(basis_list=[PolynomialBasis()])
 
-    # Function Block 3
-    function_block3 = plusBlock(wake_time=1)
+    low = [0, 0, -np.pi, -np.pi/12]
+    high = [150, 150, np.pi, np.pi/12]
+    n_tiles = [5, 5, 36, 5]
+    low = np.array(low, dtype=np.float)
+    high = np.array(high, dtype=np.float)
+    n_tilings = 9
 
-    #Features
-    features = Features(basis_list=[PolynomialBasis()])
+    tilings = list()
+    offset = (high - low) / (np.array(n_tiles) * n_tilings - n_tilings + 1.)
 
-    # Policy 1
-    sigma1 = np.array([40, 40])
-    approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
-    approximator1.set_weights(np.array([75, 75]))
-    pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
+    for i in xrange(n_tilings):
+        x_min = low - (n_tilings - 1 - i) * offset
+        x_max = high + i * offset
+        x_range = [[x, y] for x, y in zip(x_min, x_max)]
+        tilings.append(Tiles(x_range, n_tiles))
 
-    # Policy 2
-    sigma2 = Parameter(value=.01)
-    approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
-    pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
+    #FeaturesL
+    featuresL = Features(tilings=tilings)
 
-    # Agent 1
-    learning_rate = AdaptiveParameter(value=10)
+
+    # PolicyH
+    epsilon = Parameter(value=.1)
+    pi = EpsGreedy(epsilon=epsilon)
+
+    # AgentH
+    learning_rate = Parameter(value=.1)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
                     'fit_params': fit_params}
-    mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space, action_space=spaces.Box(0,150,(2,)), gamma=mdp.info.gamma, horizon=100)
-    agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params, features=features)
+    mdp_info_agentH = MDPInfo(observation_space=mdp.info.observation_space, action_space=spaces.Discrete(2), gamma=1, horizon=100)
 
-    # Agent 2
-    learning_rate = AdaptiveParameter(value=.001)
-    algorithm_params = dict(learning_rate=learning_rate)
-    fit_params = dict()
-    agent_params = {'algorithm_params': algorithm_params,
-                    'fit_params': fit_params}
-    mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi,np.pi,(1,)), action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
-    agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, params=agent_params, features=None)
+    agentH = QLearning(pi, mdp_info_agentH, agent_params)
 
-    # Control Block 1
+    # Control Block H
     parameter_callback1 = CollectPolicyParameter(pi1)
-    #dataset_gradient = CollectJ(agent1, kwargs1='dataset')
-    control_block1 = ControlBlock(wake_time=10, agent=agent1, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[parameter_callback1])
+    control_blockH = ControlBlock(wake_time=10, agent=agentH, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[parameter_callback1])
 
     # Control Block 2
     dataset_callback = CollectDataset()
@@ -88,8 +88,8 @@ def experiment():
 
 
     # Algorithm
-    blocks = [state_ph, reward_ph, control_block1, control_block2, function_block1, function_block2, function_block3]
-    order = [0, 1, 2, 4, 5, 6, 3]
+    blocks = [state_ph, reward_ph, control_blockH, mux_block]
+    order = [0, 1, 2, 3, 4, 6, 3]
     state_ph.add_input(control_block2)
     reward_ph.add_input(control_block2)
     control_block1.add_input(state_ph)

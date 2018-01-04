@@ -30,8 +30,11 @@ def visualizeShipSteering(datalist_eval, J=None, range_eps=None):
     y_list = list()
     theta_list = list()
     thetadot_list = list()
-    i = 0
+    ep_size = 0
+    n_eps = 0
+
     for dataset_step in datalist_eval:
+        print dataset_step
         if not dataset_step[-1]:
             states_step = dataset_step[0]
             action_step = dataset_step[1]
@@ -47,16 +50,15 @@ def visualizeShipSteering(datalist_eval, J=None, range_eps=None):
             thetadot_ep.append(thetadot_step)
             reward_ep.append(reward_step)
             action_ep.append(action_step)
-            i+=1
+            ep_size += 1
         else:
-            size_eps.append(i)
-            i=0
+            size_eps.append(ep_size)
+            ep_size = 0
             x_ep.append(dataset_step[3][0])
             y_ep.append(dataset_step[3][1])
             theta_ep.append(dataset_step[3][2])
             thetadot_ep.append(dataset_step[3][3])
             x_list.append(x_ep)
-
             y_list.append(y_ep)
             theta_list.append(theta_ep)
             thetadot_list.append(thetadot_ep)
@@ -64,6 +66,11 @@ def visualizeShipSteering(datalist_eval, J=None, range_eps=None):
             y_ep = []
             theta_ep = []
             thetadot_ep = []
+            n_eps += 1
+
+        if range_eps is not None and n_eps == range_eps:
+            print n_eps
+            break
 
     maxt = 0
     if range_eps is None:

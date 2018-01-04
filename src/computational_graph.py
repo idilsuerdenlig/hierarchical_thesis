@@ -51,7 +51,7 @@ class ComputationalGraph(object):
             for input_block in block.input_connections:
                 if input_block.last_output is not None:
                     inputs.append(input_block.last_output)
-            block.reset(inputs=np.array(inputs))
+            block.reset(inputs=inputs)
         self.step_counter = 0
 
     def get_sample(self):

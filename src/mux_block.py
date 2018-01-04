@@ -28,5 +28,9 @@ class MuxBlock(Block):
 
         return absorbing, last
 
+    def add_block_list(self, block_list):
+
+        self.block_lists.append(block_list)
+
 
 

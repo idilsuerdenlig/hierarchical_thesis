@@ -40,9 +40,10 @@ class ControlBlock(Block):
             self.step_counter += 1
             self.last = absorbing or last or self.step_counter >= self.horizon
             if len(inputs) == 1:
-                state = np.array(inputs)
+                state = inputs
             else:
                 state = np.concatenate(inputs, axis=0)
+
             for index, _reward in enumerate(self.rewardlist):
                 df = self.gamma**index
                 self.discounted_reward += df*_reward
@@ -84,7 +85,7 @@ class ControlBlock(Block):
         self.reward_connection = reward_block
 
     def reset(self, inputs):
-        if inputs.ndim == 1:
+        if len(inputs) == 1:
             state = inputs
         else:
             state = np.concatenate(inputs,axis=0)

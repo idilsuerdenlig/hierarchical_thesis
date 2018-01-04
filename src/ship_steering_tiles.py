@@ -27,8 +27,7 @@ def experiment(n_iterations, n_runs, ep_per_run):
                            [-np.pi / 12, np.pi / 12]],
                   n_tiles=[20, 20, 36, 5])
 
-    tiles = [tile]*9
-    theta = Features(tilings=tiles)
+    theta = Features(tilings=tile)
     #phi = Features(basis_list=basis)
 
     input_shape = (theta.size,)
