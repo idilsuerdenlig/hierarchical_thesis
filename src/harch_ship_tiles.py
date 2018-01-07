@@ -47,9 +47,9 @@ def experiment():
 
     #Tiles
 
-    low = [0, 0, -np.pi, -np.pi/12]
-    high = [150, 150, np.pi, np.pi/12]
-    n_tiles = [20, 20, 36, 5]
+    low = [0, 0]
+    high = [150, 150]
+    n_tiles = [20, 20]
     low = np.array(low, dtype=np.float)
     high = np.array(high, dtype=np.float)
     n_tilings = 9
@@ -69,22 +69,22 @@ def experiment():
     # Policy 1
     sigma1 = np.array([40, 40])
     approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
-    approximator1.set_weights(np.array([75, 75]))
+    #approximator1.set_weights(np.array([75, 75]))
     pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
 
     # Policy 2
-    sigma2 = Parameter(value=.05)
+    sigma2 = Parameter(value=.1)
     approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
     #pi2.set_weights(np.array([-0.01]))
 
     # Agent 1
-    learning_rate = AdaptiveParameter(value=10)
+    learning_rate = Parameter(value=10)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
                     'fit_params': fit_params}
-    mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space, action_space=spaces.Box(0,150,(2,)), gamma=mdp.info.gamma, horizon=100)
+    mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space[0:2], action_space=spaces.Box(0,150,(2,)), gamma=mdp.info.gamma, horizon=100)
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params, features=features)
 
     # Agent 2

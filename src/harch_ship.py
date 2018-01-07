@@ -49,7 +49,7 @@ def experiment():
     features = Features(basis_list=[PolynomialBasis()])
 
     # Policy 1
-    sigma1 = np.array([40, 40])
+    sigma1 = np.array([38, 38])
     approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
     approximator1.set_weights(np.array([75, 75]))
     pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
@@ -60,7 +60,7 @@ def experiment():
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
-    learning_rate = Parameter(value=10)
+    learning_rate = AdaptiveParameter(value=10)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
@@ -69,7 +69,7 @@ def experiment():
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params, features=features)
 
     # Agent 2
-    learning_rate = AdaptiveParameter(value=.005)
+    learning_rate = AdaptiveParameter(value=.001)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
@@ -106,13 +106,13 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn_visual = core.learn(n_episodes=5000)
-    '''dataset_learn_visual = list()
+    #dataset_learn_visual = core.learn(n_episodes=3000)
+    dataset_learn_visual = list()
     for n in xrange(7):
         dataset_learn = core.learn(n_episodes=1000)
         last_ep_dataset=PickLastEp(dataset_learn)
         dataset_learn_visual.append(last_ep_dataset)
-    '''
+
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=10)
 
@@ -122,7 +122,7 @@ def experiment():
     parameter_dataset2 = parameter_callback2.get_values()
     VisualizePolicyParams(parameter_dataset1, parameter_dataset2)
     #VisualizeControlBlock(low_level_dataset)
-    visualizeShipSteering(dataset_learn_visual, range_eps=xrange(4980,4995))
+    visualizeShipSteering(dataset_learn_visual)
     plt.suptitle('learn')
     visualizeShipSteering(dataset_eval)
     plt.suptitle('evaluate')
