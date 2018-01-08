@@ -29,7 +29,6 @@ def VisualizeControlBlock(datalist_control, J = None, upto_ep = None):
 
     for dataset_step in datalist_control:
         if not dataset_step[-1]:
-            print dataset_step
             state_step = dataset_step[0]
             action_step = dataset_step[1]
             reward_step = dataset_step[2]

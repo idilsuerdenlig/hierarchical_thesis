@@ -80,7 +80,7 @@ def experiment():
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
     #dataset_gradient = CollectJ(agent1, kwargs1='dataset')
-    control_block1 = ControlBlock(wake_time=10, agent=agent1, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[parameter_callback1])
+    control_block1 = ControlBlock(wake_time=100, agent=agent1, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[parameter_callback1])
 
     # Control Block 2
     dataset_callback = CollectDataset()
@@ -99,7 +99,7 @@ def experiment():
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
     function_block3.add_input(function_block2)
-    #function_block3.add_input(reward_ph)
+    function_block3.add_input(reward_ph)
     control_block2.add_input(function_block1)
     control_block2.add_reward(function_block3)
     computational_graph = ComputationalGraph(blocks=blocks, order=order, model=mdp)

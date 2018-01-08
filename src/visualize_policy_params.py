@@ -28,4 +28,8 @@ def VisualizePolicyParams(parameter_dataset1, parameter_dataset2):
     ax1.set_title('pi1 parameters')
     ax2.plot(parameter_dataset2)
     ax2.set_title('pi2 parameters')
+    #fig2 = plt.figure()
+    #ax1 = fig2.add_subplot(121)
+    #ax2 = fig2.add_subplot(122)
+    #time = np.arrange()
 
