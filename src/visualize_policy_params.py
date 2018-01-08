@@ -11,9 +11,13 @@ def VisualizePolicyParams(parameter_dataset1, parameter_dataset2):
 
     paramx_data = list()
     paramy_data = list()
+    paramsigmax_data = list()
+    paramsigmay_data = list()
     for param_set in parameter_dataset1:
         paramx_data.append(param_set[0])
         paramy_data.append(param_set[1])
+        paramsigmax_data.append(param_set[-2])
+        paramsigmay_data.append(param_set[-1])
     fig = plt.figure()
     ax1 = fig.add_subplot(121, projection='3d')
     ax2 = fig.add_subplot(122)

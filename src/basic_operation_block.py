@@ -30,7 +30,7 @@ class squarednormBlock(fBlock):
         def squared_norm(inputs):
             res = 0
             for input in inputs:
-                res += -input*input
+                res += -input.dot(input)
             return res
         self.phi = squared_norm
         super(squarednormBlock, self).__init__(wake_time=wake_time, phi=squared_norm)

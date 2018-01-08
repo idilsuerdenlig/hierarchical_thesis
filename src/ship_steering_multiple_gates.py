@@ -93,19 +93,19 @@ class ShipSteeringMultiGate(Environment):
             absorbing = True
         else:
             self._through_gate(self._state[:2], new_state[:2])
-            if self.gates_passed ==[1, 0, 0, 0] and self.nrew == 0:
+            if self.gates_passed == [1, 0, 0, 0] and self.nrew == 0:
                 reward = 10
                 self.nrew += 1
                 absorbing = False
-            elif self.gates_passed ==[1, 1, 0, 0] and self.nrew == 1:
+            elif self.gates_passed == [1, 1, 0, 0] and self.nrew == 1:
                 reward = 20
                 self.nrew += 1
                 absorbing = False
-            elif self.gates_passed ==[1, 1, 1, 0] and self.nrew == 2:
+            elif self.gates_passed == [1, 1, 1, 0] and self.nrew == 2:
                 reward = 30
                 self.nrew += 1
                 absorbing = False
-            elif self.gates_passed ==[1, 1, 1, 1] and self.nrew == 3:
+            elif self.gates_passed == [1, 1, 1, 1] and self.nrew == 3:
                 reward = 40
                 self.nrew += 1
                 absorbing = True

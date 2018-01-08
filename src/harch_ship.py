@@ -108,7 +108,7 @@ def experiment():
     # Train
     #dataset_learn_visual = core.learn(n_episodes=3000)
     dataset_learn_visual = list()
-    for n in xrange(6):
+    for n in xrange(4):
         dataset_learn = core.learn(n_episodes=1000)
         last_ep_dataset = PickLastEp(dataset_learn)
         dataset_learn_visual += last_ep_dataset
@@ -121,7 +121,7 @@ def experiment():
     parameter_dataset1 = parameter_callback1.get_values()
     parameter_dataset2 = parameter_callback2.get_values()
     VisualizePolicyParams(parameter_dataset1, parameter_dataset2)
-    #VisualizeControlBlock(low_level_dataset)
+    VisualizeControlBlock(low_level_dataset, upto_ep=20)
     visualizeShipSteering(dataset_learn_visual, 'learn')
     visualizeShipSteering(dataset_eval, 'evaluate')
     plt.show()

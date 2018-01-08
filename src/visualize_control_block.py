@@ -3,7 +3,7 @@ import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
-def VisualizeControlBlock(datalist_control, J=None):
+def VisualizeControlBlock(datalist_control, J = None, upto_ep = None):
 
     plt.figure()
 
@@ -25,17 +25,20 @@ def VisualizeControlBlock(datalist_control, J=None):
     next_state_ep = list()
 
     i = 0
+    n_eps = 0
+
     for dataset_step in datalist_control:
         if not dataset_step[-1]:
+            print dataset_step
             state_step = dataset_step[0]
             action_step = dataset_step[1]
             reward_step = dataset_step[2]
             next_state_step = dataset_step[3]
 
-            state_ep.append(state_step)
+            state_ep.append((state_step/np.pi)*180)
             reward_ep.append(reward_step)
             action_ep.append(action_step)
-            next_state_ep.append(next_state_step)
+            next_state_ep.append((next_state_step/np.pi)*180)
             i += 1
 
         else:
@@ -44,10 +47,10 @@ def VisualizeControlBlock(datalist_control, J=None):
             reward_step = dataset_step[2]
             next_state_step = dataset_step[3]
 
-            state_ep.append(state_step)
+            state_ep.append((state_step/np.pi)*180)
             reward_ep.append(reward_step)
             action_ep.append(action_step)
-            next_state_ep.append(next_state_step)
+            next_state_ep.append((next_state_step/np.pi)*180)
             i += 1
             size_eps.append(i)
 
@@ -60,6 +63,11 @@ def VisualizeControlBlock(datalist_control, J=None):
             reward_ep = []
             action_ep = []
             next_state_ep = []
+
+            n_eps += 1
+
+            if upto_ep is not None and n_eps == upto_ep:
+                break
 
     for episode in xrange(len(state_list)):
         state_ep = state_list[episode]

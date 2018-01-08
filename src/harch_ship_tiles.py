@@ -65,19 +65,25 @@ def experiment():
 
     #Features
     features = Features(tilings=tilings)
-    print features
 
     # Policy 1
-    mean_tiles = np.zeros(shape=(n_tiles[0], n_tiles[1], 2))
+    mean_tiles = np.zeros(shape=(2,n_tiles[0]*n_tiles[1]))
     for j in xrange(n_tiles[1]):
         for i in xrange(n_tiles[0]):
-            mean_tiles[i][j][0] = (high[0]-low[0])/(2*n_tiles) + j*(high[0]-low[0])/n_tiles
-            mean_tiles[i][j][1] = high[0]-((high[0]-low[0])/(2*n_tiles) + i*(high[0]-low[0])/n_tiles)
+            index = i+j*n_tiles[0]
+            mean_tiles[0][index] = ((high[0]-low[0])/(2*n_tiles[0])) + j*(high[0]-low[0])/n_tiles[0]
+            mean_tiles[1][index] = ((high[1]-low[1])/(2*n_tiles[1])) + i*(high[1]-low[1])/n_tiles[1]
 
-    sigma1 = np.ones(shape=(n_tiles[0], n_tiles[1]))*0.9
-    approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
+    sigma1 = np.eye(2, 2)*1.9
+    approximator1 = Regressor(LinearApproximator, weights=mean_tiles, input_shape=(features.size,), output_shape=(2,))
     approximator1.set_weights(mean_tiles)
-    pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
+    pi1 = MultivariateGaussianPolicy(mu=approximator1,sigma=sigma1)
+
+    state = np.array([1, 8])
+    index = np.argwhere(features(state))
+    print index
+    print mean_tiles[:,index[0][0]]
+    print approximator1.predict(features(state))
 
     # Policy 2
     sigma2 = Parameter(value=.1)
@@ -86,7 +92,7 @@ def experiment():
     #pi2.set_weights(np.array([-0.01]))
 
     # Agent 1
-    learning_rate = Parameter(value=10)
+    learning_rate = Parameter(value=0.05)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
@@ -136,6 +142,7 @@ def experiment():
     dataset_eval = core.evaluate(n_episodes=10)
 
     # Visualize
+    print np.reshape(pi1.get_weights(),(2,-1))
     low_level_dataset = dataset_callback.get()
     parameter_dataset1 = parameter_callback1.get_values()
     parameter_dataset2 = parameter_callback2.get_values()
