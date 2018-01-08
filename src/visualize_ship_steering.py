@@ -3,7 +3,7 @@ import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
-def visualizeShipSteering(datalist_eval, J=None, range_eps=None):
+def visualizeShipSteering(datalist_eval, name, J=None, range_eps=None):
 
     plt.figure()
 
@@ -69,9 +69,6 @@ def visualizeShipSteering(datalist_eval, J=None, range_eps=None):
             reward_ep = []
             n_eps += 1
 
-        if range_eps is not None and n_eps == range_eps:
-            print n_eps
-            break
 
     maxt = 0
     if range_eps is None:
@@ -120,3 +117,6 @@ def visualizeShipSteering(datalist_eval, J=None, range_eps=None):
         plt.title('J')
 
     plt.tight_layout()
+
+    plt.suptitle(name)
+

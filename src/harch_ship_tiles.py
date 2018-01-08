@@ -52,7 +52,7 @@ def experiment():
     n_tiles = [20, 20]
     low = np.array(low, dtype=np.float)
     high = np.array(high, dtype=np.float)
-    n_tilings = 9
+    n_tilings = 1
 
     tilings = list()
     offset = (high - low) / (np.array(n_tiles) * n_tilings - n_tilings + 1.)
@@ -65,12 +65,18 @@ def experiment():
 
     #Features
     features = Features(tilings=tilings)
-    print features.size
+    print features
 
     # Policy 1
-    sigma1 = np.array([40, 40])
+    mean_tiles = np.zeros(shape=(n_tiles[0], n_tiles[1], 2))
+    for j in xrange(n_tiles[1]):
+        for i in xrange(n_tiles[0]):
+            mean_tiles[i][j][0] = (high[0]-low[0])/(2*n_tiles) + j*(high[0]-low[0])/n_tiles
+            mean_tiles[i][j][1] = high[0]-((high[0]-low[0])/(2*n_tiles) + i*(high[0]-low[0])/n_tiles)
+
+    sigma1 = np.ones(shape=(n_tiles[0], n_tiles[1]))*0.9
     approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
-    #approximator1.set_weights(np.array([75, 75]))
+    approximator1.set_weights(mean_tiles)
     pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
 
     # Policy 2
@@ -135,8 +141,8 @@ def experiment():
     parameter_dataset2 = parameter_callback2.get_values()
     VisualizePolicyParams(parameter_dataset1, parameter_dataset2)
     #VisualizeControlBlock(low_level_dataset)
-    visualizeShipSteering(dataset_learn, range_eps=xrange(2980,2995))
-    visualizeShipSteering(dataset_eval)
+    visualizeShipSteering(dataset_learn, 'learn', range_eps=xrange(2980,2995))
+    visualizeShipSteering(dataset_eval, 'evaluate')
     plt.show()
 
     return
