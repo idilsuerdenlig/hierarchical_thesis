@@ -65,6 +65,7 @@ def experiment():
 
     #Features
     features = Features(tilings=tilings)
+    print features.size
 
     # Policy 1
     sigma1 = np.array([40, 40])
@@ -84,7 +85,7 @@ def experiment():
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
                     'fit_params': fit_params}
-    mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space[0:2], action_space=spaces.Box(0,150,(2,)), gamma=mdp.info.gamma, horizon=100)
+    mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space, action_space=spaces.Box(0,150,(2,)), gamma=mdp.info.gamma, horizon=100)
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params, features=features)
 
     # Agent 2
@@ -98,12 +99,12 @@ def experiment():
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(wake_time=10, agent=agent1, high=True, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[parameter_callback1])
+    control_block1 = ControlBlock(wake_time=10, agent=agent1, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[parameter_callback1])
 
     # Control Block 2
     dataset_callback = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(wake_time=1, agent=agent2, high=False, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[dataset_callback, parameter_callback2])
+    control_block2 = ControlBlock(wake_time=1, agent=agent2, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[dataset_callback, parameter_callback2])
 
 
     # Algorithm

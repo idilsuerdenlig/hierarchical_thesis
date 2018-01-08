@@ -9,4 +9,5 @@ def PickLastEp(dataset):
             ep_end_indices.append(i)
 
     last_ep_begin = ep_end_indices[-2]
-    return dataset[last_ep_begin:]
+    last_ep_end = ep_end_indices[-1]
+    return dataset[last_ep_begin:last_ep_end+1]
