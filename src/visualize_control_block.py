@@ -3,7 +3,7 @@ import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
-def VisualizeControlBlock(datalist_control, J = None, upto_ep = None):
+def visualize_control_block(datalist_control, J = None, ep_count = None):
 
     plt.figure()
 
@@ -65,22 +65,27 @@ def VisualizeControlBlock(datalist_control, J = None, upto_ep = None):
 
             n_eps += 1
 
-            if upto_ep is not None and n_eps == upto_ep:
-                break
+    print n_eps
+    if ep_count is None:
+        ep_count = n_eps
 
-    for episode in xrange(len(state_list)):
+    range_eps = xrange(n_eps-ep_count,n_eps)
+
+    print len(state_list)
+
+    for episode in range_eps:
         state_ep = state_list[episode]
         time =np.arange(len(state_ep))
         ax1.plot(time,state_ep)
         ax1.set_ylabel('state')
 
-    for episode in xrange(len(action_list)):
+    for episode in range_eps:
         action_ep = action_list[episode]
         time =np.arange(len(action_ep))
         ax2.plot(time,action_ep)
         ax2.set_ylabel('action')
 
-    for episode in xrange(len(reward_list)):
+    for episode in range_eps:
         reward_ep = reward_list[episode]
         time =np.arange(len(reward_ep))
         #theoretical_reward =[-x**2 for x in next_state_list[episode]]

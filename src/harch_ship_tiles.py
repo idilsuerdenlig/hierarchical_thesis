@@ -11,11 +11,11 @@ from mushroom.policy.gaussian_policy import *
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.algorithms.policy_search import *
-from visualize_ship_steering import visualizeShipSteering
+from visualize_ship_steering import visualize_ship_steering
 import matplotlib.pyplot as plt
-from visualize_control_block import VisualizeControlBlock
+from visualize_control_block import visualize_control_block
 from collect_policy_parameter import CollectPolicyParameter
-from visualize_policy_params import VisualizePolicyParams
+from visualize_policy_params import visualize_policy_params
 from feature_angle_diff_ship_steering import phi
 from basic_operation_block import *
 from model_placeholder import PlaceHolder
@@ -146,10 +146,10 @@ def experiment():
     low_level_dataset = dataset_callback.get()
     parameter_dataset1 = parameter_callback1.get_values()
     parameter_dataset2 = parameter_callback2.get_values()
-    VisualizePolicyParams(parameter_dataset1, parameter_dataset2)
-    #VisualizeControlBlock(low_level_dataset)
-    visualizeShipSteering(dataset_learn, 'learn', range_eps=xrange(2980,2995))
-    visualizeShipSteering(dataset_eval, 'evaluate')
+    visualize_policy_params(parameter_dataset1, parameter_dataset2)
+    #visualize_control_block(low_level_dataset)
+    visualize_ship_steering(dataset_learn, 'learn', range_eps=xrange(2980,2995))
+    visualize_ship_steering(dataset_eval, 'evaluate')
     plt.show()
 
     return

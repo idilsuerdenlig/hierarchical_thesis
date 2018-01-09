@@ -3,7 +3,7 @@ import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
-def visualizeShipSteering(datalist_eval, name, J=None, range_eps=None):
+def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None):
 
     plt.figure()
 

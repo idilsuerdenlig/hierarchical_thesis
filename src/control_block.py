@@ -1,5 +1,4 @@
 from block import Block
-from J_block import JBlock
 import numpy as np
 class ControlBlock(Block):
     """

@@ -10,7 +10,7 @@ from mushroom.features.features import Features
 from mushroom.policy import GaussianPolicy
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
-from visualize_ship_steering import visualizeShipSteering
+from visualize_ship_steering import visualize_ship_steering
 
 
 
@@ -59,7 +59,7 @@ def experiment(n_iterations, n_runs, ep_per_run):
                                      iterate_over='episodes')
         J = compute_J(dataset_eval, gamma=mdp.gamma)
         print('J at iteration ' + str(i) + ': ' + str(np.mean(J)))
-        visualizeShipSteering(datalist_eval=dataset_eval, J=J)
+        visualize_ship_steering(datalist_eval=dataset_eval, J=J)
 
 
     np.save('ship_steering.npy', dataset_eval)

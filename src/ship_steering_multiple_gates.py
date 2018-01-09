@@ -67,7 +67,7 @@ class ShipSteeringMultiGate(Environment):
 
     def reset(self, state=None):
         if state is None:
-            self._state = np.zeros(4)
+            self._state = np.zeros(5)
         else:
             self._state = state
 
@@ -75,7 +75,7 @@ class ShipSteeringMultiGate(Environment):
 
     def step(self, action):
         r = np.maximum(-self.omega_max, np.minimum(self.omega_max, action[0]))
-        new_state = np.empty(4)
+        new_state = np.empty(5)
         new_state[0] = self._state[0] + self._v * np.sin(self._state[2]) *\
             self._dt
         new_state[1] = self._state[1] + self._v * np.cos(self._state[2]) *\
@@ -95,15 +95,15 @@ class ShipSteeringMultiGate(Environment):
             self._through_gate(self._state[:2], new_state[:2])
             if self.gates_passed == [1, 0, 0, 0] and self.nrew == 0:
                 reward = 10
-                self.nrew += 1
+                self.new_state[4] = 1
                 absorbing = False
             elif self.gates_passed == [1, 1, 0, 0] and self.nrew == 1:
                 reward = 20
-                self.nrew += 1
+                self.new_state[4] = 2
                 absorbing = False
             elif self.gates_passed == [1, 1, 1, 0] and self.nrew == 2:
                 reward = 30
-                self.nrew += 1
+                self.new_state[4] = 3
                 absorbing = False
             elif self.gates_passed == [1, 1, 1, 1] and self.nrew == 3:
                 reward = 40

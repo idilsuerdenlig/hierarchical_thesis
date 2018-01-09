@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def PickLastEp(dataset):
+def pick_last_ep(dataset):
 
     ep_end_indices = list()
     for i, dataset_step in enumerate(dataset):

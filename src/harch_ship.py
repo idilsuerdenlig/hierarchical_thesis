@@ -5,22 +5,22 @@ from mushroom.utils import spaces
 from mushroom.environments import *
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 from mushroom.utils.callbacks import CollectDataset
+from mushroom.utils.dataset import compute_J
 from mushroom.features.basis import *
 from mushroom.features.features import *
 from mushroom.policy.gaussian_policy import *
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.algorithms.policy_search import *
-from visualize_ship_steering import visualizeShipSteering
+from visualize_ship_steering import visualize_ship_steering
 import matplotlib.pyplot as plt
-from visualize_control_block import VisualizeControlBlock
+from visualize_control_block import visualize_control_block
 from collect_policy_parameter import CollectPolicyParameter
-from visualize_policy_params import VisualizePolicyParams
+from visualize_policy_params import visualize_policy_params
 from feature_angle_diff_ship_steering import phi
 from basic_operation_block import *
 from model_placeholder import PlaceHolder
-from collect_J import CollectJ
-from pick_last_ep_dataset import PickLastEp
+from pick_last_ep_dataset import pick_last_ep
 
 
 def experiment():
@@ -60,7 +60,7 @@ def experiment():
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
-    learning_rate = AdaptiveParameter(value=10)
+    learning_rate = AdaptiveParameter(value=5)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
@@ -79,7 +79,6 @@ def experiment():
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    #dataset_gradient = CollectJ(agent1, kwargs1='dataset')
     control_block1 = ControlBlock(wake_time=100, agent=agent1, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[parameter_callback1])
 
     # Control Block 2
@@ -106,24 +105,28 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    #dataset_learn_visual = core.learn(n_episodes=3000)
+    #dataset_learn_visual = core.learn(n_episodes=2000)
     dataset_learn_visual = list()
-    for n in xrange(4):
+    for n in xrange(3):
         dataset_learn = core.learn(n_episodes=1000)
-        last_ep_dataset = PickLastEp(dataset_learn)
+        last_ep_dataset = pick_last_ep(dataset_learn)
         dataset_learn_visual += last_ep_dataset
         del dataset_learn
 
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=10)
+
     # Visualize
+    J = compute_J(dataset_eval, gamma=mdp.info.gamma)
     low_level_dataset = dataset_callback.get()
     parameter_dataset1 = parameter_callback1.get_values()
     parameter_dataset2 = parameter_callback2.get_values()
-    VisualizePolicyParams(parameter_dataset1, parameter_dataset2)
-    VisualizeControlBlock(low_level_dataset, upto_ep=20)
-    visualizeShipSteering(dataset_learn_visual, 'learn')
-    visualizeShipSteering(dataset_eval, 'evaluate')
+    visualize_policy_params(parameter_dataset1, parameter_dataset2)
+    visualize_control_block(low_level_dataset, ep_count=20)
+    #visualize_ship_steering(dataset_learn_visual, range_eps=xrange(1980,1995), name='learn')
+    visualize_ship_steering(dataset_learn_visual, name='learn')
+
+    visualize_ship_steering(dataset_eval, 'evaluate')
     plt.show()
 
     return
