@@ -60,7 +60,7 @@ def experiment():
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
-    learning_rate = AdaptiveParameter(value=5)
+    learning_rate = AdaptiveParameter(value=10)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,

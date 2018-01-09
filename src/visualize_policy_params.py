@@ -48,10 +48,6 @@ def visualize_policy_params(parameter_dataset1, parameter_dataset2):
     sigmax2 = paramsigmax_data[-1]
     sigmay2 = paramsigmay_data[-1]
 
-    print x0, y0, sigmax0, sigmay0
-    print x1, y1, sigmax1, sigmay1
-    print x2, y2, sigmax2, sigmay2
-
     ellipse0 = Ellipse(xy=(x0, y0), width=4*sigmax0, height=4*sigmay0,
                         edgecolor='g', fc='None', lw=2)
     ellipse1 = Ellipse(xy=(x1, y1), width=4*sigmax1, height=4*sigmay1,
@@ -61,6 +57,6 @@ def visualize_policy_params(parameter_dataset1, parameter_dataset2):
     ax3.add_patch(ellipse0)
     ax3.add_patch(ellipse1)
     ax3.add_patch(ellipse2)
-    ax3.set_xlim(-70, 150)
-    ax3.set_ylim(-70, 150)
+    ax3.set_xlim(-50, 150)
+    ax3.set_ylim(-50, 150)
     ax3.set_title('95% interval pi1 parameters')
