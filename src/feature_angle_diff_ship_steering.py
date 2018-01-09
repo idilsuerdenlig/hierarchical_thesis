@@ -11,6 +11,6 @@ def phi(ins):
     del_x = x_ref-x
     del_y = y_ref-y
     theta_ref = normalize_angle(np.arctan2(del_y, del_x))
-    theta = np.pi/2-theta
-    del_theta = shortest_angular_distance(theta_ref,theta)
+    theta = normalize_angle(np.pi/2-theta)
+    del_theta = shortest_angular_distance(from_angle=theta,to_angle=theta_ref)
     return np.array([del_theta])
