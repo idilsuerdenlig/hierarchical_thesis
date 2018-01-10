@@ -107,7 +107,7 @@ class ShipSteeringMultiGate(Environment):
                 absorbing = False
             elif self.gates_passed == [1, 1, 1, 1] and self.nrew == 3:
                 reward = 40
-                self.nrew += 1
+                self.new_state[4] = 4
                 absorbing = True
             else:
                 reward = -1

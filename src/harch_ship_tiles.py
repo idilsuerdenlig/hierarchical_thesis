@@ -20,6 +20,7 @@ from feature_angle_diff_ship_steering import phi
 from basic_operation_block import *
 from model_placeholder import PlaceHolder
 from mushroom.features.tiles import Tiles
+from pick_last_ep_dataset import pick_last_ep
 
 
 
@@ -79,12 +80,6 @@ def experiment():
     approximator1.set_weights(mean_tiles)
     pi1 = MultivariateGaussianPolicy(mu=approximator1,sigma=sigma1)
 
-    state = np.array([1, 8])
-    index = np.argwhere(features(state))
-    print index
-    print mean_tiles[:,index[0][0]]
-    print approximator1.predict(features(state))
-
     # Policy 2
     sigma2 = Parameter(value=.1)
     approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
@@ -92,7 +87,7 @@ def experiment():
     #pi2.set_weights(np.array([-0.01]))
 
     # Agent 1
-    learning_rate = Parameter(value=0.05)
+    learning_rate = AdaptiveParameter(value=0.6)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
@@ -137,7 +132,13 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn = core.learn(n_episodes=4000)
+    dataset_learn_visual = list()
+    #dataset_learn_visual = core.learn(n_episodes=4000)
+    for n in xrange(3):
+        dataset_learn = core.learn(n_episodes=1000)
+        last_ep_dataset = pick_last_ep(dataset_learn)
+        dataset_learn_visual += last_ep_dataset
+        del dataset_learn
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=10)
 
@@ -147,8 +148,8 @@ def experiment():
     parameter_dataset1 = parameter_callback1.get_values()
     parameter_dataset2 = parameter_callback2.get_values()
     visualize_policy_params(parameter_dataset1, parameter_dataset2)
-    #visualize_control_block(low_level_dataset)
-    visualize_ship_steering(dataset_learn, 'learn', range_eps=xrange(2980,2995))
+    visualize_control_block(low_level_dataset, ep_count=20)
+    visualize_ship_steering(dataset_learn_visual, 'learn')
     visualize_ship_steering(dataset_eval, 'evaluate')
     plt.show()
 

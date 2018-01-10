@@ -2,7 +2,7 @@ from f_block import fBlock
 import numpy as np
 
 
-class plusBlock(fBlock):
+class addBlock(fBlock):
 
     def __init__(self, wake_time, phi=None):
         def summation(inputs):
@@ -11,17 +11,17 @@ class plusBlock(fBlock):
                 res += i
             return res
         self.phi = summation
-        super(plusBlock, self).__init__(wake_time=wake_time, phi=summation)
+        super(addBlock, self).__init__(wake_time=wake_time, phi=summation)
 
 
-class minusBlock(fBlock):
+class extractBlock(fBlock):
 
     def __init__(self, wake_time, phi=None):
         def extraction(inputs):
             res = inputs[0] - inputs[1]
             return res
         self.phi = extraction
-        super(minusBlock, self).__init__(wake_time=wake_time, phi=extraction)
+        super(extractBlock, self).__init__(wake_time=wake_time, phi=extraction)
 
 
 class squarednormBlock(fBlock):

@@ -43,7 +43,7 @@ def experiment():
     function_block2 = squarednormBlock(wake_time=1)
 
     # Function Block 3
-    function_block3 = plusBlock(wake_time=1)
+    function_block3 = addBlock(wake_time=1)
 
     #Features
     features = Features(basis_list=[PolynomialBasis()])

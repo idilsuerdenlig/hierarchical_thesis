@@ -23,8 +23,10 @@ class MuxBlock(Block):
         selected_block_list = self.block_lists[selector]
 
         for block in selected_block_list:
-            absorbing, last = block(inputs=inputs, reward=None, absorbing=absorbing, learn_flag=learn_flag)
-            inputs = block.last_output
+            absorbing, last = block(inputs=inputs[1], reward=None, absorbing=absorbing, learn_flag=learn_flag)
+            inputs[1] = block.last_output
+
+        self.last_output = inputs[1]
 
         return absorbing, last
 
@@ -32,5 +34,11 @@ class MuxBlock(Block):
 
         self.block_lists.append(block_list)
 
+    def reset(self, inputs):
 
+        for block_list in self.block_lists:
+            for block in block_list:
+                block.reset(inputs=inputs[1])
+                inputs[1] = block.last_output
+        self.clock_counter = 0
 
