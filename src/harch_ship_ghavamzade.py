@@ -25,6 +25,9 @@ from mushroom.policy import EpsGreedy
 from mushroom.features.tiles import Tiles
 from pick_state import pick_state
 from rototranslate import rototranslate
+from hold_state import hold_state
+from hi_lev_extr_rew_ghavamzade import G_high
+from low_lev_extr_rew_ghavamzade import G_low
 
 def experiment():
     np.random.seed()
@@ -126,11 +129,26 @@ def experiment():
     parameter_callback2 = CollectPolicyParameter(pi2)
     control_block2 = ControlBlock(wake_time=1, agent=agent2, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[dataset_callback2, parameter_callback2])
 
-    # Function Block 1
+    # Function Block 1: picks state for hi lev ctrl
     function_block1 = fBlock(wake_time=1, phi=pick_state)
 
-    # Function Block 2
+    # Function Block 2: maps the env to low lev ctrl state
     function_block2 = fBlock(wake_time=1, phi=rototranslate)
+
+    # Function Block 3: holds curr state as ref
+    function_block3 = fBlock(wake_time=100, phi=hold_state)
+
+    # Function Block 4: adds hi lev rew
+    function_block4 = addBlock(wake_time=1)
+
+    # Function Block 5: adds low lev rew
+    function_block5 = addBlock(wake_time=1)
+
+    # Function Block 6:ext rew of hi lev ctrl
+    function_block6 = fBlock(wake_time=1, phi=G_high)
+
+    # Function Block 7: ext rew of low lev ctrl
+    function_block7 = fBlock(wake_time=1, phi=G_low)
 
     #Mux_Block
     mux_block = MuxBlock(wake_time = 1)
@@ -138,16 +156,32 @@ def experiment():
     mux_block.add_block_list(block_lists_in)
 
     # Algorithm
-    blocks = [state_ph, reward_ph, control_blockH, mux_block, function_block1, function_block2]
-    order = [0, 1, 5, 2, 4, 3]
+    blocks = [state_ph, reward_ph, control_blockH, mux_block,
+              function_block1, function_block2, function_block3,
+              function_block4, function_block5,
+              function_block6, function_block7]
+
+    order = [0, 1, 4, 7, 9, 6, 2, 5, 10, 8, 3]
     state_ph.add_input(mux_block)
     reward_ph.add_input(mux_block)
     control_blockH.add_input(function_block1)
-    control_blockH.add_reward(reward_ph)
+    control_blockH.add_reward(function_block4)
     mux_block.add_input(control_blockH)
     mux_block.add_input(function_block2)
+    mux_block.add_input(function_block5)
     function_block1.add_input(state_ph)
     function_block2.add_input(control_blockH)
+    function_block2.add_input(state_ph)
+    function_block2.add_input(function_block3)
+    function_block3.add_input(state_ph)
+    function_block4.add_input(function_block6)
+    function_block4.add_input(reward_ph)
+    function_block5.add_input(reward_ph)
+    function_block5.add_input(function_block7)
+    function_block6.add_input(reward_ph)
+    function_block7.add_input(control_blockH)
+    function_block7.add_input(function_block2)
+
     computational_graph = ComputationalGraph(blocks=blocks, order=order, model=mdp)
     core = HierarchicalCore(computational_graph)
 
