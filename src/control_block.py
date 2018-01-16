@@ -46,6 +46,8 @@ class ControlBlock(Block):
             for index, _reward in enumerate(self.rewardlist):
                 df = self.gamma**index
                 self.discounted_reward += df*_reward
+            if isinstance(self.discounted_reward, np.ndarray):
+                self.discounted_reward = self.discounted_reward[0]
             sample = self.last_input, self.last_output, self.discounted_reward, state, absorbing, self.last
             self.dataset.append(sample)
 

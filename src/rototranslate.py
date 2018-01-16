@@ -8,6 +8,7 @@ def rototranslate(inputs):
     x = inputs[1][0]
     y = inputs[1][1]
     theta = inputs[1][2]
+    theta_dot = inputs[1][3]
 
     x0 = inputs[2][0]
     y0 = inputs[2][1]
@@ -43,4 +44,5 @@ def rototranslate(inputs):
         new_states[1] = x-x0-40
         new_states[2] = normalize_angle(theta + np.pi*1.5)
 
+    new_states[3] = theta_dot
     return new_states
