@@ -3,6 +3,7 @@ from mushroom.utils.angles_utils import normalize_angle
 
 
 def rototranslate(inputs):
+
     new_states = np.zeros(shape=(4,))
     active_direction = inputs[0]
     x = inputs[1][0]
@@ -13,35 +14,38 @@ def rototranslate(inputs):
     x0 = inputs[2][0]
     y0 = inputs[2][1]
 
+    small_offset = 4
+    large_offset = 7.5
+
     if active_direction == 0:   #R
-        new_states[0] = x-x0+40
-        new_states[1] = y-y0+75
+        new_states[0] = x-x0+small_offset
+        new_states[1] = y-y0+large_offset
     elif active_direction == 1: #D
-        new_states[0] = y-y0+75
-        new_states[1] = x-x0-40
+        new_states[0] = y-y0+large_offset
+        new_states[1] = x-x0-small_offset
         new_states[2] = normalize_angle(theta + np.pi/2)
     elif active_direction == 2: #L
-        new_states[0] = x-x0-40
-        new_states[1] = y-y0-75
+        new_states[0] = x-x0-small_offset
+        new_states[1] = y-y0-large_offset
         new_states[2] = normalize_angle(theta +np.pi)
     elif active_direction == 3: #U
-        new_states[0] = y-y0+40
-        new_states[1] = x-x0-75
+        new_states[0] = y-y0+small_offset
+        new_states[1] = x-x0-large_offset
         new_states[2] = normalize_angle(theta+1.5*np.pi)
     elif active_direction == 4: #UR
-        new_states[0] = x-x0+40
-        new_states[1] = y-y0+40
+        new_states[0] = x-x0+small_offset
+        new_states[1] = y-y0+small_offset
     elif active_direction == 5: #DR
-        new_states[0] = y-y0-40
-        new_states[1] = x-x0+40
+        new_states[0] = y-y0-small_offset
+        new_states[1] = x-x0+small_offset
         new_states[2] = normalize_angle(theta + np.pi/2)
     elif active_direction == 6: #DL
-        new_states[0] = x-x0-40
-        new_states[1] = x-x0-40
+        new_states[0] = x-x0-small_offset
+        new_states[1] = x-x0-small_offset
         new_states[2] = normalize_angle(theta + np.pi)
     else:                       #UL
-        new_states[0] = y-y0+40
-        new_states[1] = x-x0-40
+        new_states[0] = y-y0+small_offset
+        new_states[1] = x-x0-small_offset
         new_states[2] = normalize_angle(theta + np.pi*1.5)
 
     new_states[3] = theta_dot

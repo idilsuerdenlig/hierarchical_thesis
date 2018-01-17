@@ -4,7 +4,7 @@ from control_block import ControlBlock
 from mushroom.utils import spaces
 from mushroom.environments import *
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
-from mushroom.utils.callbacks import CollectDataset, CollectQ
+from mushroom.utils.callbacks import CollectDataset
 from mushroom.features.basis import *
 from mushroom.features.features import *
 from mushroom.policy.gaussian_policy import *
@@ -13,10 +13,10 @@ from mushroom.approximators.regressor import Regressor
 from mushroom.algorithms.policy_search import *
 from visualize_ship_steering import visualize_ship_steering
 import matplotlib.pyplot as plt
-from visualize_control_block import visualize_control_block
+import matplotlib as mpl
+from visualize_control_block_ghavamzade import visualize_control_block_ghavamzade
 from collect_policy_parameter import CollectPolicyParameter
 from visualize_policy_params import visualize_policy_params
-from feature_angle_diff_ship_steering import phi
 from basic_operation_block import *
 from model_placeholder import PlaceHolder
 from mux_block import MuxBlock
@@ -28,7 +28,6 @@ from rototranslate import rototranslate
 from hold_state import hold_state
 from hi_lev_extr_rew_ghavamzade import G_high
 from low_lev_extr_rew_ghavamzade import G_low
-from collect_Q import Collect_Q
 
 def experiment():
     np.random.seed()
@@ -48,13 +47,13 @@ def experiment():
     featuresH = Features(tilings=tilingsH)
 
     # PolicyH
-    epsilon = Parameter(value=0.01)
+    epsilon = Parameter(value=0.0)
     piH = EpsGreedy(epsilon=epsilon)
 
     # AgentH
-    learning_rate = Parameter(value=0.1)
+    learning_rate = Parameter(value=0.05)
 
-    mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=0, high=150, shape=(2,)), action_space=spaces.Discrete(8), gamma=1, horizon=100)
+    mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]), high=np.array([150, 150]), shape=(2,)), action_space=spaces.Discrete(8), gamma=1, horizon=100)
     approximator_params = dict(input_shape=(featuresH.size,),
                                output_shape=mdp_info_agentH.action_space.size,
                                n_actions=mdp_info_agentH.action_space.n)
@@ -67,7 +66,7 @@ def experiment():
     agentH = TrueOnlineSARSALambda(policy=piH, mdp_info=mdp_info_agentH, params=agent_params, features=featuresH)
 
     # Control Block H
-    control_blockH = ControlBlock(wake_time=100, agent=agentH, n_eps_per_fit=None, n_steps_per_fit=1)
+    control_blockH = ControlBlock(wake_time=10, agent=agentH, n_eps_per_fit=None, n_steps_per_fit=1)
 
     #FeaturesL
     low = [0, 0, -np.pi, -np.pi/12]
@@ -91,32 +90,32 @@ def experiment():
     pi2 = MultivariateGaussianPolicy(mu=approximator2,sigma=sigma2)
 
     # Agent1
-    learning_rate1 = AdaptiveParameter(value=.001)
+    learning_rate1 = AdaptiveParameter(value=.01)
     algorithm_params1 = dict(learning_rate=learning_rate1)
     fit_params1 = dict()
     agent_params1 = {'algorithm_params': algorithm_params1,
                     'fit_params': fit_params1}
-    mdp_info_agent1 = MDPInfo(observation_space=spaces.Box(low=np.array([0,0,-np.pi,-np.pi/12]), high=np.array([15,15,np.pi,np.pi/12])), action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
+    mdp_info_agent1 = MDPInfo(observation_space=spaces.Box(low=np.array([0,0,-np.pi,-np.pi/12]), high=np.array([15,15,np.pi,np.pi/12])), action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=10)
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params1, features=featuresL)
 
     # Agent2
-    learning_rate2 = AdaptiveParameter(value=.001)
+    learning_rate2 = AdaptiveParameter(value=.01)
     algorithm_params2 = dict(learning_rate=learning_rate2)
     fit_params2 = dict()
     agent_params2 = {'algorithm_params': algorithm_params2,
                     'fit_params': fit_params2}
-    mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low=np.array([0,0,-np.pi,-np.pi/12]), high=np.array([15,15,np.pi,np.pi/12])), action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
+    mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low=np.array([0,0,-np.pi,-np.pi/12]), high=np.array([15,15,np.pi,np.pi/12])), action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=10)
     agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, params=agent_params2, features=featuresL)
 
     # Control Block +
     dataset_callback1 = CollectDataset()
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(wake_time=1, agent=agent1, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[dataset_callback1, parameter_callback1])
+    control_block1 = ControlBlock(wake_time=1, agent=agent1, n_eps_per_fit=5, n_steps_per_fit=None, callbacks=[dataset_callback1, parameter_callback1])
 
     # Control Block x
     dataset_callback2 = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(wake_time=1, agent=agent2, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[dataset_callback2, parameter_callback2])
+    control_block2 = ControlBlock(wake_time=1, agent=agent2, n_eps_per_fit=5, n_steps_per_fit=None, callbacks=[dataset_callback2, parameter_callback2])
 
     # Function Block 1: picks state for hi lev ctrl
     function_block1 = fBlock(wake_time=1, phi=pick_state)
@@ -125,7 +124,7 @@ def experiment():
     function_block2 = fBlock(wake_time=1, phi=rototranslate)
 
     # Function Block 3: holds curr state as ref
-    function_block3 = fBlock(wake_time=100, phi=hold_state)
+    function_block3 = fBlock(wake_time=10, phi=hold_state)
 
     # Function Block 4: adds hi lev rew
     function_block4 = addBlock(wake_time=1)
@@ -176,32 +175,42 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn = core.learn(n_episodes=3000)
+    dataset_learn = core.learn(n_episodes=1000)
     # Evaluate
-    dataset_eval = core.evaluate(n_episodes=10)
+    dataset_eval = core.evaluate(n_episodes=50)
 
     # Visualize
-    low_level_dataset1 = dataset_callback1.get()
-    low_level_dataset2 = dataset_callback2.get()
     hi_lev_params = agentH.Q.get_weights()
-    hi_lev_params = np.reshape(hi_lev_params, (400, 8))
-
-    print hi_lev_params
-
-    blablabla = np.zeros(shape=(400,))
+    hi_lev_params = np.reshape(hi_lev_params, (8, 400))
+    max_q_val = np.zeros(shape=(400,))
+    act_max_q_val = np.zeros(shape=(400,))
     for i in xrange(400):
-        blablabla[i] = max(hi_lev_params[i])
+        max_q_val[i] = np.amax(hi_lev_params[:,i])
+        act_max_q_val[i] = np.argmax(hi_lev_params[:,i])
+    max_q_val_tiled = np.reshape(max_q_val, (20, 20))
+    print max_q_val[5]
+    print max_q_val_tiled[0,5]
+    print max_q_val[21]
+    print max_q_val_tiled[1,1]
+    act_max_q_val_tiled = np.reshape(act_max_q_val, (20, 20))
+    for i in xrange(20):
+        for j in xrange(20):
+            act_no = act_max_q_val_tiled[i,j]
+            
 
-    max_q_val = np.reshape(blablabla, (20,20))
-    print max_q_val
-    plt.imshow(max_q_val, cmap='hot', interpolation='nearest')
-
+    fig, axis = plt.subplots()
+    heatmap = axis.pcolor(max_q_val_tiled, cmap=plt.cm.Blues)
+    plt.colorbar(heatmap)
     #parameter_dataset1 = parameter_callback1.get_values()
     #parameter_dataset2 = parameter_callback2.get_values()
     #visualize_policy_params(parameter_dataset1, parameter_dataset2)
-    #visualize_control_block(low_level_dataset1)
-    #visualize_control_block(low_level_dataset2)
-    visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(2980,2995))
+    low_level_dataset1 = dataset_callback1.get()
+    low_level_dataset2 = dataset_callback2.get()
+    visualize_control_block_ghavamzade(low_level_dataset1, ep_count=20)
+    plt.suptitle('ctrl1')
+    visualize_control_block_ghavamzade(low_level_dataset2, ep_count=20)
+    plt.suptitle('ctrl2')
+    visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(980, 995))
     visualize_ship_steering(dataset_eval, name='evaluate')
     plt.show()
 
