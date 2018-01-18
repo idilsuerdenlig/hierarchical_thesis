@@ -6,10 +6,10 @@ class fBlock(Block):
     This class implements the block object of a computational graph for hierarchical learning.
 
     """
-    def __init__(self, wake_time, phi):
+    def __init__(self, wake_time, phi, name=None):
 
         self.phi = phi
-        super(fBlock, self).__init__(wake_time=wake_time)
+        super(fBlock, self).__init__(wake_time=wake_time, name=name)
 
     def __call__(self, inputs, reward, absorbing, last, learn_flag):
 

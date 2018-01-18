@@ -20,33 +20,40 @@ def rototranslate(inputs):
     if active_direction == 0:   #R
         new_states[0] = x-x0+small_offset
         new_states[1] = y-y0+large_offset
+        new_states[2] = normalize_angle(theta)
     elif active_direction == 1: #D
-        new_states[0] = y-y0+large_offset
-        new_states[1] = x-x0-small_offset
+        new_states[0] = y0-y+small_offset
+        new_states[1] = x-x0+large_offset
         new_states[2] = normalize_angle(theta + np.pi/2)
     elif active_direction == 2: #L
-        new_states[0] = x-x0-small_offset
-        new_states[1] = y-y0-large_offset
+        new_states[0] = x0-x+small_offset
+        new_states[1] = y0-y+large_offset
         new_states[2] = normalize_angle(theta +np.pi)
     elif active_direction == 3: #U
         new_states[0] = y-y0+small_offset
-        new_states[1] = x-x0-large_offset
+        new_states[1] = x0-x+large_offset
         new_states[2] = normalize_angle(theta+1.5*np.pi)
     elif active_direction == 4: #UR
         new_states[0] = x-x0+small_offset
         new_states[1] = y-y0+small_offset
+        new_states[2] = normalize_angle(theta)
     elif active_direction == 5: #DR
-        new_states[0] = y-y0-small_offset
+        new_states[0] = y0-y+small_offset
         new_states[1] = x-x0+small_offset
         new_states[2] = normalize_angle(theta + np.pi/2)
     elif active_direction == 6: #DL
-        new_states[0] = x-x0-small_offset
-        new_states[1] = x-x0-small_offset
+        new_states[0] = x0-x+small_offset
+        new_states[1] = y0-y+small_offset
         new_states[2] = normalize_angle(theta + np.pi)
     else:                       #UL
         new_states[0] = y-y0+small_offset
-        new_states[1] = x-x0-small_offset
+        new_states[1] = x0-x+small_offset
         new_states[2] = normalize_angle(theta + np.pi*1.5)
 
     new_states[3] = theta_dot
+    #print 'active direction     : ', active_direction
+    #print 'non_translated states:', inputs[1]
+    #print 'initial_point        :', inputs[2]
+    #print 'translated states    :', new_states
     return new_states
+

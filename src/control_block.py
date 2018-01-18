@@ -6,7 +6,7 @@ class ControlBlock(Block):
     actions from its policy.
 
     """
-    def __init__(self, wake_time, agent, n_eps_per_fit=None, n_steps_per_fit=None, callbacks=list()):
+    def __init__(self, wake_time, name, agent, n_eps_per_fit=None, n_steps_per_fit=None, callbacks=list()):
 
         self.agent = agent
         self.step_counter = 0
@@ -23,7 +23,7 @@ class ControlBlock(Block):
         self.rewardlist = list()
         self.discounted_reward = 0
 
-        super(ControlBlock, self).__init__(wake_time=wake_time)
+        super(ControlBlock, self).__init__(wake_time=wake_time, name=name)
 
     def __call__(self, inputs, reward, absorbing, last, learn_flag):
         self.clock_counter += 1
@@ -60,10 +60,12 @@ class ControlBlock(Block):
             self.dataset = list()
 
         if self.last and not absorbing:
+            print self.name, 'HORIZON REACHED'
             self.agent.episode_start()
             self.step_counter = 0
 
         if self.wake_time == self.clock_counter and not absorbing:
+            print self.name, 'STEP', self.step_counter
             action = self.agent.draw_action(state)
             self.last_output = action
             self.last_input = state
@@ -86,6 +88,7 @@ class ControlBlock(Block):
         self.reward_connection = reward_block
 
     def reset(self, inputs):
+        print self.name, 'RESETS'
         if isinstance(inputs[0], np.float64):
             state = inputs
         else:

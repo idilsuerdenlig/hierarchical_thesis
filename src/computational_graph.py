@@ -30,8 +30,12 @@ class ComputationalGraph(object):
         self.blocks[1].last_output = self.reward
         for index in self.order:
             block = self.blocks[index]
+            #print 'NAME  :',block.name
+            #print 'ORDER :',index
             inputs = list()
+            #print 'INPUTS: '
             for input_block in block.input_connections:
+                #print input_block.name
                 if input_block.last_output is not None:
                     inputs.append(input_block.last_output)
             if block.reward_connection is None:

@@ -7,12 +7,13 @@ def visualize_control_block_ghavamzade(datalist_control, J = None, ep_count = No
 
     plt.figure()
 
-    ax1 = plt.subplot2grid((3,2), (0,0))
-    ax2 = plt.subplot2grid((3,2), (1,0))
-    ax3 = plt.subplot2grid((3,2), (2,0))
-    ax4 = plt.subplot2grid((3,2), (0,1))
-    ax5 = plt.subplot2grid((3,2), (1,1))
-    ax6 = plt.subplot2grid((3,2), (2,1))
+    ax1 = plt.subplot2grid((4,2), (0,0))
+    ax2 = plt.subplot2grid((4,2), (1,0))
+    ax3 = plt.subplot2grid((4,2), (2,0))
+    ax4 = plt.subplot2grid((4,2), (0,1))
+    ax5 = plt.subplot2grid((4,2), (1,1))
+    ax6 = plt.subplot2grid((4,2), (2,1))
+    ax7 = plt.subplot2grid((4,2), (3,0))
 
 
 
@@ -70,7 +71,6 @@ def visualize_control_block_ghavamzade(datalist_control, J = None, ep_count = No
             reward_ep = []
             action_ep = []
             next_state_ep = []
-
             n_eps += 1
 
     if ep_count is None:
@@ -82,8 +82,6 @@ def visualize_control_block_ghavamzade(datalist_control, J = None, ep_count = No
     for episode in range_eps:
         state_ep = np.array(state_list[episode])
         x_ep = state_ep[:, 0]
-        print state_ep[5:10]
-        print x_ep[5:10]
         time =np.arange(len(x_ep))
         ax1.plot(time,x_ep)
         ax1.set_ylabel('x')
@@ -101,6 +99,13 @@ def visualize_control_block_ghavamzade(datalist_control, J = None, ep_count = No
         time =np.arange(len(theta_ep))
         ax3.plot(time,theta_ep)
         ax3.set_ylabel('theta')
+
+    for episode in range_eps:
+        state_ep = np.array(state_list[episode])
+        theta_dot_ep = state_ep[:, 3]
+        time =np.arange(len(theta_dot_ep))
+        ax7.plot(time,theta_dot_ep)
+        ax7.set_ylabel('theta_dot')
 
     for episode in range_eps:
         action_ep = action_list[episode]

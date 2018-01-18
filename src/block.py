@@ -3,7 +3,7 @@ class Block(object):
     This class implements the block object of a computational graph for hierarchical learning.
 
     """
-    def __init__(self, wake_time):
+    def __init__(self, name=None, wake_time=1):
         """
         Constructor.
 
@@ -15,6 +15,7 @@ class Block(object):
         self.clock_counter = 0
         self.last_output = None
         self.wake_time = wake_time
+        self.name = name
 
     def __call__(self, inputs, reward, absorbing, last, learn_flag):
         """

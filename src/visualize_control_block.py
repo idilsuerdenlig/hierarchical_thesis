@@ -91,8 +91,8 @@ def visualize_control_block(datalist_control, J = None, ep_count = None):
         ax3.plot(time,reward_ep)
         ax3.set_ylabel('reward')
 
-
-    ax4.plot(size_eps)
+    time = np.arange(len(size_eps))
+    ax4.plot(time, size_eps)
     ax4.set_title('size_eps')
 
 

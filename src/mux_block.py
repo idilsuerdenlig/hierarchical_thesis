@@ -5,11 +5,11 @@ class MuxBlock(Block):
     This class implements the multiplexer object of a computational graph for hierarchical learning.
 
     """
-    def __init__(self, wake_time):
+    def __init__(self, wake_time, name=None):
 
         self.block_lists = list()
 
-        super(MuxBlock, self).__init__(wake_time=wake_time)
+        super(MuxBlock, self).__init__(wake_time=wake_time, name=name)
 
 
     def __call__(self, inputs, reward, absorbing, last, learn_flag):
@@ -19,10 +19,10 @@ class MuxBlock(Block):
 
         """
         selector = inputs[0]
-        if selector <=4:
-            selector=0
+        if selector < 4:
+            selector = 0
         else:
-            selector=1
+            selector = 1
 
         state = inputs[1]
 
@@ -46,10 +46,10 @@ class MuxBlock(Block):
 
     def reset(self, inputs):
         selector = inputs[0]
-        if selector <=4:
-            selector=0
+        if selector < 4:
+            selector = 0
         else:
-            selector=1
+            selector = 1
         for block_list in self.block_lists:
             state = inputs[1]
             for block in block_list:
