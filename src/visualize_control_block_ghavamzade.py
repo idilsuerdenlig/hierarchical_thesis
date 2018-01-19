@@ -82,43 +82,37 @@ def visualize_control_block_ghavamzade(datalist_control, J = None, ep_count = No
     for episode in range_eps:
         state_ep = np.array(state_list[episode])
         x_ep = state_ep[:, 0]
-        time =np.arange(len(x_ep))
-        ax1.plot(time,x_ep)
+        ax1.plot(x_ep)
         ax1.set_ylabel('x')
 
     for episode in range_eps:
         state_ep = np.array(state_list[episode])
         y_ep = state_ep[:, 1]
-        time =np.arange(len(y_ep))
-        ax2.plot(time,y_ep)
+        ax2.plot(y_ep)
         ax2.set_ylabel('y')
 
     for episode in range_eps:
         state_ep = np.array(state_list[episode])
         theta_ep = state_ep[:, 2]
-        time =np.arange(len(theta_ep))
-        ax3.plot(time,theta_ep)
+        ax3.plot(theta_ep)
         ax3.set_ylabel('theta')
 
     for episode in range_eps:
         state_ep = np.array(state_list[episode])
         theta_dot_ep = state_ep[:, 3]
-        time =np.arange(len(theta_dot_ep))
-        ax7.plot(time,theta_dot_ep)
+        ax7.plot(theta_dot_ep)
         ax7.set_ylabel('theta_dot')
 
     for episode in range_eps:
         action_ep = action_list[episode]
-        time =np.arange(len(action_ep))
-        ax4.plot(time,action_ep)
+        ax4.plot(action_ep)
         ax4.set_ylabel('action')
 
     for episode in range_eps:
         reward_ep = reward_list[episode]
-        time =np.arange(len(reward_ep))
         #theoretical_reward =[-x**2 for x in next_state_list[episode]]
         #ax3.plot(time, theoretical_reward)
-        ax5.plot(time,reward_ep)
+        ax5.plot(reward_ep)
         ax5.set_ylabel('reward')
 
 

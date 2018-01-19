@@ -15,12 +15,16 @@ class fBlock(Block):
 
         self.clock_counter += 1
         if self.wake_time == self.clock_counter or absorbing:
+        #    if self.name == 'f3':
+        #        print self.name, 'STEP', self.clock_counter, absorbing
             self.last_output = self.phi(inputs)
             self.clock_counter = 0
 
         return absorbing, last
 
     def reset(self, inputs):
+        #if self.name == 'f3':
+        #    print self.name, 'RESET'
         self.clock_counter = 0
         self.last_output = self.phi(inputs)
 

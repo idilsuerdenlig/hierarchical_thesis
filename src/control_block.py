@@ -30,14 +30,10 @@ class ControlBlock(Block):
         self.last = False
         self.rewardlist.append(reward)
 
-        if absorbing:
-            self.curr_episode_counter += 1
-            self.step_counter = 0
-
-        if absorbing or self.wake_time == self.clock_counter:
+        if last or self.wake_time == self.clock_counter:
             self.curr_step_counter += 1
             self.step_counter += 1
-            self.last = absorbing or last or self.step_counter >= self.horizon
+            self.last = last or self.step_counter >= self.horizon
             if isinstance(inputs[0], np.float64):
                 state = inputs
             else:
@@ -48,35 +44,43 @@ class ControlBlock(Block):
                 self.discounted_reward += df*_reward
             if isinstance(self.discounted_reward, np.ndarray):
                 self.discounted_reward = self.discounted_reward[0]
+            print 'adding sample', self.name, 'STEP', self.step_counter
             sample = self.last_input, self.last_output, self.discounted_reward, state, absorbing, self.last
             self.dataset.append(sample)
 
             self.rewardlist = list()
             self.discounted_reward = 0
 
+        if self.last:
+            print self.name, 'EP ENDED'
+            self.curr_episode_counter += 1
+            self.step_counter = 0
+
+
         if learn_flag and \
             (self.curr_step_counter == self.n_steps_per_fit or self.curr_episode_counter == self.n_eps_per_fit):
+            #print self.curr_episode_counter
             self.fit(self.dataset)
             self.dataset = list()
 
-        if self.last and not absorbing:
-            print self.name, 'HORIZON REACHED'
+        if self.last and not last:
+            #print self.name, 'HORIZON REACHED'
             self.agent.episode_start()
             self.step_counter = 0
 
-        if self.wake_time == self.clock_counter and not absorbing:
-            print self.name, 'STEP', self.step_counter
+        if self.wake_time == self.clock_counter and not last:
+            #print self.name, 'STEP', self.step_counter
             action = self.agent.draw_action(state)
             self.last_output = action
             self.last_input = state
-            #for reward, index in enumerate(self.rewardlist):
-            #    self.discounted_reward += (self.gamma**index) * reward
-            #self.rewardlist = list()
             self.clock_counter = 0
 
-        return absorbing, last
-
     def fit(self, dataset):
+        #print self.name, 'len of dataset   :', len(dataset), 'FITS'
+        #if len(dataset)>45 and (self.name == 'control block 1' or 'control block 2'):
+        #    for i in dataset:
+        #        print i
+        #    exit()
         self.agent.fit(dataset)
         self.curr_episode_counter = 0
         self.curr_step_counter = 0
@@ -97,6 +101,7 @@ class ControlBlock(Block):
         self.clock_counter = 0
         self.step_counter = 0
         action = self.agent.draw_action(state=state)
+        #print self.name, 'STEP 0'
         self.last_output = action
         self.last_input = state
 

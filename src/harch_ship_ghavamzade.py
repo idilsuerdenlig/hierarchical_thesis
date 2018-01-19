@@ -62,7 +62,7 @@ def experiment():
     agentH = TrueOnlineSARSALambda(policy=piH, mdp_info=mdp_info_agentH, params=agent_params, features=featuresH)
 
     # Control Block H
-    control_blockH = ControlBlock(name='control block H ', wake_time=10, agent=agentH, n_eps_per_fit=None, n_steps_per_fit=1)
+    control_blockH = ControlBlock(name='control block H', wake_time=9, agent=agentH, n_eps_per_fit=None, n_steps_per_fit=1)
 
     #FeaturesL
     low = [0, 0, -np.pi, -np.pi/12]
@@ -106,12 +106,12 @@ def experiment():
     # Control Block +
     dataset_callback1 = CollectDataset()
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='control block 1 ', wake_time=1, agent=agent1, n_eps_per_fit=5, n_steps_per_fit=None, callbacks=[dataset_callback1, parameter_callback1])
+    control_block1 = ControlBlock(name='control block 1', wake_time=1, agent=agent1, n_eps_per_fit=5, n_steps_per_fit=None, callbacks=[dataset_callback1, parameter_callback1])
 
     # Control Block x
     dataset_callback2 = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='control block 2 ', wake_time=1, agent=agent2, n_eps_per_fit=5, n_steps_per_fit=None, callbacks=[dataset_callback2, parameter_callback2])
+    control_block2 = ControlBlock(name='control block 2', wake_time=1, agent=agent2, n_eps_per_fit=5, n_steps_per_fit=None, callbacks=[dataset_callback2, parameter_callback2])
 
     # Function Block 1: picks state for hi lev ctrl
     function_block1 = fBlock(wake_time=1, phi=pick_state, name='f1')
@@ -171,9 +171,9 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn = core.learn(n_episodes=10)
+    dataset_learn = core.learn(n_episodes=500)
     # Evaluate
-    dataset_eval = core.evaluate(n_episodes=5)
+    dataset_eval = core.evaluate(n_episodes=10)
 
     # Visualize
     hi_lev_params = agentH.Q.get_weights()
@@ -198,15 +198,15 @@ def experiment():
     #visualize_policy_params(parameter_dataset1, parameter_dataset2)
     low_level_dataset1 = dataset_callback1.get()
     low_level_dataset2 = dataset_callback2.get()
-    visualize_control_block_ghavamzade(low_level_dataset1)
+    visualize_control_block_ghavamzade(low_level_dataset1, ep_count=20)
     plt.suptitle('ctrl1')
-    visualize_control_block_ghavamzade(low_level_dataset2)
+    visualize_control_block_ghavamzade(low_level_dataset2, ep_count=20)
     plt.suptitle('ctrl2')
     #print 'low_level_dataset1   :'
     #print low_level_dataset1
     #print 'low_level_dataset2   :'
     #print low_level_dataset2
-    visualize_ship_steering(dataset_learn, name='learn')
+    visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(90, 95))
     visualize_ship_steering(dataset_eval, name='evaluate')
     plt.show()
 

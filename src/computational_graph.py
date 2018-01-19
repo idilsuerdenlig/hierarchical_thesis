@@ -24,8 +24,8 @@ class ComputationalGraph(object):
         """
         action = self.blocks[self.order[-1]].last_output
         self.state, self.reward, self.absorbing, _ = self.model.step(action)
-        self.last = self.step_counter >= self.model.info.horizon or self.absorbing
         self.step_counter += 1
+        self.last = self.step_counter >= self.model.info.horizon or self.absorbing
         self.blocks[0].last_output = self.state
         self.blocks[1].last_output = self.reward
         for index in self.order:
