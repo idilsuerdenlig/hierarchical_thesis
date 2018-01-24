@@ -37,13 +37,13 @@ def experiment():
     reward_ph = PlaceHolder()
 
     # Function Block 1
-    function_block1 = fBlock(wake_time=1, phi=phi)
+    function_block1 = fBlock(name='f1 (angle difference)',phi=phi)
 
     # Function Block 2
-    function_block2 = squarednormBlock(wake_time=1)
+    function_block2 = squarednormBlock(name='f2 (squared norm)')
 
     # Function Block 3
-    function_block3 = addBlock(wake_time=1)
+    function_block3 = addBlock(name='f3 (summation)')
 
     #Features
     features = Features(basis_list=[PolynomialBasis()])
@@ -79,12 +79,12 @@ def experiment():
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(wake_time=100, name='Control Block 1', agent=agent1, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[parameter_callback1])
+    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[parameter_callback1])
 
     # Control Block 2
     dataset_callback = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(wake_time=1, name='Control Block 2', agent=agent2, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[dataset_callback, parameter_callback2])
+    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[dataset_callback, parameter_callback2])
 
 
     # Algorithm
@@ -94,11 +94,12 @@ def experiment():
     reward_ph.add_input(control_block2)
     control_block1.add_input(state_ph)
     control_block1.add_reward(reward_ph)
+    control_block1.add_alarm_connection(control_block2)
     function_block1.add_input(control_block1)
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
     function_block3.add_input(function_block2)
-    function_block3.add_input(reward_ph)
+    #function_block3.add_input(reward_ph)
     control_block2.add_input(function_block1)
     control_block2.add_reward(function_block3)
     computational_graph = ComputationalGraph(blocks=blocks, order=order, model=mdp)
