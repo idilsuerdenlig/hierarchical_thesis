@@ -3,7 +3,7 @@ class Block(object):
     This class implements the block object of a computational graph for hierarchical learning.
 
     """
-    def __init__(self, name=None, wake_time=1):
+    def __init__(self, name=None):
         """
         Constructor.
 
@@ -12,12 +12,14 @@ class Block(object):
         """
         self.input_connections = list()
         self.reward_connection = None
-        self.clock_counter = 0
+        self.alarm_connections = list()
+        #self.clock_counter = 0
         self.last_output = None
-        self.wake_time = wake_time
+        #self.wake_time = wake_time
         self.name = name
+        self.alarm_output = False
 
-    def __call__(self, inputs, reward, absorbing, last, learn_flag):
+    def __call__(self, inputs, reward, absorbing, last, learn_flag, alarms):
         """
                 whatever the block does when activated by the computational graph.
                 if the state is absorbing, fit is called for controllers
@@ -27,6 +29,9 @@ class Block(object):
 
     def add_input(self, block):
         self.input_connections.append(block)
+
+    def add_alarm_connection(self, block):
+        self.alarm_connections.append(block)
 
     def reset(self, inputs):
         raise NotImplementedError('Block is an abstract class')

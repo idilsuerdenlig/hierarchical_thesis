@@ -5,14 +5,14 @@ class MuxBlock(Block):
     This class implements the multiplexer object of a computational graph for hierarchical learning.
 
     """
-    def __init__(self, wake_time, name=None):
+    def __init__(self, name=None):
 
         self.block_lists = list()
 
-        super(MuxBlock, self).__init__(wake_time=wake_time, name=name)
+        super(MuxBlock, self).__init__(name=name)
 
 
-    def __call__(self, inputs, reward, absorbing, last, learn_flag):
+    def __call__(self, inputs, reward, absorbing, last, learn_flag, alarms):
         """
                 whatever the block does when activated by the computational graph.
                 if the state is absorbing, fit is called for controllers
@@ -29,21 +29,37 @@ class MuxBlock(Block):
         state = inputs[1]
 
         selected_block_list = self.block_lists[selector]
+        other_block_list = self.block_lists[int(not(selector))]
+        alarms = list()
 
         for block in selected_block_list:
             if block.reward_connection is not None:
                 reward = block.reward_connection.last_output
             else:
                 reward = None
-            block(inputs=state, reward=reward, absorbing=absorbing, last=last, learn_flag=learn_flag)
+            if not block.alarm_connections:
+                alarms.append(True)
+            else:
+                for alarm_connection in block.alarm_connections:
+                    alarms.append(alarm_connection.alarm_output)
+            block(inputs=state, reward=reward, absorbing=absorbing, last=last, learn_flag=learn_flag, alarms=alarms)
             state = block.last_output
 
+        for block in other_block_list:
+            block.alarm_output = False
+
+        '''
+
         if last:
-            for block in self.block_lists[abs(abs(selector)-1)]:
-                block(inputs=state, reward=reward, absorbing=absorbing, last=last, learn_flag=learn_flag)
+            for block in other_block_list:
+                if not block.alarm_connections:
+                    alarms.append(True)
+                else:
+                    for alarm_connection in block.alarm_connections:
+                        alarms.append(alarm_connection.alarm_output)
+                block(inputs=state, reward=reward, absorbing=absorbing, last=last, learn_flag=learn_flag, alarms=alarms)
                 state = block.last_output
-
-
+        '''
         self.last_output = selected_block_list[-1].last_output
 
         return absorbing, last
@@ -65,7 +81,7 @@ class MuxBlock(Block):
                 state = block.last_output
         selected_block_list = self.block_lists[selector]
         self.last_output = selected_block_list[-1].last_output
-        self.clock_counter = 0
+        #self.clock_counter = 0
 
 
 

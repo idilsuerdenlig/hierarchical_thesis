@@ -6,7 +6,7 @@ class ControlBlock(Block):
     actions from its policy.
 
     """
-    def __init__(self, wake_time, name, agent, n_eps_per_fit=None, n_steps_per_fit=None, callbacks=list()):
+    def __init__(self, name, agent, n_eps_per_fit=None, n_steps_per_fit=None, callbacks=list()):
 
         self.agent = agent
         self.step_counter = 0
@@ -23,14 +23,19 @@ class ControlBlock(Block):
         self.rewardlist = list()
         self.discounted_reward = 0
 
-        super(ControlBlock, self).__init__(wake_time=wake_time, name=name)
+        super(ControlBlock, self).__init__(name=name)
 
-    def __call__(self, inputs, reward, absorbing, last, learn_flag):
-        self.clock_counter += 1
+    def __call__(self, inputs, reward, absorbing, last, learn_flag, alarms):
+        #self.clock_counter += 1
         self.last = False
         self.rewardlist.append(reward)
+        self.alarm_output = False
 
-        if last or self.wake_time == self.clock_counter:
+        print alarms, self.name
+        if np.any(alarms):
+            print 'wakey wakey', self.name
+
+        if last or np.any(alarms):
             self.curr_step_counter += 1
             self.step_counter += 1
             self.last = last or self.step_counter >= self.horizon
@@ -56,7 +61,6 @@ class ControlBlock(Block):
             self.curr_episode_counter += 1
             self.step_counter = 0
 
-
         if learn_flag and \
             (self.curr_step_counter == self.n_steps_per_fit or self.curr_episode_counter == self.n_eps_per_fit):
             #print self.curr_episode_counter
@@ -66,14 +70,17 @@ class ControlBlock(Block):
         if self.last and not last:
             #print self.name, 'HORIZON REACHED'
             self.agent.episode_start()
+            print 'new EPISODE', self.name
             self.step_counter = 0
 
-        if self.wake_time == self.clock_counter and not last:
+        if np.any(alarms) and not last:
             #print self.name, 'STEP', self.step_counter
             action = self.agent.draw_action(state)
             self.last_output = action
             self.last_input = state
-            self.clock_counter = 0
+            #self.clock_counter = 0
+
+        self.alarm_output = self.last
 
     def fit(self, dataset):
         #print self.name, 'len of dataset   :', len(dataset), 'FITS'
@@ -98,11 +105,12 @@ class ControlBlock(Block):
         else:
             state = np.concatenate(inputs,axis=0)
         self.agent.episode_start()
-        self.clock_counter = 0
+        #self.clock_counter = 0
         self.step_counter = 0
         action = self.agent.draw_action(state=state)
         #print self.name, 'STEP 0'
         self.last_output = action
         self.last_input = state
+        self.alarm_output = False
 
 

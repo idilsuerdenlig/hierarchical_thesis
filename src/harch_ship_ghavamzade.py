@@ -62,7 +62,8 @@ def experiment():
     agentH = TrueOnlineSARSALambda(policy=piH, mdp_info=mdp_info_agentH, params=agent_params, features=featuresH)
 
     # Control Block H
-    control_blockH = ControlBlock(name='control block H', wake_time=9, agent=agentH, n_eps_per_fit=None, n_steps_per_fit=1)
+    control_blockH = ControlBlock(name='control block H', agent=agentH, n_eps_per_fit=None, n_steps_per_fit=1)
+
 
     #FeaturesL
     low = [0, 0, -np.pi, -np.pi/12]
@@ -106,36 +107,36 @@ def experiment():
     # Control Block +
     dataset_callback1 = CollectDataset()
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='control block 1', wake_time=1, agent=agent1, n_eps_per_fit=5, n_steps_per_fit=None, callbacks=[dataset_callback1, parameter_callback1])
+    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=5, n_steps_per_fit=None, callbacks=[dataset_callback1, parameter_callback1])
 
     # Control Block x
     dataset_callback2 = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='control block 2', wake_time=1, agent=agent2, n_eps_per_fit=5, n_steps_per_fit=None, callbacks=[dataset_callback2, parameter_callback2])
+    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=5, n_steps_per_fit=None, callbacks=[dataset_callback2, parameter_callback2])
 
     # Function Block 1: picks state for hi lev ctrl
-    function_block1 = fBlock(wake_time=1, phi=pick_state, name='f1')
+    function_block1 = fBlock(phi=pick_state, name='f1')
 
     # Function Block 2: maps the env to low lev ctrl state
-    function_block2 = fBlock(wake_time=1, phi=rototranslate, name='f2')
+    function_block2 = fBlock(phi=rototranslate, name='f2')
 
     # Function Block 3: holds curr state as ref
-    function_block3 = fBlock(wake_time=10, phi=hold_state, name='f3')
+    function_block3 = fBlock(phi=hold_state, name='f3')
 
     # Function Block 4: adds hi lev rew
-    function_block4 = addBlock(wake_time=1, name='f4')
+    function_block4 = addBlock(name='f4')
 
     # Function Block 5: adds low lev rew
-    function_block5 = addBlock(wake_time=1, name='f5')
+    function_block5 = addBlock(name='f5')
 
     # Function Block 6:ext rew of hi lev ctrl
-    function_block6 = fBlock(wake_time=1, phi=G_high, name='f6')
+    function_block6 = fBlock(phi=G_high, name='f6')
 
     # Function Block 7: ext rew of low lev ctrl
-    function_block7 = fBlock(wake_time=1, phi=G_low, name='f7')
+    function_block7 = fBlock(phi=G_low, name='f7')
 
     #Mux_Block
-    mux_block = MuxBlock(wake_time=1, name='mux')
+    mux_block = MuxBlock(name='mux')
     mux_block.add_block_list([control_block1])
     mux_block.add_block_list([control_block2])
 
@@ -150,6 +151,8 @@ def experiment():
     reward_ph.add_input(mux_block)
     control_blockH.add_input(function_block1)
     control_blockH.add_reward(function_block4)
+    control_blockH.add_alarm_connection(control_block1)
+    control_blockH.add_alarm_connection(control_block2)
     mux_block.add_input(control_blockH)
     mux_block.add_input(function_block2)
     control_block1.add_reward(function_block5)
@@ -159,6 +162,8 @@ def experiment():
     function_block2.add_input(state_ph)
     function_block2.add_input(function_block3)
     function_block3.add_input(state_ph)
+    function_block3.add_alarm_connection(control_block1)
+    function_block3.add_alarm_connection(control_block2)
     function_block4.add_input(function_block6)
     function_block4.add_input(reward_ph)
     function_block5.add_input(reward_ph)

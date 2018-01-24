@@ -33,16 +33,22 @@ class ComputationalGraph(object):
             #print 'NAME  :',block.name
             #print 'ORDER :',index
             inputs = list()
+            alarms = list()
             #print 'INPUTS: '
             for input_block in block.input_connections:
                 #print input_block.name
                 if input_block.last_output is not None:
                     inputs.append(input_block.last_output)
+            if not block.alarm_connections:
+                alarms.append(True)
+            else:
+                for alarm_connection in block.alarm_connections:
+                    alarms.append(alarm_connection.alarm_output)
             if block.reward_connection is None:
                 reward = None
             else:
                 reward = block.reward_connection.last_output
-            block(inputs=inputs, reward=reward, absorbing=self.absorbing, last=self.last, learn_flag=learn_flag)
+            block(inputs=inputs, reward=reward, absorbing=self.absorbing, last=self.last, learn_flag=learn_flag, alarms=alarms)
         return self.absorbing, self.last
 
     def reset(self):
