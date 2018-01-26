@@ -1,3 +1,4 @@
+import numpy as np
 class Block(object):
     """
     This class implements the block object of a computational graph for hierarchical learning.
@@ -25,7 +26,8 @@ class Block(object):
                 if the state is absorbing, fit is called for controllers
 
         """
-        raise NotImplementedError('Block is an abstract class')
+        if np.any(alarms) or last:
+            self._call(inputs, reward, absorbing, last, learn_flag)
 
     def add_input(self, block):
         self.input_connections.append(block)

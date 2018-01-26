@@ -99,7 +99,7 @@ def experiment():
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
     function_block3.add_input(function_block2)
-    #function_block3.add_input(reward_ph)
+    function_block3.add_input(reward_ph)
     control_block2.add_input(function_block1)
     control_block2.add_reward(function_block3)
     computational_graph = ComputationalGraph(blocks=blocks, order=order, model=mdp)

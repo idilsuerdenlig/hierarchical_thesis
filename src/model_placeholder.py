@@ -5,12 +5,11 @@ class PlaceHolder(Block):
     def __init__(self, name=None):
         super(PlaceHolder, self).__init__(name=name)
 
-    def __call__(self, inputs, reward, absorbing, last, learn_flag, alarms):
+    def _call(self, inputs, reward, absorbing, last, learn_flag):
         pass
 
     def reset(self,inputs):
-        pass
-        #return self.last_output
+        return self.last_output
 
 
 

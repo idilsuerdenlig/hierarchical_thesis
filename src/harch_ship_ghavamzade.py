@@ -24,6 +24,7 @@ from rototranslate import rototranslate
 from hold_state import hold_state
 from hi_lev_extr_rew_ghavamzade import G_high
 from low_lev_extr_rew_ghavamzade import G_low
+from reward_accumulator import reward_accumulator_block
 
 def experiment():
     np.random.seed()
@@ -62,7 +63,7 @@ def experiment():
     agentH = TrueOnlineSARSALambda(policy=piH, mdp_info=mdp_info_agentH, params=agent_params, features=featuresH)
 
     # Control Block H
-    control_blockH = ControlBlock(name='control block H', agent=agentH, n_eps_per_fit=None, n_steps_per_fit=1)
+    control_blockH = ControlBlock(name='control block H', agent=agentH, n_steps_per_fit=1)
 
 
     #FeaturesL
@@ -135,6 +136,9 @@ def experiment():
     # Function Block 7: ext rew of low lev ctrl
     function_block7 = fBlock(phi=G_low, name='f7')
 
+    #Reward Accumulator H:
+    reward_acc_H = reward_accumulator_block(gamma=mdp_info_agentH.gamma, name='reward_acc_H')
+
     #Mux_Block
     mux_block = MuxBlock(name='mux')
     mux_block.add_block_list([control_block1])
@@ -144,11 +148,12 @@ def experiment():
     blocks = [state_ph, reward_ph, control_blockH, mux_block,
               function_block1, function_block2, function_block3,
               function_block4, function_block5,
-              function_block6, function_block7]
+              function_block6, function_block7, reward_acc_H]
 
-    order = [0, 1, 4, 9, 7, 6, 2, 5, 10, 8, 3]
+    order = [0, 1, 4, 9, 11, 7, 6, 2, 5, 10, 8, 3]
     state_ph.add_input(mux_block)
     reward_ph.add_input(mux_block)
+    reward_acc_H.add_input(reward_ph)
     control_blockH.add_input(function_block1)
     control_blockH.add_reward(function_block4)
     control_blockH.add_alarm_connection(control_block1)
@@ -165,7 +170,7 @@ def experiment():
     function_block3.add_alarm_connection(control_block1)
     function_block3.add_alarm_connection(control_block2)
     function_block4.add_input(function_block6)
-    function_block4.add_input(reward_ph)
+    function_block4.add_input(reward_acc_H)
     function_block5.add_input(reward_ph)
     function_block5.add_input(function_block7)
     function_block6.add_input(reward_ph)
@@ -176,7 +181,7 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn = core.learn(n_episodes=500)
+    dataset_learn = core.learn(n_episodes=50)
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=10)
 
@@ -211,7 +216,7 @@ def experiment():
     #print low_level_dataset1
     #print 'low_level_dataset2   :'
     #print low_level_dataset2
-    visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(90, 95))
+    visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(40, 45))
     visualize_ship_steering(dataset_eval, name='evaluate')
     plt.show()
 
