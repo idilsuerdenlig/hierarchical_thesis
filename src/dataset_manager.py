@@ -24,3 +24,9 @@ class DatasetManager():
             sample_step = self.s, self.a, self.r, self.ss, self.abs, self.last
             self.dataset.append(sample_step)
             self.a = a
+
+    def empty_dataset(self):
+        self.dataset = list()
+
+    def get(self):
+        return self.dataset

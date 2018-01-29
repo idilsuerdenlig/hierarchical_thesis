@@ -25,25 +25,28 @@ class HierarchicalCore(object):
 
     def _run(self, learn_flag, n_steps, n_episodes, render, quiet):
         dataset_manager = DatasetManager()
+        self.computational_graph.init()
+        self.computational_graph.reset()
+        dataset_manager.add_first_sample(self.computational_graph.get_sample(), False)
         assert (n_episodes is not None and n_steps is None) or (n_episodes is None and n_steps is not None)
         if n_steps is not None:
-            last = True
+            last = False
             for step in tqdm(xrange(n_steps), dynamic_ncols=True,
                                    disable=quiet, leave=False):
                 if last:
                     self.computational_graph.reset()
-                    dataset_manager.add_first_sample(self.computational_graph.get_sample(), False)
+                    dataset_manager.add_first_sample(self.computational_graph.get_sample(),False)
                 absorbing, last = self.computational_graph.call_blocks(learn_flag=learn_flag)
                 dataset_manager.add_sample(self.computational_graph.get_sample(), False)
 
         else:
             for episode in tqdm(xrange(n_episodes), dynamic_ncols=True,
                                    disable=quiet, leave=False):
-                self.computational_graph.reset()
-                dataset_manager.add_first_sample(self.computational_graph.get_sample(), False)
                 last = False
                 while not last:
                     absorbing, last = self.computational_graph.call_blocks(learn_flag=learn_flag)
                     dataset_manager.add_sample(self.computational_graph.get_sample(), False)
+                self.computational_graph.reset()
+                dataset_manager.add_first_sample(self.computational_graph.get_sample(), False)
 
         return dataset_manager.dataset

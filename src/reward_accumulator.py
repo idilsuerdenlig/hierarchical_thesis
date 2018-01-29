@@ -9,15 +9,20 @@ class reward_accumulator_block(Block):
     def __init__(self, gamma, name=None):
 
         self.gamma = gamma
+        self.last = None
         super(reward_accumulator_block, self).__init__(name=name)
 
     def _call(self, inputs, reward, absorbing, last, learn_flag):
-        if isinstance(inputs, np.ndarray):
-            inputs = inputs[0]
-        self.last_output = inputs[0] + self.gamma*self.last_output
 
-        return absorbing, last
+        if self.last:
+            self.last_output = 0
+        else:
+            if isinstance(inputs, np.ndarray):
+                inputs = inputs[0]
+            self.last_output = inputs + self.gamma*self.last_output
 
-    def reset(self, inputs):
-        self.last_output = 0
+
+    def reset(self):
+        self.last_output = None
+        self.last = True
 

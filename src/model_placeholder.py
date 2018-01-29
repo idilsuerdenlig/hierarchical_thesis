@@ -8,9 +8,8 @@ class PlaceHolder(Block):
     def _call(self, inputs, reward, absorbing, last, learn_flag):
         pass
 
-    def reset(self,inputs):
-        return self.last_output
-
+    def reset(self):
+        pass
 
 
 

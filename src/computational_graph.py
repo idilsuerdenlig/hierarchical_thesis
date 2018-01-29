@@ -14,7 +14,6 @@ class ComputationalGraph(object):
         self.reward = None
         self.absorbing = False
         self.last = False
-        self.dataset_eval = list()
         self.step_counter = 0
 
     def call_blocks(self, learn_flag):
@@ -28,6 +27,10 @@ class ComputationalGraph(object):
         self.last = self.step_counter >= self.model.info.horizon or self.absorbing
         self.blocks[0].last_output = self.state
         self.blocks[1].last_output = self.reward
+        self._call_in_order(learn_flag)
+        return self.absorbing, self.last
+
+    def _call_in_order(self, learn_flag):
         for index in self.order:
             block = self.blocks[index]
             #print 'NAME  :',block.name
@@ -49,19 +52,21 @@ class ComputationalGraph(object):
             else:
                 reward = block.reward_connection.last_output[0]
             block(inputs=inputs, reward=reward, absorbing=self.absorbing, last=self.last, learn_flag=learn_flag, alarms=alarms)
-        return self.absorbing, self.last
 
     def reset(self):
         self.state = self.model.reset()
         self.blocks[0].last_output = self.state
         self.blocks[1].last_output = None
+        self.absorbing = False
+        self.last = False
+        self._call_in_order(learn_flag=False)
+        self.step_counter = 1
+
+
+    def init(self):
         for index in self.order:
             block = self.blocks[index]
-            inputs = list()
-            for input_block in block.input_connections:
-                if input_block.last_output is not None:
-                    inputs.append(input_block.last_output)
-            block.reset(inputs=inputs)
+            block.reset()
         self.step_counter = 0
 
     def get_sample(self):
