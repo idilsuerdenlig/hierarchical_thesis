@@ -1,6 +1,5 @@
 from block import Block
 import numpy as np
-from dataset_manager import DatasetManager
 class ControlBlock(Block):
     """
     This class implements the functions to initialize and move the agent drawing
@@ -15,65 +14,58 @@ class ControlBlock(Block):
         self.curr_episode_counter = 0
         self.n_eps_per_fit = n_eps_per_fit
         self.n_steps_per_fit = n_steps_per_fit
+        self.dataset = list()
         self.horizon = self.agent.mdp_info.horizon
         self.gamma = self.agent.mdp_info.gamma
         self.last_input = None
         self.last_output = None
         self.last = False
         self.callbacks = callbacks
-        self.dataset = DatasetManager()
 
         super(ControlBlock, self).__init__(name=name)
 
     def _call(self, inputs, reward, absorbing, last, learn_flag):
+
+        self.alarm_output = self.last
 
         if isinstance(inputs[0], np.float64):
             state = inputs
         else:
             state = np.concatenate(inputs, axis=0)
 
-        if last:
-            print 'model last', self.name
-            sample = state, None, reward, absorbing, True
-            self.dataset.add_sample(sample, False)
-
-        elif self.last:
-            print 'start eps', self.name
-            self.curr_episode_counter += 1
-            self.agent.episode_start()
-            self.ep_step_counter = 0
-            self.draw_action(state)
-            sample = state, self.last_output
-            self.dataset.add_first_sample(sample, False)
-
-        else:
-            print 'step', self.name
-            self.draw_action(state)
-            sample = state, self.last_output, reward, absorbing, last or self.last
-            self.dataset.add_sample(sample, False)
+        self.build_sample(state, reward, absorbing, last)
 
         if learn_flag and \
             (self.curr_step_counter == self.n_steps_per_fit or self.curr_episode_counter == self.n_eps_per_fit):
             #print self.curr_episode_counter
-            self.fit(self.dataset.get())
-            self.dataset.empty_dataset()
+            self.fit(self.dataset)
+            self.dataset = list()
 
-        self.last = self.ep_step_counter >= self.horizon or last
+        self.draw_action(state, last)
 
-        self.alarm_output = self.last
+        self.last = self.ep_step_counter >= self.horizon
 
-    def draw_action(self, state):
-        self.last_input = state
-        self.last_output = self.agent.draw_action(state)
-        self.curr_step_counter += 1
-        self.ep_step_counter += 1
+        if self.last or last:
+            self.curr_episode_counter += 1
 
-        '''if self.name == 'control block H':
-            print '-------------------------------------------------------------------------'
-            print self.name, self.last_output
-    '''
+        if self.last:
+            self.ep_step_counter = 0
+            if not last:
+                self.agent.episode_start()
 
 
+
+    def draw_action(self, state, last):
+        if not last:
+            self.last_input = state
+            self.last_output = self.agent.draw_action(state)
+            self.curr_step_counter += 1
+            self.ep_step_counter += 1
+
+
+    def build_sample(self, next_state, reward, absorbing, last):
+        sample = self.last_input, self.last_output, reward, next_state, absorbing, last or self.last
+        self.dataset.append(sample)
 
     def check_no_of_eps(self, dataset):
         i = 0
@@ -89,10 +81,24 @@ class ControlBlock(Block):
 
 
     def fit(self, dataset):
-        for step in dataset:
-            print step
-            import time
-            time.sleep(1)
+
+        if dataset[0][0] is None:
+            dataset = dataset[1:]
+
+
+        if self.name == 'control block 1' or self.name == 'control block 2':
+            print '-----------------------------------------------------------', self.name
+            for step in dataset:
+                print step
+        if np.any(self.check_no_of_eps(dataset)) > self.horizon:
+            exit()
+
+
+        #print self.name, 'len of dataset   :', len(dataset), 'FITS'
+        #if len(dataset)>45 and (self.name == 'control block 1' or 'control block 2'):
+        #    for i in dataset:
+        #        print i
+        #    exit()
         self.agent.fit(dataset)
         self.curr_episode_counter = 0
         self.curr_step_counter = 0
@@ -103,12 +109,19 @@ class ControlBlock(Block):
     def add_reward(self, reward_block):
         self.reward_connection = reward_block
 
-    def reset(self):
-
+    def reset(self, inputs):
+        if self.name == 'control block 1' or self.name == 'control block 2':
+            print inputs
+        if isinstance(inputs[0], np.float64):
+            state = inputs
+        else:
+            state = np.concatenate(inputs,axis=0)
+        #if self.last_input is not None and self.name != 'control block H':
+        #    self.build_sample(state, 0, True, True)
         self.agent.episode_start()
         self.ep_step_counter = 0
-        self.last = True
-        self.alarm_output = True
-        self.dataset.empty_dataset()
+        self.draw_action(state, False)
+        self.alarm_output = False
+        self.last = False
 
 

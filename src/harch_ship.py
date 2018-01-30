@@ -108,7 +108,7 @@ def experiment():
     # Train
     #dataset_learn_visual = core.learn(n_episodes=2000)
     dataset_learn_visual = list()
-    for n in xrange(1):
+    for n in xrange(3):
         dataset_learn = core.learn(n_episodes=1000)
         last_ep_dataset = pick_last_ep(dataset_learn)
         dataset_learn_visual += last_ep_dataset
@@ -118,6 +118,7 @@ def experiment():
     dataset_eval = core.evaluate(n_episodes=10)
 
     # Visualize
+    J = compute_J(dataset_eval, gamma=mdp.info.gamma)
     low_level_dataset = dataset_callback.get()
     parameter_dataset1 = parameter_callback1.get_values()
     parameter_dataset2 = parameter_callback2.get_values()
