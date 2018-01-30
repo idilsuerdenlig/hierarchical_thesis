@@ -9,7 +9,10 @@ class PlaceHolder(Block):
         pass
 
     def reset(self,inputs):
-        return self.last_output
+        pass
+
+    def init(self):
+        pass
 
 
 

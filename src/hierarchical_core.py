@@ -25,6 +25,7 @@ class HierarchicalCore(object):
 
     def _run(self, learn_flag, n_steps, n_episodes, render, quiet):
         dataset_manager = DatasetManager()
+        self.computational_graph.init()
         assert (n_episodes is not None and n_steps is None) or (n_episodes is None and n_steps is not None)
         if n_steps is not None:
             last = True

@@ -28,7 +28,7 @@ class ComputationalGraph(object):
         self.step_counter += 1
         self.last = self.step_counter >= self.model.info.horizon or self.absorbing
         self.blocks[0].last_output = self.state
-        self.blocks[1].last_output = self.reward
+        self.blocks[1].last_output = np.array([self.reward])
         for index in self.order:
             block = self.blocks[index]
             #print 'NAME  :',block.name
@@ -72,3 +72,8 @@ class ComputationalGraph(object):
         abs = self.absorbing
         last = self.last
         return state, action, rew_last, abs, last
+
+    def init(self):
+        for index in self.order:
+            self.blocks[index].init()
+        self.step_counter = 0

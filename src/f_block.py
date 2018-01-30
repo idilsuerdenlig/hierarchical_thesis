@@ -17,8 +17,11 @@ class fBlock(Block):
         self.last_output = self.phi(inputs)
         self.alarm_output = self.last_output
 
-        return absorbing, last
 
     def reset(self, inputs):
         self.last_output = self.phi(inputs)
         self.alarm_output = self.last_output
+
+    def init(self):
+        self.last_output = None
+        self.alarm_output = None

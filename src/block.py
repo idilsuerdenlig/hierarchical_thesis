@@ -37,3 +37,6 @@ class Block(object):
 
     def reset(self, inputs):
         raise NotImplementedError('Block is an abstract class')
+
+    def init(self):
+        raise NotImplementedError('Block is an abstract class')

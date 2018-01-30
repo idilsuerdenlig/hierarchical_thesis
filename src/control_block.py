@@ -23,7 +23,6 @@ class ControlBlock(Block):
         self.last = False
         self.callbacks = callbacks
         self.terminated = False
-        self.first = True
 
         super(ControlBlock, self).__init__(name=name)
 
@@ -33,8 +32,12 @@ class ControlBlock(Block):
         else:
             state = np.concatenate(inputs, axis=0)
 
-        if self.last or self.first:
-            if not self.terminated and not self.first:
+
+        if self.last or last:
+            self.curr_episode_counter += 1
+
+        if self.last:
+            if not self.terminated:
                 sample = state, None, reward, absorbing, True
                 self.dataset.add_sample(sample, False)
             self.reset(inputs)
@@ -51,20 +54,17 @@ class ControlBlock(Block):
             self.fit(self.dataset.get())
             self.dataset.empty()
 
-        if self.last:
-            self.curr_episode_counter += 1
 
         self.alarm_output = self.last
 
     def last_call(self, inputs, reward, absorbing):
-        if not self.first:
-            if isinstance(inputs[0], np.float64):
-                state = inputs
-            else:
-                state = np.concatenate(inputs, axis=0)
-            sample = state, self.last_output, reward, absorbing, True
-            self.dataset.add_sample(sample, False)
-            self.terminated = True
+        if isinstance(inputs[0], np.float64):
+            state = inputs
+        else:
+            state = np.concatenate(inputs, axis=0)
+        sample = state, self.last_output, reward, absorbing, True
+        self.dataset.add_sample(sample, False)
+        self.terminated = True
 
 
 
@@ -88,19 +88,6 @@ class ControlBlock(Block):
         return size_eps
 
     def fit(self, dataset):
-
-        if self.name == 'control block 1' or self.name == 'control block 2':
-            print '-----------------------------------------------------------', self.name
-            for step in dataset:
-                print step
-        if np.any(self.check_no_of_eps(dataset)) > self.horizon:
-            exit()
-
-        #print self.name, 'len of dataset   :', len(dataset), 'FITS'
-        #if len(dataset)>45 and (self.name == 'control block 1' or 'control block 2'):
-        #    for i in dataset:
-        #        print i
-        #    exit()
         self.agent.fit(dataset)
         self.curr_episode_counter = 0
         self.curr_step_counter = 0
@@ -112,8 +99,6 @@ class ControlBlock(Block):
         self.reward_connection = reward_block
 
     def reset(self, inputs):
-        #print 'FIRST', self.name
-
         if isinstance(inputs[0], np.float64):
             state = inputs
         else:
@@ -124,11 +109,16 @@ class ControlBlock(Block):
         self.ep_step_counter = 0
         self.draw_action(state, False)
         sample = state, self.last_output
-        print 'RESET SAMPLE', self.name, sample
         self.dataset.add_first_sample(sample, False)
         self.alarm_output = False
         self.last = False
         self.terminated = False
-        self.first = False
 
-
+    def init(self):
+        self.dataset.empty()
+        self.ep_step_counter = 0
+        self.curr_step_counter = 0
+        self.curr_episode_counter = 0
+        self.last_output = None
+        self.last = False
+        self.terminated = False

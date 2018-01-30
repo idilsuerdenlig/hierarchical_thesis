@@ -154,6 +154,8 @@ def experiment():
     state_ph.add_input(mux_block)
     reward_ph.add_input(mux_block)
     reward_acc_H.add_input(reward_ph)
+    reward_acc_H.add_alarm_connection(control_block1)
+    reward_acc_H.add_alarm_connection(control_block2)
     control_blockH.add_input(function_block1)
     control_blockH.add_reward(function_block4)
     control_blockH.add_alarm_connection(control_block1)
@@ -181,7 +183,7 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn = core.learn(n_episodes=50)
+    dataset_learn = core.learn(n_episodes=5000)
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=10)
 
@@ -216,7 +218,7 @@ def experiment():
     #print low_level_dataset1
     #print 'low_level_dataset2   :'
     #print low_level_dataset2
-    visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(40, 45))
+    visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(4980, 4995))
     visualize_ship_steering(dataset_eval, name='evaluate')
     plt.show()
 
