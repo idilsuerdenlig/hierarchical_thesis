@@ -20,7 +20,13 @@ class DatasetManager():
     def add_sample(self, sample, skip):
         if not skip:
             self.s = self.ss
-            self.ss, a, self.r, self.abs, self.last = sample
+            self.ss, aa, self.r, self.abs, self.last = sample
             sample_step = self.s, self.a, self.r, self.ss, self.abs, self.last
             self.dataset.append(sample_step)
-            self.a = a
+            self.a = aa
+
+    def empty(self):
+        self.dataset = list()
+
+    def get(self):
+        return self.dataset

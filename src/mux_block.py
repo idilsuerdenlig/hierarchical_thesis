@@ -9,6 +9,7 @@ class MuxBlock(Block):
     def __init__(self, name=None):
 
         self.block_lists = list()
+        self.last_selection = None
 
         super(MuxBlock, self).__init__(name=name)
 
@@ -39,12 +40,15 @@ class MuxBlock(Block):
             else:
                 for alarm_connection in block.alarm_connections:
                     alarms.append(alarm_connection.alarm_output)
-            '''if self.last_selection == selector:
-                block(inputs=state, reward=reward, absorbing=absorbing, last=last, learn_flag=learn_flag, alarms=alarms)
-            else:
-                block.reset(state)'''
             block(inputs=state, reward=reward, absorbing=absorbing, last=last, learn_flag=learn_flag, alarms=alarms)
             state = block.last_output
+
+        state = inputs[1]
+
+        if self.last_selection is not None and self.last_selection != selector:
+            for block in other_block_list:
+                block.last_call(inputs=state, reward=reward, absorbing=absorbing)
+                state = block.last_output
 
         for block in other_block_list:
             block.alarm_output = False
