@@ -9,13 +9,13 @@ def G_low(inputs):
     if active_direction <= 4:
         goal_pos = np.array([14, 7.5])
     else:
-        goal_pos = np.array([14,14])
+        goal_pos = np.array([14, 14])
 
     pos = np.array([inputs[1][0], inputs[1][1]])
 
     if np.linalg.norm(pos-goal_pos) <= 1:
         plus = 100
-    elif pos[0] > 15 or pos[0] < 0 or pos[1] > 15 or pos[1]< 0:
+    elif pos[0] > 15 or pos[0] < 0 or pos[1] > 15 or pos[1] < 0:
         plus = -100
 
     theta_ref = normalize_angle(np.arctan2(pos[1]-goal_pos[1], pos[0]-goal_pos[0]))

@@ -127,7 +127,7 @@ def experiment():
     dataset_eval = core.evaluate(n_episodes=10)
 
     # Visualize
-    J = compute_J(dataset_eval, gamma=mdp.info.gamma)
+    #J = compute_J(dataset_eval, gamma=mdp.info.gamma)
     low_level_dataset = dataset_callback.get()
     parameter_dataset1 = parameter_callback1.get_values()
     parameter_dataset2 = parameter_callback2.get_values()

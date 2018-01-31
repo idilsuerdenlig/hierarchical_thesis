@@ -7,7 +7,7 @@ class ControlBlock(Block):
     actions from its policy.
 
     """
-    def __init__(self, name, agent, n_eps_per_fit=None, n_steps_per_fit=None, callbacks=list()):
+    def __init__(self, name, agent, termination_condition=None, n_eps_per_fit=None, n_steps_per_fit=None, callbacks=list()):
 
         self.agent = agent
         self.ep_step_counter = 0
@@ -23,6 +23,10 @@ class ControlBlock(Block):
         self.last = False
         self.callbacks = callbacks
         self.terminated = False
+        if termination_condition is None:
+            self.termination_condition = lambda x : False
+        else:
+            self.termination_condition = termination_condition
 
         super(ControlBlock, self).__init__(name=name)
 
@@ -32,25 +36,27 @@ class ControlBlock(Block):
         else:
             state = np.concatenate(inputs, axis=0)
 
-
         if self.last or last:
             self.curr_episode_counter += 1
+            self.curr_step_counter += 1
 
         if self.last:
             if not self.terminated:
-                sample = state, None, reward, absorbing, True
-                self.dataset.add_sample(sample, False)
+                self.last_call(inputs, reward, absorbing)
             self.reset(inputs)
         else:
             self.draw_action(state, last)
             sample = state, self.last_output, reward, absorbing, last or self.last
+            if self.name == 'control block 1':
+                print self.name, 'STEP-----------------------------------------------------'
+                print sample
             self.dataset.add_sample(sample, False)
 
-            self.last = self.ep_step_counter >= self.horizon
+            self.last = self.ep_step_counter >= self.horizon or self.termination_condition(state)
+
 
         if learn_flag and \
             (self.curr_step_counter == self.n_steps_per_fit or self.curr_episode_counter == self.n_eps_per_fit):
-            #print self.curr_episode_counter
             self.fit(self.dataset.get())
             self.dataset.empty()
 
@@ -62,11 +68,12 @@ class ControlBlock(Block):
             state = inputs
         else:
             state = np.concatenate(inputs, axis=0)
-        sample = state, self.last_output, reward, absorbing, True
+        sample = state, None, reward, absorbing, True
         self.dataset.add_sample(sample, False)
+        if self.name == 'control block 1':
+            print self.name, 'LAST STEP-----------------------------------------------------'
+            print sample
         self.terminated = True
-
-
 
     def draw_action(self, state, last):
         if not last:
@@ -74,6 +81,7 @@ class ControlBlock(Block):
             self.last_output = self.agent.draw_action(state)
             self.curr_step_counter += 1
             self.ep_step_counter += 1
+
 
     def check_no_of_eps(self, dataset):
         i = 0
@@ -88,6 +96,9 @@ class ControlBlock(Block):
         return size_eps
 
     def fit(self, dataset):
+        if self.name == 'control block 1':
+            print self.name, 'FIT-----------------------------------------------------'
+            print dataset
         self.agent.fit(dataset)
         self.curr_episode_counter = 0
         self.curr_step_counter = 0
@@ -108,6 +119,7 @@ class ControlBlock(Block):
         self.agent.episode_start()
         self.ep_step_counter = 0
         self.draw_action(state, False)
+        self.curr_step_counter -= 1
         sample = state, self.last_output
         self.dataset.add_first_sample(sample, False)
         self.alarm_output = False

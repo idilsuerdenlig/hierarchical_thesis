@@ -26,6 +26,24 @@ from hi_lev_extr_rew_ghavamzade import G_high
 from low_lev_extr_rew_ghavamzade import G_low
 from reward_accumulator import reward_accumulator_block
 
+class TerminationCondition(object):
+
+    def __init__(self, active_dir):
+        self.active_direction = active_dir
+
+    def __call__(self, state):
+        if self.active_direction <= 4:
+            goal_pos = np.array([14, 7.5])
+        else:
+            goal_pos = np.array([14, 14])
+        pos = np.array([state[0], state[1]])
+
+        if np.linalg.norm(pos-goal_pos) <= 1 or pos[0] > 15 or pos[0] < 0 or pos[1] > 15 or pos[1] < 0:
+            return True
+        else:
+            return False
+
+
 def experiment():
     np.random.seed()
 
@@ -50,7 +68,9 @@ def experiment():
     # AgentH
     learning_rate = Parameter(value=0.05)
 
-    mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]), high=np.array([150, 150]), shape=(2,)), action_space=spaces.Discrete(8), gamma=1, horizon=5000)
+    mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]),
+                                                           high=np.array([150, 150]), shape=(2,)),
+                              action_space=spaces.Discrete(8), gamma=1, horizon=5000)
     approximator_params = dict(input_shape=(featuresH.size,),
                                output_shape=mdp_info_agentH.action_space.size,
                                n_actions=mdp_info_agentH.action_space.n)
@@ -63,8 +83,9 @@ def experiment():
     agentH = TrueOnlineSARSALambda(policy=piH, mdp_info=mdp_info_agentH, params=agent_params, features=featuresH)
 
     # Control Block H
-    control_blockH = ControlBlock(name='control block H', agent=agentH, n_steps_per_fit=1)
-
+    dataset_callbackH = CollectDataset()
+    control_blockH = ControlBlock(name='control block H', agent=agentH, n_steps_per_fit=1,
+                                  callbacks=[dataset_callbackH])
 
     #FeaturesL
     low = [0, 0, -np.pi, -np.pi/12]
@@ -79,41 +100,55 @@ def experiment():
 
     # Policy1
     sigma1 = np.eye(1, 1)*0.01
-    approximator1 = Regressor(LinearApproximator, input_shape=(featuresL.size,), output_shape=mdp.info.action_space.shape)
+    approximator1 = Regressor(LinearApproximator, input_shape=(featuresL.size,),
+                              output_shape=mdp.info.action_space.shape)
     pi1 = MultivariateGaussianPolicy(mu=approximator1,sigma=sigma1)
 
     # Policy2
     sigma2 = np.eye(1, 1)*0.01
-    approximator2 = Regressor(LinearApproximator, input_shape=(featuresL.size,), output_shape=mdp.info.action_space.shape)
+    approximator2 = Regressor(LinearApproximator, input_shape=(featuresL.size,),
+                              output_shape=mdp.info.action_space.shape)
     pi2 = MultivariateGaussianPolicy(mu=approximator2,sigma=sigma2)
 
     # Agent1
-    learning_rate1 = AdaptiveParameter(value=.01)
+    learning_rate1 = AdaptiveParameter(value=.001)
     algorithm_params1 = dict(learning_rate=learning_rate1)
     fit_params1 = dict()
     agent_params1 = {'algorithm_params': algorithm_params1,
                     'fit_params': fit_params1}
-    mdp_info_agent1 = MDPInfo(observation_space=spaces.Box(low=np.array([0,0,-np.pi,-np.pi/12]), high=np.array([15,15,np.pi,np.pi/12])), action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=10)
+    mdp_info_agent1 = MDPInfo(observation_space=spaces.Box(low=np.array([0,0,-np.pi,-np.pi/12]),
+                                                           high=np.array([15,15,np.pi,np.pi/12])),
+                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=50)
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params1, features=featuresL)
 
     # Agent2
-    learning_rate2 = AdaptiveParameter(value=.01)
+    learning_rate2 = AdaptiveParameter(value=.001)
     algorithm_params2 = dict(learning_rate=learning_rate2)
     fit_params2 = dict()
     agent_params2 = {'algorithm_params': algorithm_params2,
                     'fit_params': fit_params2}
-    mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low=np.array([0,0,-np.pi,-np.pi/12]), high=np.array([15,15,np.pi,np.pi/12])), action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=10)
+    mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low=np.array([0,0,-np.pi,-np.pi/12]),
+                                                           high=np.array([15,15,np.pi,np.pi/12])),
+                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=50)
     agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, params=agent_params2, features=featuresL)
+
+    #Termination Conds
+    termination_condition1 = TerminationCondition(active_dir=1)
+    termination_condition2 = TerminationCondition(active_dir=5)
 
     # Control Block +
     dataset_callback1 = CollectDataset()
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=5, n_steps_per_fit=None, callbacks=[dataset_callback1, parameter_callback1])
+    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=5,
+                                  termination_condition=termination_condition1,
+                                  callbacks=[dataset_callback1, parameter_callback1])
 
     # Control Block x
     dataset_callback2 = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=5, n_steps_per_fit=None, callbacks=[dataset_callback2, parameter_callback2])
+    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=5,
+                                  termination_condition=termination_condition2,
+                                  callbacks=[dataset_callback2, parameter_callback2])
 
     # Function Block 1: picks state for hi lev ctrl
     function_block1 = fBlock(phi=pick_state, name='f1')
@@ -205,20 +240,14 @@ def experiment():
     fig, axis = plt.subplots()
     heatmap = axis.pcolor(max_q_val_tiled, cmap=plt.cm.Blues)
     plt.colorbar(heatmap)
-    #parameter_dataset1 = parameter_callback1.get_values()
-    #parameter_dataset2 = parameter_callback2.get_values()
-    #visualize_policy_params(parameter_dataset1, parameter_dataset2)
     low_level_dataset1 = dataset_callback1.get()
     low_level_dataset2 = dataset_callback2.get()
-    visualize_control_block_ghavamzade(low_level_dataset1, ep_count=20)
+    visualize_control_block_ghavamzade(low_level_dataset1, ep_count=5)
     plt.suptitle('ctrl1')
-    visualize_control_block_ghavamzade(low_level_dataset2, ep_count=20)
+    visualize_control_block_ghavamzade(low_level_dataset2, ep_count=5)
     plt.suptitle('ctrl2')
-    #print 'low_level_dataset1   :'
-    #print low_level_dataset1
-    #print 'low_level_dataset2   :'
-    #print low_level_dataset2
-    visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(4980, 4995))
+
+    visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(1980,1995))
     visualize_ship_steering(dataset_eval, name='evaluate')
     plt.show()
 

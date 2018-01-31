@@ -16,7 +16,7 @@ def visualize_control_block_ghavamzade(datalist_control, J = None, ep_count = No
     ax7 = plt.subplot2grid((4,2), (3,0))
 
 
-
+    dataset_list = list()
     state_list = list()
     x_list = list()
     y_list = list()
@@ -24,6 +24,8 @@ def visualize_control_block_ghavamzade(datalist_control, J = None, ep_count = No
     action_list = list()
     reward_list = list()
     next_state_list = list()
+
+    dataset_ep = list()
     state_ep = list()
     x_ep = list()
     y_ep = list()
@@ -43,6 +45,7 @@ def visualize_control_block_ghavamzade(datalist_control, J = None, ep_count = No
             reward_step = dataset_step[2]
             next_state_step = dataset_step[3]
 
+            dataset_ep.append(dataset_step)
             state_ep.append(state_step)
             reward_ep.append(reward_step)
             action_ep.append(action_step)
@@ -50,6 +53,7 @@ def visualize_control_block_ghavamzade(datalist_control, J = None, ep_count = No
             i += 1
 
         else:
+            dataset_ep.append(dataset_step)
             state_step = dataset_step[0]
             action_step = dataset_step[1]
             reward_step = dataset_step[2]
@@ -63,6 +67,7 @@ def visualize_control_block_ghavamzade(datalist_control, J = None, ep_count = No
             size_eps.append(i)
 
             i=0
+            dataset_list.append(dataset_ep)
             state_list.append(state_ep)
             reward_list.append(reward_ep)
             action_list.append(action_ep)
@@ -78,7 +83,11 @@ def visualize_control_block_ghavamzade(datalist_control, J = None, ep_count = No
 
     range_eps = xrange(n_eps-ep_count,n_eps)
 
-
+    '''for dataset_ep in dataset_list[n_eps-ep_count:n_eps]:
+        print '-------------------------------------------------------------------------'
+        for dataset_step in dataset_ep:
+            print dataset_step
+'''
     for episode in range_eps:
         state_ep = np.array(state_list[episode])
         x_ep = state_ep[:, 0]

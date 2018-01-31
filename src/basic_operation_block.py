@@ -6,7 +6,7 @@ class addBlock(fBlock):
 
     def __init__(self, name=None, phi=None):
         def summation(inputs):
-            res = 0
+            res = np.zeros(1)
             for i in inputs:
                 res += i
             return res
@@ -14,21 +14,12 @@ class addBlock(fBlock):
         super(addBlock, self).__init__(phi=summation, name=name)
 
 
-class extractBlock(fBlock):
-
-    def __init__(self, name=None, phi=None):
-        def extraction(inputs):
-            res = inputs[0] - inputs[1]
-            return res
-        self.phi = extraction
-        super(extractBlock, self).__init__(phi=extraction, name=name)
-
 
 class squarednormBlock(fBlock):
 
     def __init__(self, name=None, phi=None):
         def squared_norm(inputs):
-            res = 0
+            res = np.zeros(1)
             for input in inputs:
                 res += -input.dot(input)
             return res
