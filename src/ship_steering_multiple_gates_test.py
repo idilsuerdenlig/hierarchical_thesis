@@ -3,6 +3,7 @@ from computational_graph import ComputationalGraph
 from control_block import ControlBlock
 from mushroom.utils import spaces
 from mushroom.environments import *
+from ship_steering_multiple_gates import ShipSteeringMultiGate
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 from mushroom.utils.callbacks import CollectDataset
 from mushroom.utils.dataset import compute_J
@@ -29,7 +30,7 @@ def experiment():
 
 
   # Model Block
-    mdp = ShipSteering()
+    mdp = ShipSteeringMultiGate()
 
     #State Placeholder
     state_ph = PlaceHolder(name='state_ph')
@@ -50,9 +51,13 @@ def experiment():
     features = Features(basis_list=[PolynomialBasis()])
 
     # Policy 1
-    sigma1 = np.array([38, 38])
-    approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
-    approximator1.set_weights(np.array([75, 75]))
+    sigma1 = np.array([[8, 8],[8, 8],[8, 8],[8, 8]])
+    approximator1 = Regressor(LinearApproximator, input_shape=(features.size, 4), output_shape=(2,))
+    approximator1.set_weights(np.array([[32.5, 32.5],
+                                        [32.5, 117.5],
+                                        [117.5, 32.5],
+                                        [117.5, 117.5]]))
+
     pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
 
     # Policy 2
@@ -82,7 +87,7 @@ def experiment():
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=10,
+    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=5,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
@@ -123,7 +128,7 @@ def experiment():
     #dataset_learn_visual = core.learn(n_episodes=2000)
     dataset_learn_visual = list()
     for n in xrange(4):
-        dataset_learn = core.learn(n_episodes=1000)
+        dataset_learn = core.learn(n_episodes=500)
         last_ep_dataset = pick_last_ep(dataset_learn)
         dataset_learn_visual += last_ep_dataset
         del dataset_learn
@@ -138,9 +143,9 @@ def experiment():
     visualize_policy_params(parameter_dataset1, parameter_dataset2)
     visualize_control_block(low_level_dataset, ep_count=20)
     #visualize_ship_steering(dataset_learn_visual, range_eps=xrange(1980,1995), name='learn')
-    visualize_ship_steering(dataset_learn_visual, name='learn')
+    visualize_ship_steering(dataset_learn_visual, name='learn', n_gates=4)
 
-    visualize_ship_steering(dataset_eval, 'evaluate')
+    visualize_ship_steering(dataset_eval, 'evaluate', n_gates=4)
     plt.show()
 
     return

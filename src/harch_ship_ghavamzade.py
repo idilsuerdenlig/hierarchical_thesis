@@ -25,6 +25,8 @@ from hold_state import hold_state
 from hi_lev_extr_rew_ghavamzade import G_high
 from low_lev_extr_rew_ghavamzade import G_low
 from reward_accumulator import reward_accumulator_block
+from topological_sort import topological_sort
+from arrows import plot_arrows
 
 class TerminationCondition(object):
 
@@ -66,11 +68,11 @@ def experiment():
     piH = EpsGreedy(epsilon=epsilon)
 
     # AgentH
-    learning_rate = Parameter(value=0.05)
+    learning_rate = Parameter(value=0.2)
 
     mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]),
                                                            high=np.array([150, 150]), shape=(2,)),
-                              action_space=spaces.Discrete(8), gamma=1, horizon=5000)
+                              action_space=spaces.Discrete(8), gamma=1, horizon=10000)
     approximator_params = dict(input_shape=(featuresH.size,),
                                output_shape=mdp_info_agentH.action_space.size,
                                n_actions=mdp_info_agentH.action_space.n)
@@ -99,19 +101,19 @@ def experiment():
     featuresL = Features(tilings=tilingsL)
 
     # Policy1
-    sigma1 = np.eye(1, 1)*0.01
+    sigma1 = np.eye(1, 1)*0.0005
     approximator1 = Regressor(LinearApproximator, input_shape=(featuresL.size,),
                               output_shape=mdp.info.action_space.shape)
     pi1 = MultivariateGaussianPolicy(mu=approximator1,sigma=sigma1)
 
     # Policy2
-    sigma2 = np.eye(1, 1)*0.01
+    sigma2 = np.eye(1, 1)*0.0005
     approximator2 = Regressor(LinearApproximator, input_shape=(featuresL.size,),
                               output_shape=mdp.info.action_space.shape)
     pi2 = MultivariateGaussianPolicy(mu=approximator2,sigma=sigma2)
 
     # Agent1
-    learning_rate1 = AdaptiveParameter(value=.001)
+    learning_rate1 = AdaptiveParameter(value=.04)
     algorithm_params1 = dict(learning_rate=learning_rate1)
     fit_params1 = dict()
     agent_params1 = {'algorithm_params': algorithm_params1,
@@ -122,7 +124,7 @@ def experiment():
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params1, features=featuresL)
 
     # Agent2
-    learning_rate2 = AdaptiveParameter(value=.001)
+    learning_rate2 = AdaptiveParameter(value=.04)
     algorithm_params2 = dict(learning_rate=learning_rate2)
     fit_params2 = dict()
     agent_params2 = {'algorithm_params': algorithm_params2,
@@ -139,37 +141,37 @@ def experiment():
     # Control Block +
     dataset_callback1 = CollectDataset()
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=5,
+    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=50,
                                   termination_condition=termination_condition1,
                                   callbacks=[dataset_callback1, parameter_callback1])
 
     # Control Block x
     dataset_callback2 = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=5,
+    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=50,
                                   termination_condition=termination_condition2,
                                   callbacks=[dataset_callback2, parameter_callback2])
 
     # Function Block 1: picks state for hi lev ctrl
-    function_block1 = fBlock(phi=pick_state, name='f1')
+    function_block1 = fBlock(phi=pick_state, name='f1 pickstate')
 
     # Function Block 2: maps the env to low lev ctrl state
-    function_block2 = fBlock(phi=rototranslate, name='f2')
+    function_block2 = fBlock(phi=rototranslate, name='f2 rotot')
 
     # Function Block 3: holds curr state as ref
-    function_block3 = fBlock(phi=hold_state, name='f3')
+    function_block3 = fBlock(phi=hold_state, name='f3 holdstate')
 
     # Function Block 4: adds hi lev rew
-    function_block4 = addBlock(name='f4')
+    function_block4 = addBlock(name='f4 add')
 
     # Function Block 5: adds low lev rew
-    function_block5 = addBlock(name='f5')
+    function_block5 = addBlock(name='f5 add')
 
     # Function Block 6:ext rew of hi lev ctrl
-    function_block6 = fBlock(phi=G_high, name='f6')
+    function_block6 = fBlock(phi=G_high, name='f6 G_hi')
 
     # Function Block 7: ext rew of low lev ctrl
-    function_block7 = fBlock(phi=G_low, name='f7')
+    function_block7 = fBlock(phi=G_low, name='f7 G_lo')
 
     #Reward Accumulator H:
     reward_acc_H = reward_accumulator_block(gamma=mdp_info_agentH.gamma, name='reward_acc_H')
@@ -185,7 +187,7 @@ def experiment():
               function_block4, function_block5,
               function_block6, function_block7, reward_acc_H]
 
-    order = [0, 1, 4, 9, 11, 7, 6, 2, 5, 10, 8, 3]
+    #order = [0, 1, 4, 9, 11, 7, 6, 2, 5, 10, 8, 3]
     state_ph.add_input(mux_block)
     reward_ph.add_input(mux_block)
     reward_acc_H.add_input(reward_ph)
@@ -214,11 +216,16 @@ def experiment():
     function_block7.add_input(control_blockH)
     function_block7.add_input(function_block2)
 
-    computational_graph = ComputationalGraph(blocks=blocks, order=order, model=mdp)
+    ordered = topological_sort(blocks)
+    for block in ordered:
+        print block.name
+
+    order = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    computational_graph = ComputationalGraph(blocks=ordered, order=order, model=mdp)
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn = core.learn(n_episodes=5000)
+    dataset_learn = core.learn(n_episodes=15000)
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=10)
 
@@ -232,9 +239,7 @@ def experiment():
         act_max_q_val[i] = np.argmax(hi_lev_params[:,i])
     max_q_val_tiled = np.reshape(max_q_val, (20, 20))
     act_max_q_val_tiled = np.reshape(act_max_q_val, (20, 20))
-    for i in xrange(20):
-        for j in xrange(20):
-            act_no = act_max_q_val_tiled[i,j]
+    plot_arrows(act_max_q_val_tiled)
             
 
     fig, axis = plt.subplots()
@@ -247,7 +252,7 @@ def experiment():
     visualize_control_block_ghavamzade(low_level_dataset2, ep_count=5)
     plt.suptitle('ctrl2')
 
-    visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(1980,1995))
+    visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(6980, 6995))
     visualize_ship_steering(dataset_eval, name='evaluate')
     plt.show()
 

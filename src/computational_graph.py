@@ -29,7 +29,7 @@ class ComputationalGraph(object):
         self.last = self.step_counter >= self.model.info.horizon or self.absorbing
         self.blocks[0].last_output = self.state
         self.blocks[1].last_output = np.array([self.reward])
-        print 'ENV STATE, REW', self.state, self.reward
+        #print 'ENV STATE, REW', self.state, self.reward
         for index in self.order:
             block = self.blocks[index]
             #print 'NAME  :',block.name
@@ -57,7 +57,7 @@ class ComputationalGraph(object):
         self.state = self.model.reset()
         self.blocks[0].last_output = self.state
         self.blocks[1].last_output = None
-        print 'ENV RESET STATE, REW', self.state, self.reward
+        #print 'ENV RESET STATE, REW', self.state, self.reward
 
         for index in self.order:
             block = self.blocks[index]

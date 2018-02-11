@@ -47,9 +47,9 @@ class ControlBlock(Block):
         else:
             self.draw_action(state, last)
             sample = state, self.last_output, reward, absorbing, last or self.last
-            if self.name == 'control block 1':
-                print self.name, 'STEP-----------------------------------------------------'
-                print sample
+            #if self.name == 'control block 1':
+            #    print self.name, 'STEP-----------------------------------------------------'
+            #    print sample
             self.dataset.add_sample(sample, False)
 
             self.last = self.ep_step_counter >= self.horizon or self.termination_condition(state)
@@ -70,9 +70,9 @@ class ControlBlock(Block):
             state = np.concatenate(inputs, axis=0)
         sample = state, None, reward, absorbing, True
         self.dataset.add_sample(sample, False)
-        if self.name == 'control block 1':
-            print self.name, 'LAST STEP-----------------------------------------------------'
-            print sample
+        #if self.name == 'control block 1':
+        #    print self.name, 'LAST STEP-----------------------------------------------------'
+        #    print sample
         self.terminated = True
 
     def draw_action(self, state, last):
@@ -96,9 +96,9 @@ class ControlBlock(Block):
         return size_eps
 
     def fit(self, dataset):
-        if self.name == 'control block 1':
-            print self.name, 'FIT-----------------------------------------------------'
-            print dataset
+        #if self.name == 'control block 1':
+        #    print self.name, 'FIT-----------------------------------------------------'
+        #    print dataset
         self.agent.fit(dataset)
         self.curr_episode_counter = 0
         self.curr_step_counter = 0
@@ -106,8 +106,6 @@ class ControlBlock(Block):
             callback_pars = dict(dataset=dataset)
             c(**callback_pars)
 
-    def add_reward(self, reward_block):
-        self.reward_connection = reward_block
 
     def reset(self, inputs):
         if isinstance(inputs[0], np.float64):

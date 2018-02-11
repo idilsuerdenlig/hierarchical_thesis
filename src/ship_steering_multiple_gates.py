@@ -25,8 +25,8 @@ class ShipSteeringMultiGate(Environment):
         self.nrew = 0
         self.no_of_gates = 4
         self.gates_passed = np.zeros(shape=(self.no_of_gates,))
-        self.gate_s = np.empty(shape=(self.no_of_gates,2))
-        self.gate_e = np.empty(shape=(self.no_of_gates,2))
+        self._gate_s = np.empty(shape=(self.no_of_gates,2))
+        self._gate_e = np.empty(shape=(self.no_of_gates,2))
 
         self.field_size = 150 if small else 1000
         low = np.array([0, 0, -np.pi, -np.pi / 12.])
@@ -89,23 +89,23 @@ class ShipSteeringMultiGate(Environment):
 
         if new_state[0] > self.field_size or new_state[1] > self.field_size\
            or new_state[0] < 0 or new_state[1] < 0:
-            reward = -100
+            reward = -1000
             absorbing = True
         else:
             self._through_gate(self._state[:2], new_state[:2])
-            if self.gates_passed == [1, 0, 0, 0] and self.nrew == 0:
+            if self.gates_passed[0] and not np.any(self.gates_passed[1:]) and self.nrew == 0:
                 reward = 10
                 self.new_state[4] = 1
                 absorbing = False
-            elif self.gates_passed == [1, 1, 0, 0] and self.nrew == 1:
+            elif np.all(self.gates_passed[0:1]) and not any(self.gates_passed[2:]) and self.nrew == 1:
                 reward = 20
                 self.new_state[4] = 2
                 absorbing = False
-            elif self.gates_passed == [1, 1, 1, 0] and self.nrew == 2:
+            elif np.all(self.gates_passed[0:2]) and not self.gates_passed[3] and self.nrew == 2:
                 reward = 30
                 self.new_state[4] = 3
                 absorbing = False
-            elif self.gates_passed == [1, 1, 1, 1] and self.nrew == 3:
+            elif np.all(self.gates_passed) and self.nrew == 3:
                 reward = 40
                 self.new_state[4] = 4
                 absorbing = True

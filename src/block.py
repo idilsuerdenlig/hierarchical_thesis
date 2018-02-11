@@ -32,6 +32,9 @@ class Block(object):
     def add_input(self, block):
         self.input_connections.append(block)
 
+    def add_reward(self, reward_block):
+        self.reward_connection = reward_block
+
     def add_alarm_connection(self, block):
         self.alarm_connections.append(block)
 

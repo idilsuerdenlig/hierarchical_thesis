@@ -3,7 +3,7 @@ import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
-def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None):
+def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None, n_gates=1):
 
     plt.figure()
 
@@ -18,6 +18,21 @@ def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None):
     xe = 120
     ys = 120
     ye = 100
+
+    if not n_gates == 1:
+        xs1=30
+        xe1=50
+        ys1=50
+        ye1=30
+        xs2=30
+        xe2=50
+        ys2=100
+        ye2=120
+        xs3=100
+        xe3=120
+        ys3=30
+        ye3=50
+
 
     x_ep = list()
     y_ep = list()
@@ -81,14 +96,30 @@ def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None):
         ax1.plot(x,y,time)
         maxt = max(maxt,len(x))
 
-    xg=[xs, xe, xe, xs]
-    yg=[ys, ye, ye, ys]
-    zg=[0, 0, maxt, maxt]
+    xg = [xs, xe, xe, xs]
+    yg = [ys, ye, ye, ys]
+    zg = [0, 0, maxt, maxt]
     verts = [list(zip(xg,yg,zg))]
-    ax1.set_xlim([0,160])
-    ax1.set_ylim([0,160])
+    ax1.set_xlim([0, 160])
+    ax1.set_ylim([0, 160])
 
     ax1.add_collection3d(Poly3DCollection(verts),zs=zg)
+    if not n_gates == 1:
+        xg1 = [xs1, xe1, xe1, xs1]
+        yg1 = [ys1, ye1, ye1, ys1]
+        verts1 = [list(zip(xg1,yg1,zg))]
+        ax1.add_collection3d(Poly3DCollection(verts1),zs=zg)
+
+        xg2 = [xs2, xe2, xe2, xs2]
+        yg2 = [ys2, ye2, ye2, ys2]
+        verts2 = [list(zip(xg2,yg2,zg))]
+        ax1.add_collection3d(Poly3DCollection(verts2),zs=zg)
+
+        xg3 = [xs3, xe3, xe3, xs3]
+        yg3 = [ys3, ye3, ye3, ys3]
+        verts3 = [list(zip(xg3,yg3,zg))]
+        ax1.add_collection3d(Poly3DCollection(verts3),zs=zg)
+
 
     for episode in range_eps:
         x_ep = x_list[episode]
