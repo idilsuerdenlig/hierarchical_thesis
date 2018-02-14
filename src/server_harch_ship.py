@@ -23,7 +23,7 @@ from model_placeholder import PlaceHolder
 from pick_last_ep_dataset import pick_last_ep
 from reward_accumulator import reward_accumulator_block
 from topological_sort import topological_sort
-
+from tempfile import NamedTemporaryFile
 def experiment():
     np.random.seed()
 
@@ -97,7 +97,6 @@ def experiment():
 
     # Algorithm
     blocks = [state_ph, reward_ph, control_block1, control_block2, function_block1, function_block2, function_block3, reward_acc]
-    #order = [0, 1, 7, 2, 4, 5, 6, 3]
     state_ph.add_input(control_block2)
     reward_ph.add_input(control_block2)
     control_block1.add_input(state_ph)
@@ -116,9 +115,8 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    #dataset_learn_visual = core.learn(n_episodes=2000)
     dataset_learn_visual = list()
-    for n in xrange(6):
+    for n in xrange(10):
         print n
         dataset_learn = core.learn(n_episodes=1000)
         last_ep_dataset = pick_last_ep(dataset_learn)
@@ -128,17 +126,18 @@ def experiment():
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=10)
 
-    # Visualize
+    # Save
     low_level_dataset = dataset_callback.get()
     parameter_dataset1 = parameter_callback1.get_values()
     parameter_dataset2 = parameter_callback2.get_values()
-    visualize_policy_params(parameter_dataset1, parameter_dataset2)
-    visualize_control_block(low_level_dataset, ep_count=20)
-    #visualize_ship_steering(dataset_learn_visual, range_eps=xrange(1980,1995), name='learn')
-    visualize_ship_steering(dataset_learn_visual, name='learn')
 
-    visualize_ship_steering(dataset_eval, 'evaluate')
-    plt.show()
+    np.save('low_level_dataset_file', low_level_dataset)
+    np.save('parameter_dataset1_file', parameter_dataset1)
+    np.save('parameter_dataset2_file', parameter_dataset2)
+    np.save('dataset_learn_visual_file', dataset_learn_visual)
+    np.save('dataset_eval_file', dataset_eval)
+
+
 
     return
 

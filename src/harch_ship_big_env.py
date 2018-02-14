@@ -77,7 +77,7 @@ def experiment():
     agent_params = {'algorithm_params': algorithm_params,
                     'fit_params': fit_params}
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi,np.pi,(1,)),
-                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
+                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=50)
     agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, params=agent_params, features=None)
 
     # Control Block 1
