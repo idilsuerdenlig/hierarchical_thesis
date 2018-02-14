@@ -237,7 +237,7 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn = core.learn(n_episodes=5000)
+    dataset_learn = core.learn(n_episodes=50000)
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=10)
 
