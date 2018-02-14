@@ -4,6 +4,8 @@ from mushroom.utils.angles_utils import normalize_angle
 
 def rototranslate(inputs):
 
+    small = False
+
     new_states = np.zeros(shape=(4,))
     active_direction = inputs[0]
     x = inputs[1][0]
@@ -14,8 +16,12 @@ def rototranslate(inputs):
     x0 = inputs[2][0]
     y0 = inputs[2][1]
 
-    small_offset = 4
-    large_offset = 7.5
+    if small:
+        small_offset = 4
+        large_offset = 7.5
+    else:
+        small_offset = 40
+        large_offset = 75
 
     if active_direction == 0:   #R
         new_states[0] = x-x0+small_offset

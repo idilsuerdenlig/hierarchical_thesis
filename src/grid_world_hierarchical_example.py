@@ -43,7 +43,7 @@ def experiment():
 
 
     # Control Block
-    control_block = ControlBlock(wake_time=1, agent=agent, n_steps_per_fit=1)
+    control_block = ControlBlock(name='controller', agent=agent, n_steps_per_fit=1)
 
     # Algorithm
     blocks = [model_block, control_block]

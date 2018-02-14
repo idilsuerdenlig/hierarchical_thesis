@@ -112,17 +112,14 @@ def experiment():
     function_block3.add_input(reward_ph)
     control_block2.add_input(function_block1)
     control_block2.add_reward(function_block3)
-    ordered = topological_sort(blocks)
-    order = [0, 1, 2, 3, 4, 5, 6, 7]
-    for block in ordered:
-        print block.name
-    computational_graph = ComputationalGraph(blocks=ordered, order=order, model=mdp)
+    computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
     core = HierarchicalCore(computational_graph)
 
     # Train
     #dataset_learn_visual = core.learn(n_episodes=2000)
     dataset_learn_visual = list()
-    for n in xrange(4):
+    for n in xrange(6):
+        print n
         dataset_learn = core.learn(n_episodes=1000)
         last_ep_dataset = pick_last_ep(dataset_learn)
         dataset_learn_visual += last_ep_dataset

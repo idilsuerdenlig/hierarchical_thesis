@@ -5,12 +5,11 @@ from matplotlib.patches import Ellipse
 import math
 
 
-def visualize_policy_params(parameter_dataset1, parameter_dataset2):
+def visualize_policy_params(parameter_dataset1, parameter_dataset2, small=True):
 
     #np.concatenate(self._approximator.get_weights(), self._sigma)
     #if sigmas is not None:
     #    print sigmas
-
     paramx_data = list()
     paramy_data = list()
     paramsigmax_data = list()
@@ -57,6 +56,10 @@ def visualize_policy_params(parameter_dataset1, parameter_dataset2):
     ax3.add_patch(ellipse0)
     ax3.add_patch(ellipse1)
     ax3.add_patch(ellipse2)
-    ax3.set_xlim(-50, 150)
-    ax3.set_ylim(-50, 150)
+    if small:
+        ax3.set_xlim(-50, 150)
+        ax3.set_ylim(-50, 150)
+    else:
+        ax3.set_xlim(-50, 1100)
+        ax3.set_ylim(-50, 1100)
     ax3.set_title('95% interval pi1 parameters')

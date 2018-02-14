@@ -3,7 +3,7 @@ import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
-def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None, n_gates=1):
+def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None, n_gates=1, small=True):
 
     plt.figure()
 
@@ -100,8 +100,12 @@ def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None, n_gates
     yg = [ys, ye, ye, ys]
     zg = [0, 0, maxt, maxt]
     verts = [list(zip(xg,yg,zg))]
-    ax1.set_xlim([0, 160])
-    ax1.set_ylim([0, 160])
+    if small:
+        ax1.set_xlim([0, 160])
+        ax1.set_ylim([0, 160])
+    else:
+        ax1.set_xlim([0, 1100])
+        ax1.set_ylim([0, 1100])
 
     ax1.add_collection3d(Poly3DCollection(verts),zs=zg)
     if not n_gates == 1:

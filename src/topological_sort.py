@@ -17,18 +17,17 @@ def topological_sort(blocks):
                 for oneblock in blocklist:
                     for ins in oneblock.input_connections:
                         if not isinstance(ins, PlaceHolder):
-                            G.add_edge(block, ins)
+                            G.add_edge(ins, block)
                     if oneblock.reward_connection is not None and not isinstance(oneblock.reward_connection, PlaceHolder):
-                        G.add_edge(block, oneblock.reward_connection)
+                        G.add_edge(oneblock.reward_connection, block)
         if block.input_connections is not None:
             for ins in block.input_connections:
                 if not isinstance(ins, PlaceHolder):
-                    G.add_edge(block, ins)
+                    G.add_edge(ins, block)
         if block.reward_connection is not None and not isinstance(block.reward_connection, PlaceHolder):
-            G.add_edge(block, block.reward_connection)
+            G.add_edge(block.reward_connection, block)
 
-    ordered_block_list = list(reversed(list(nx.topological_sort(G))))
-
+    ordered_block_list = list(nx.topological_sort(G))
     placeholders = list()
     for block in blocks:
         if isinstance(block, PlaceHolder):

@@ -3,7 +3,7 @@ from computational_graph import ComputationalGraph
 from control_block import ControlBlock
 from mushroom.utils import spaces
 from mushroom.environments import *
-from mushroom.utils.parameters import Parameter, AdaptiveParameter
+from mushroom.utils.parameters import *
 from mushroom.utils.callbacks import CollectDataset
 from mushroom.features.features import *
 from mushroom.policy.gaussian_policy import *
@@ -30,25 +30,37 @@ from arrows import plot_arrows
 
 class TerminationCondition(object):
 
-    def __init__(self, active_dir):
+    def __init__(self, active_dir, small=True):
         self.active_direction = active_dir
+        self.small = small
 
     def __call__(self, state):
         if self.active_direction <= 4:
-            goal_pos = np.array([14, 7.5])
+            if self.small:
+                goal_pos = np.array([14, 7.5])
+            else:
+                goal_pos = np.array([140, 75])
         else:
-            goal_pos = np.array([14, 14])
+            if self.small:
+                goal_pos = np.array([14, 14])
+            else:
+                goal_pos = np.array([140, 140])
+
         pos = np.array([state[0], state[1]])
-
-        if np.linalg.norm(pos-goal_pos) <= 1 or pos[0] > 15 or pos[0] < 0 or pos[1] > 15 or pos[1] < 0:
-            return True
+        if self.small:
+            if np.linalg.norm(pos-goal_pos) <= 1 or pos[0] > 15 or pos[0] < 0 or pos[1] > 15 or pos[1] < 0:
+                return True
+            else:
+                return False
         else:
-            return False
-
+            if np.linalg.norm(pos-goal_pos) <= 10 or pos[0] > 150 or pos[0] < 0 or pos[1] > 150 or pos[1] < 0:
+                return True
+            else:
+                return False
 
 def experiment():
     np.random.seed()
-
+    small = False
 
     # Model Block
     mdp = ShipSteering()
@@ -64,7 +76,7 @@ def experiment():
     featuresH = Features(tilings=tilingsH)
 
     # PolicyH
-    epsilon = Parameter(value=0.0)
+    epsilon = LinearDecayParameter(value=0.1, min_value=0.0, n=10000)
     piH = EpsGreedy(epsilon=epsilon)
 
     # AgentH
@@ -90,8 +102,12 @@ def experiment():
                                   callbacks=[dataset_callbackH])
 
     #FeaturesL
+    if small:
+        high = [15, 15, np.pi, np.pi/12]
+    else:
+        high = [150, 150, np.pi, np.pi/12]
+
     low = [0, 0, -np.pi, -np.pi/12]
-    high = [15, 15, np.pi, np.pi/12]
     n_tiles = [5, 5, 36, 5]
     low = np.array(low, dtype=np.float)
     high = np.array(high, dtype=np.float)
@@ -101,54 +117,54 @@ def experiment():
     featuresL = Features(tilings=tilingsL)
 
     # Policy1
-    sigma1 = np.eye(1, 1)*0.0005
+    sigma1 = np.eye(1, 1)*0.005
     approximator1 = Regressor(LinearApproximator, input_shape=(featuresL.size,),
                               output_shape=mdp.info.action_space.shape)
     pi1 = MultivariateGaussianPolicy(mu=approximator1,sigma=sigma1)
 
     # Policy2
-    sigma2 = np.eye(1, 1)*0.0005
+    sigma2 = np.eye(1, 1)*0.005
     approximator2 = Regressor(LinearApproximator, input_shape=(featuresL.size,),
                               output_shape=mdp.info.action_space.shape)
     pi2 = MultivariateGaussianPolicy(mu=approximator2,sigma=sigma2)
 
     # Agent1
-    learning_rate1 = AdaptiveParameter(value=.04)
+    learning_rate1 = AdaptiveParameter(value=.1)
     algorithm_params1 = dict(learning_rate=learning_rate1)
     fit_params1 = dict()
     agent_params1 = {'algorithm_params': algorithm_params1,
                     'fit_params': fit_params1}
     mdp_info_agent1 = MDPInfo(observation_space=spaces.Box(low=np.array([0,0,-np.pi,-np.pi/12]),
                                                            high=np.array([15,15,np.pi,np.pi/12])),
-                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=50)
+                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=10000)
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params1, features=featuresL)
 
     # Agent2
-    learning_rate2 = AdaptiveParameter(value=.04)
+    learning_rate2 = AdaptiveParameter(value=.1)
     algorithm_params2 = dict(learning_rate=learning_rate2)
     fit_params2 = dict()
     agent_params2 = {'algorithm_params': algorithm_params2,
                     'fit_params': fit_params2}
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low=np.array([0,0,-np.pi,-np.pi/12]),
                                                            high=np.array([15,15,np.pi,np.pi/12])),
-                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=50)
+                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=10000)
     agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, params=agent_params2, features=featuresL)
 
     #Termination Conds
-    termination_condition1 = TerminationCondition(active_dir=1)
-    termination_condition2 = TerminationCondition(active_dir=5)
+    termination_condition1 = TerminationCondition(active_dir=1, small=small)
+    termination_condition2 = TerminationCondition(active_dir=5, small=small)
 
     # Control Block +
     dataset_callback1 = CollectDataset()
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=50,
+    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=40,
                                   termination_condition=termination_condition1,
                                   callbacks=[dataset_callback1, parameter_callback1])
 
     # Control Block x
     dataset_callback2 = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=50,
+    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=40,
                                   termination_condition=termination_condition2,
                                   callbacks=[dataset_callback2, parameter_callback2])
 
@@ -216,16 +232,12 @@ def experiment():
     function_block7.add_input(control_blockH)
     function_block7.add_input(function_block2)
 
-    ordered = topological_sort(blocks)
-    for block in ordered:
-        print block.name
 
-    order = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-    computational_graph = ComputationalGraph(blocks=ordered, order=order, model=mdp)
+    computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn = core.learn(n_episodes=15000)
+    dataset_learn = core.learn(n_episodes=5000)
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=10)
 
@@ -252,7 +264,7 @@ def experiment():
     visualize_control_block_ghavamzade(low_level_dataset2, ep_count=5)
     plt.suptitle('ctrl2')
 
-    visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(6980, 6995))
+    visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(4980, 4995))
     visualize_ship_steering(dataset_eval, name='evaluate')
     plt.show()
 

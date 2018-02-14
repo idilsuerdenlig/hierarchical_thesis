@@ -3,7 +3,6 @@ from computational_graph import ComputationalGraph
 from control_block import ControlBlock
 from mushroom.utils import spaces
 from mushroom.environments import *
-from ship_steering_multiple_gates import ShipSteeringMultiGate
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 from mushroom.utils.callbacks import CollectDataset
 from mushroom.utils.dataset import compute_J
@@ -30,7 +29,7 @@ def experiment():
 
 
   # Model Block
-    mdp = ShipSteeringMultiGate()
+    mdp = ShipSteering(small=False)
 
     #State Placeholder
     state_ph = PlaceHolder(name='state_ph')
@@ -51,10 +50,9 @@ def experiment():
     features = Features(basis_list=[PolynomialBasis()])
 
     # Policy 1
-    sigma1 = np.array([38, 38])
+    sigma1 = np.array([250, 250])
     approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
-    approximator1.set_weights(np.array([75, 75]))
-
+    approximator1.set_weights(np.array([500, 500]))
     pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
 
     # Policy 2
@@ -63,17 +61,17 @@ def experiment():
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
-    learning_rate = AdaptiveParameter(value=10)
+    learning_rate = AdaptiveParameter(value=100)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
                     'fit_params': fit_params}
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
-                              action_space=spaces.Box(0, 150, (2,)), gamma=mdp.info.gamma, horizon=50)
+                              action_space=spaces.Box(0,150,(2,)), gamma=mdp.info.gamma, horizon=100)
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params, features=features)
 
     # Agent 2
-    learning_rate = AdaptiveParameter(value=.001)
+    learning_rate = AdaptiveParameter(value=.01)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
@@ -84,7 +82,7 @@ def experiment():
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=5,
+    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=10,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
@@ -114,14 +112,16 @@ def experiment():
     function_block3.add_input(reward_ph)
     control_block2.add_input(function_block1)
     control_block2.add_reward(function_block3)
+    # block in ordered:
+    #    print block.name
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
     core = HierarchicalCore(computational_graph)
 
     # Train
     #dataset_learn_visual = core.learn(n_episodes=2000)
     dataset_learn_visual = list()
-    for n in xrange(4):
-        dataset_learn = core.learn(n_episodes=500)
+    for n in xrange(8):
+        dataset_learn = core.learn(n_episodes=1000)
         last_ep_dataset = pick_last_ep(dataset_learn)
         dataset_learn_visual += last_ep_dataset
         del dataset_learn
@@ -133,12 +133,12 @@ def experiment():
     low_level_dataset = dataset_callback.get()
     parameter_dataset1 = parameter_callback1.get_values()
     parameter_dataset2 = parameter_callback2.get_values()
-    visualize_policy_params(parameter_dataset1, parameter_dataset2)
+    visualize_policy_params(parameter_dataset1, parameter_dataset2, small=False)
     visualize_control_block(low_level_dataset, ep_count=20)
     #visualize_ship_steering(dataset_learn_visual, range_eps=xrange(1980,1995), name='learn')
-    visualize_ship_steering(dataset_learn_visual, name='learn', n_gates=4)
+    visualize_ship_steering(dataset_learn_visual, name='learn', small=False)
 
-    visualize_ship_steering(dataset_eval, 'evaluate', n_gates=4)
+    visualize_ship_steering(dataset_eval, 'evaluate', small=False)
     plt.show()
 
     return
