@@ -14,24 +14,25 @@ def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None, n_gates
     ax5 = plt.subplot2grid((4,3), (3,1))
     ax6 = plt.subplot2grid((4,3), (0,2), rowspan=4)
 
-    xs = 100
-    xe = 120
-    ys = 120
-    ye = 100
-
     if not n_gates == 1:
-        xs1=30
-        xe1=50
-        ys1=50
-        ye1=30
-        xs2=30
-        xe2=50
-        ys2=100
-        ye2=120
-        xs3=100
-        xe3=120
-        ys3=30
-        ye3=50
+        xs1=30 if small else 80
+        xe1=50 if small else 100
+        ys1=50 if small else 100
+        ye1=30 if small else 80
+        xs2=30 if small else 80
+        xe2=50 if small else 100
+        ys2=100 if small else 900
+        ye2=120 if small else 920
+        xs3=100 if small else 900
+        xe3=120 if small else 920
+        ys3=30 if small else 80
+        ye3=50 if small else 100
+
+    else:
+        xs = 100 if small else 900
+        xe = 120 if small else 920
+        ys = 120 if small else 920
+        ye = 100 if small else 900
 
 
     x_ep = list()

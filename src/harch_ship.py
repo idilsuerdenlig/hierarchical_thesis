@@ -82,7 +82,7 @@ def experiment():
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=10,
+    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=20,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2

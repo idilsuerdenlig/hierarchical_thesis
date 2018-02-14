@@ -8,11 +8,7 @@ from mushroom.utils.callbacks import CollectDataset
 from mushroom.features.features import *
 from mushroom.policy.gaussian_policy import *
 from mushroom.algorithms.policy_search import *
-from visualize_ship_steering import visualize_ship_steering
-import matplotlib.pyplot as plt
-from visualize_control_block_ghavamzade import visualize_control_block_ghavamzade
 from collect_policy_parameter import CollectPolicyParameter
-from visualize_policy_params import visualize_policy_params
 from basic_operation_block import *
 from model_placeholder import PlaceHolder
 from mux_block import MuxBlock
@@ -25,8 +21,10 @@ from hold_state import hold_state
 from hi_lev_extr_rew_ghavamzade import G_high
 from low_lev_extr_rew_ghavamzade import G_low
 from reward_accumulator import reward_accumulator_block
-from topological_sort import topological_sort
-from arrows import plot_arrows
+import datetime
+import argparse
+from mushroom.utils.folder import mk_dir_recursive
+
 
 class TerminationCondition(object):
 
@@ -59,11 +57,15 @@ class TerminationCondition(object):
                 return False
 
 def experiment():
+    parser = argparse.ArgumentParser(description='server_harch_ship')
+    parser.add_argument("--small", help="environment size small or big", action="store_true")
+    args = parser.parse_args()
+    small = args.small
+    print 'SMALL IS', small
     np.random.seed()
-    small = False
 
     # Model Block
-    mdp = ShipSteering()
+    mdp = ShipSteering(small=small)
 
     #State Placeholder
     state_ph = PlaceHolder(name='state_ph')
@@ -81,9 +83,11 @@ def experiment():
 
     # AgentH
     learning_rate = Parameter(value=0.2)
+    lim = 150 if small else 1000
+
 
     mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]),
-                                                           high=np.array([150, 150]), shape=(2,)),
+                                                           high=np.array([lim, lim]), shape=(2,)),
                               action_space=spaces.Discrete(8), gamma=1, horizon=10000)
     approximator_params = dict(input_shape=(featuresH.size,),
                                output_shape=mdp_info_agentH.action_space.size,
@@ -102,11 +106,7 @@ def experiment():
                                   callbacks=[dataset_callbackH])
 
     #FeaturesL
-    if small:
-        high = [15, 15, np.pi, np.pi/12]
-    else:
-        high = [150, 150, np.pi, np.pi/12]
-
+    high = [15, 15, np.pi, np.pi/12] if small else [150, 150, np.pi, np.pi/12]
     low = [0, 0, -np.pi, -np.pi/12]
     n_tiles = [5, 5, 36, 5]
     low = np.array(low, dtype=np.float)
@@ -135,7 +135,7 @@ def experiment():
     agent_params1 = {'algorithm_params': algorithm_params1,
                     'fit_params': fit_params1}
     mdp_info_agent1 = MDPInfo(observation_space=spaces.Box(low=np.array([0,0,-np.pi,-np.pi/12]),
-                                                           high=np.array([15,15,np.pi,np.pi/12])),
+                                                           high=high),
                               action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=10000)
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params1, features=featuresL)
 
@@ -146,7 +146,7 @@ def experiment():
     agent_params2 = {'algorithm_params': algorithm_params2,
                     'fit_params': fit_params2}
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low=np.array([0,0,-np.pi,-np.pi/12]),
-                                                           high=np.array([15,15,np.pi,np.pi/12])),
+                                                           high=high),
                               action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=10000)
     agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, params=agent_params2, features=featuresL)
 
@@ -172,7 +172,7 @@ def experiment():
     function_block1 = fBlock(phi=pick_state, name='f1 pickstate')
 
     # Function Block 2: maps the env to low lev ctrl state
-    function_block2 = fBlock(phi=rototranslate, name='f2 rotot')
+    function_block2 = fBlock(phi=rototranslate(small=small), name='f2 rotot')
 
     # Function Block 3: holds curr state as ref
     function_block3 = fBlock(phi=hold_state, name='f3 holdstate')
@@ -187,7 +187,7 @@ def experiment():
     function_block6 = fBlock(phi=G_high, name='f6 G_hi')
 
     # Function Block 7: ext rew of low lev ctrl
-    function_block7 = fBlock(phi=G_low, name='f7 G_lo')
+    function_block7 = fBlock(phi=G_low(small=small), name='f7 G_lo')
 
     #Reward Accumulator H:
     reward_acc_H = reward_accumulator_block(gamma=mdp_info_agentH.gamma, name='reward_acc_H')
@@ -203,7 +203,6 @@ def experiment():
               function_block4, function_block5,
               function_block6, function_block7, reward_acc_H]
 
-    #order = [0, 1, 4, 9, 11, 7, 6, 2, 5, 10, 8, 3]
     state_ph.add_input(mux_block)
     reward_ph.add_input(mux_block)
     reward_acc_H.add_input(reward_ph)
@@ -237,7 +236,7 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn = core.learn(n_episodes=50000)
+    dataset_learn = core.learn(n_episodes=80000)
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=10)
 
@@ -254,12 +253,15 @@ def experiment():
     low_level_dataset1 = dataset_callback1.get()
     low_level_dataset2 = dataset_callback2.get()
 
-    np.save('low_level_dataset1_file', low_level_dataset1)
-    np.save('low_level_dataset2_file', low_level_dataset2)
-    np.save('max_q_val_tiled_file', max_q_val_tiled)
-    np.save('act_max_q_val_tiled_file', act_max_q_val_tiled)
-    np.save('dataset_learn_file', dataset_learn)
-    np.save('dataset_eval_file', dataset_eval)
+    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '/'
+    mk_dir_recursive('./' + subdir)
+
+    np.save(subdir+'/low_level_dataset1_file', low_level_dataset1)
+    np.save(subdir+'/low_level_dataset2_file', low_level_dataset2)
+    np.save(subdir+'/max_q_val_tiled_file', max_q_val_tiled)
+    np.save(subdir+'/act_max_q_val_tiled_file', act_max_q_val_tiled)
+    np.save(subdir+'/dataset_learn_file', dataset_learn)
+    np.save(subdir+'/dataset_eval_file', dataset_eval)
 
     return
 

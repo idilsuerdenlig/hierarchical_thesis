@@ -8,6 +8,7 @@ import numpy as np
 
 def visualize_saved_in_server(our_approach, small, n_gates=1):
 
+
     if our_approach:
 
         low_level_dataset = np.load('low_level_dataset_file.npy')
@@ -38,7 +39,7 @@ def visualize_saved_in_server(our_approach, small, n_gates=1):
         plt.suptitle('ctrl+')
         visualize_control_block_ghavamzade(low_level_dataset2, ep_count=5)
         plt.suptitle('ctrlx')
-        visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(4980, 4995))
-        visualize_ship_steering(dataset_eval, name='evaluate')
+        visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(980, 995), small=small)
+        visualize_ship_steering(dataset_eval, name='evaluate', small=small)
 
     plt.show()

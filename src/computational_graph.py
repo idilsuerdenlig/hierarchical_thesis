@@ -8,8 +8,6 @@ class ComputationalGraph(object):
     def __init__(self, blocks, model):
 
         self.ordered = topological_sort(blocks)
-        for block in self.ordered:
-            print block.name
         self.model = model
         self.state = list()
         self.reward = None
