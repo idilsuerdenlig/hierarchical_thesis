@@ -50,6 +50,9 @@ def experiment():
     # Function Block 3
     function_block3 = addBlock(name='f3 (summation)')
 
+    # Function Block 4
+    function_block4 = multiplybyten(name='f4 (multiply by 10)')
+
     #Features
     features = Features(basis_list=[PolynomialBasis()])
 
@@ -92,7 +95,7 @@ def experiment():
     agent_params = {'algorithm_params': algorithm_params,
                     'fit_params': fit_params}
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi,np.pi,(1,)),
-                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=25)
+                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=50)
     agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, params=agent_params, features=None)
 
     # Control Block 1
@@ -122,8 +125,9 @@ def experiment():
     function_block1.add_input(control_block1)
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
-    function_block3.add_input(function_block2)
+    function_block3.add_input(function_block4)
     function_block3.add_input(reward_ph)
+    function_block4.add_input(function_block2)
     control_block2.add_input(function_block1)
     control_block2.add_reward(function_block3)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
