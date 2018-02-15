@@ -92,12 +92,12 @@ def experiment():
     agent_params = {'algorithm_params': algorithm_params,
                     'fit_params': fit_params}
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi,np.pi,(1,)),
-                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=50)
+                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=25)
     agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, params=agent_params, features=None)
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=20,
+    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=40,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
@@ -132,7 +132,7 @@ def experiment():
     # Train
     dataset_learn_visual = list()
 
-    n_eps = 20 if small else 50
+    n_eps = 5 if small else 20
     for n in xrange(n_eps):
         print n
         dataset_learn = core.learn(n_episodes=1000)
