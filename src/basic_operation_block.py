@@ -17,8 +17,9 @@ class multiplybyten(fBlock):
 
     def __init__(self, name=None, phi=None):
         def multiply_by_ten(inputs):
-            res = np.array(inputs*10)
-            print res
+            res = np.zeros(1)
+            for input in inputs
+                res = input*10
             return res
         self.phi = multiply_by_ten
         super(multiplybyten, self).__init__(phi=multiply_by_ten, name=name)
