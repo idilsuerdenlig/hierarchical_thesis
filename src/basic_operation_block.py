@@ -13,16 +13,16 @@ class addBlock(fBlock):
         self.phi = summation
         super(addBlock, self).__init__(phi=summation, name=name)
 
-class multiplybyten(fBlock):
+class minusBlock(fBlock):
 
     def __init__(self, name=None, phi=None):
-        def multiply_by_ten(inputs):
+        def minus(inputs):
             res = np.zeros(1)
             for input in inputs:
-                res = input*10
+                res = input*-1
             return res
-        self.phi = multiply_by_ten
-        super(multiplybyten, self).__init__(phi=multiply_by_ten, name=name)
+        self.phi = minus
+        super(minus, self).__init__(phi=minus, name=name)
 
 class squarednormBlock(fBlock):
 
