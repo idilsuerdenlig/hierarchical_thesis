@@ -28,6 +28,7 @@ class ComputationalGraph(object):
         self.last = self.step_counter >= self.model.info.horizon or self.absorbing
         self.ordered[0].last_output = self.state
         self.ordered[1].last_output = np.array([self.reward])
+        self.ordered[2].last_output = action
         #print 'ENV STATE, REW', self.state, self.reward
         for block in self.ordered:
             #print 'NAME  :',block.name
@@ -55,6 +56,7 @@ class ComputationalGraph(object):
         self.state = self.model.reset()
         self.ordered[0].last_output = self.state
         self.ordered[1].last_output = None
+        self.ordered[2].last_output = None
         #print 'ENV RESET STATE, REW', self.state, self.reward
 
         for block in self.ordered:

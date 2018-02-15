@@ -41,6 +41,9 @@ def experiment():
     #Reward Placeholder
     reward_ph = PlaceHolder(name='reward_ph')
 
+    #Last_In Placeholder
+    lastaction_ph = PlaceHolder(name='lastaction_ph')
+
     # Function Block 1
     function_block1 = fBlock(name='f1 (angle difference)',phi=phi)
 
@@ -49,9 +52,6 @@ def experiment():
 
     # Function Block 3
     function_block3 = addBlock(name='f3 (summation)')
-
-    # Function Block 4
-    function_block4 = multiplybyten(name='f4 (multiply by 10)')
 
     #Features
     features = Features(basis_list=[PolynomialBasis()])
@@ -114,9 +114,10 @@ def experiment():
     reward_acc = reward_accumulator_block(gamma=mdp_info_agent1.gamma, name='reward_acc')
 
     # Algorithm
-    blocks = [state_ph, reward_ph, control_block1, control_block2, function_block1, function_block2, function_block3, reward_acc]
+    blocks = [state_ph, reward_ph, lastaction_ph, control_block1, control_block2, function_block1, function_block2, function_block3, reward_acc]
     state_ph.add_input(control_block2)
     reward_ph.add_input(control_block2)
+    lastaction_ph.add_input(control_block2)
     control_block1.add_input(state_ph)
     reward_acc.add_input(reward_ph)
     reward_acc.add_alarm_connection(control_block2)
@@ -125,9 +126,9 @@ def experiment():
     function_block1.add_input(control_block1)
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
-    function_block3.add_input(function_block4)
+    function_block3.add_input(function_block2)
     function_block3.add_input(reward_ph)
-    function_block4.add_input(function_block2)
+    function_block3.add_input(lastaction_ph)
     control_block2.add_input(function_block1)
     control_block2.add_reward(function_block3)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
