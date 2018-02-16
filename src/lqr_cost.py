@@ -2,7 +2,7 @@ import numpy as np
 
 
 def lqr_cost(ins):
-    q_square = 5
+    q_square = 16
     r_square = 1
 
     error_cost = np.zeros(1)
