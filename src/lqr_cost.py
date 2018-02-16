@@ -22,5 +22,5 @@ def lqr_cost(ins):
     for r in R:
         action_cost += -r.dot(r)
 
-    lqr_cost = 5*error_cost + action_cost
+    lqr_cost = error_cost + 144 * action_cost
     return lqr_cost
