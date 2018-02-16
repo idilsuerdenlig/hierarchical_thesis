@@ -22,7 +22,7 @@ class minusBlock(fBlock):
                 res = input*-1
             return res
         self.phi = minus
-        super(minus, self).__init__(phi=minus, name=name)
+        super(minusBlock, self).__init__(phi=minus, name=name)
 
 class squarednormBlock(fBlock):
 
