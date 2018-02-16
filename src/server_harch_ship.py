@@ -71,7 +71,7 @@ def experiment():
     pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
 
     # Policy 2
-    sigma2 = Parameter(value=.01)
+    sigma2 = Parameter(value=.05)
     approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
