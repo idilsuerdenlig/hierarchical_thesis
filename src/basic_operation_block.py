@@ -30,7 +30,7 @@ class squarednormBlock(fBlock):
         def squared_norm(inputs):
             res = np.zeros(1)
             for input in inputs:
-                res += -input.dot(input)
+                res += input.dot(input)
             return res
         self.phi = squared_norm
         super(squarednormBlock, self).__init__(phi=squared_norm, name=name)

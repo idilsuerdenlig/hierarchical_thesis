@@ -135,7 +135,6 @@ def experiment():
     parameter_dataset2 = parameter_callback2.get_values()
     visualize_policy_params(parameter_dataset1, parameter_dataset2)
     visualize_control_block(low_level_dataset, ep_count=20)
-    #visualize_ship_steering(dataset_learn_visual, range_eps=xrange(1980,1995), name='learn')
     visualize_ship_steering(dataset_learn_visual, name='learn', n_gates=4)
 
     visualize_ship_steering(dataset_eval, 'evaluate', n_gates=4)
