@@ -1,8 +1,10 @@
 import numpy as np
-from mushroom.utils.angles_utils import shortest_angular_distance, normalize_angle
 
 
 def lqr_cost(ins):
+    q_square = 5
+    r_square = 1
+
     error_cost = np.zeros(1)
     action_cost = np.zeros(1)
 
@@ -22,5 +24,7 @@ def lqr_cost(ins):
     for r in R:
         action_cost += -r.dot(r)
 
-    lqr_cost = error_cost + 144 * action_cost
+    normalization_coefficient = 144
+
+    lqr_cost = q_square * error_cost + r_square * normalization_coefficient * action_cost
     return lqr_cost
