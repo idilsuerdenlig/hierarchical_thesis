@@ -79,7 +79,7 @@ def experiment():
     if small:
         learning_rate = AdaptiveParameter(value=10)
     else:
-        learning_rate = AdaptiveParameter(value=100)
+        learning_rate = AdaptiveParameter(value=65)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
