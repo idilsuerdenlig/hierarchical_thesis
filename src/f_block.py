@@ -1,11 +1,9 @@
 from block import Block
 import numpy as np
 
-class fBlock(Block):
-    """
-    This class implements the block object of a computational graph for hierarchical learning.
 
-    """
+class fBlock(Block):
+
     def __init__(self, phi, name=None):
 
         self.phi = phi

@@ -20,6 +20,7 @@ from reward_accumulator import reward_accumulator_block
 import datetime
 import argparse
 from mushroom.utils.folder import mk_dir_recursive
+from lqr_cost import lqr_cost
 
 
 def experiment():
@@ -48,19 +49,11 @@ def experiment():
     function_block1 = fBlock(name='f1 (angle difference)',phi=phi)
 
     # Function Block 2
-    function_block2 = squarednormBlock(name='f2 (squared norm)')
+    function_block2 = fBlock(name='f2 (lqr cost)', phi=lqr_cost)
 
     # Function Block 3
     function_block3 = addBlock(name='f3 (summation)')
 
-    # Function Block 4
-    function_block4 = minusBlock(name='f4 (minus)')
-
-    #Function Block 5
-    function_block5 = squarednormBlock(name='f5 (squared norm)')
-
-    #Function Block 6
-    function_block6 = minusBlock(name='f6 (minus)')
 
     #Features
     features = Features(basis_list=[PolynomialBasis()])
@@ -124,8 +117,7 @@ def experiment():
 
     # Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_block1, control_block2,
-              function_block1, function_block2, function_block3, function_block4,
-              function_block5, function_block6, reward_acc]
+              function_block1, function_block2, function_block3, reward_acc]
 
     state_ph.add_input(control_block2)
     reward_ph.add_input(control_block2)
@@ -138,12 +130,10 @@ def experiment():
     function_block1.add_input(control_block1)
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
-    function_block3.add_input(function_block4)
+    function_block2.add_input(lastaction_ph)
+    function_block3.add_input(function_block1)
+    function_block3.add_input(function_block2)
     function_block3.add_input(reward_ph)
-    function_block3.add_input(function_block6)
-    function_block4.add_input(function_block2)
-    function_block5.add_input(lastaction_ph)
-    function_block6.add_input(function_block5)
     control_block2.add_input(function_block1)
     control_block2.add_reward(function_block3)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
