@@ -139,7 +139,7 @@ def experiment():
     function_block2.add_input(lastaction_ph)
     function_block3.add_input(function_block1)
     function_block3.add_input(function_block2)
-    #function_block3.add_input(reward_ph)
+    function_block3.add_input(reward_ph)
     control_block2.add_input(function_block1)
     control_block2.add_input(err_acc)
     control_block2.add_reward(function_block3)
