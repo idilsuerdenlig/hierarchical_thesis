@@ -131,7 +131,6 @@ def experiment():
     reward_acc.add_alarm_connection(control_block2)
     err_acc.add_input(function_block1)
     err_acc.add_alarm_connection(control_block2)
-    err_acc.add_alarm_connection(control_block1)
     control_block1.add_reward(reward_acc)
     control_block1.add_alarm_connection(control_block2)
     function_block1.add_input(control_block1)
