@@ -78,7 +78,7 @@ def experiment():
 
     # Agent 1
     if small:
-        learning_rate = AdaptiveParameter(value=10)
+        learning_rate = Parameter(value=0)
     else:
         learning_rate = AdaptiveParameter(value=65)
     algorithm_params = dict(learning_rate=learning_rate)
@@ -98,7 +98,7 @@ def experiment():
     agent_params = {'algorithm_params': algorithm_params,
                     'fit_params': fit_params}
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low=np.array([-np.pi, 0]), high=np.array([np.pi, 1000])),
-                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
+                              action_space=mdp.info.action_space, gamma=0.6, horizon=100)
     agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, params=agent_params, features=None)
 
     # Control Block 1
@@ -139,7 +139,7 @@ def experiment():
     function_block2.add_input(lastaction_ph)
     function_block3.add_input(function_block1)
     function_block3.add_input(function_block2)
-    function_block3.add_input(reward_ph)
+    #function_block3.add_input(reward_ph)
     control_block2.add_input(function_block1)
     control_block2.add_input(err_acc)
     control_block2.add_reward(function_block3)
