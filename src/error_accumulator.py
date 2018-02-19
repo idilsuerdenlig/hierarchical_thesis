@@ -13,7 +13,7 @@ class ErrorAccumulatorBlock(Block):
 
     def __call__(self, inputs, reward, absorbing, last, learn_flag, alarms):
 
-        if absorbing:
+        if absorbing or np.any(alarms):
             self.accumulator = 0
         else:
             if isinstance(inputs, list):

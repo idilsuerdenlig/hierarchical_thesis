@@ -72,7 +72,7 @@ def experiment():
     pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
 
     # Policy 2
-    sigma2 = Parameter(value=.02)
+    sigma2 = Parameter(value=.05)
     approximator2 = Regressor(LinearApproximator, input_shape=(2,), output_shape=mdp.info.action_space.shape)
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
@@ -130,6 +130,8 @@ def experiment():
     reward_acc.add_input(reward_ph)
     reward_acc.add_alarm_connection(control_block2)
     err_acc.add_input(function_block1)
+    err_acc.add_alarm_connection(control_block2)
+    err_acc.add_alarm_connection(control_block1)
     control_block1.add_reward(reward_acc)
     control_block1.add_alarm_connection(control_block2)
     function_block1.add_input(control_block1)
