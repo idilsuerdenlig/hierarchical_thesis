@@ -73,7 +73,7 @@ def experiment():
 
     # Policy 2
     sigma2 = Parameter(value=.05)
-    approximator2 = Regressor(LinearApproximator, input_shape=(2,), output_shape=mdp.info.action_space.shape)
+    approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
@@ -97,7 +97,7 @@ def experiment():
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
                     'fit_params': fit_params}
-    mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low=np.array([-np.pi, 0]), high=np.array([np.pi, 1000])),
+    mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low=-np.pi, high=np.pi),
                               action_space=mdp.info.action_space, gamma=0.6, horizon=100)
     agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, params=agent_params, features=None)
 
@@ -117,7 +117,7 @@ def experiment():
     reward_acc = reward_accumulator_block(gamma=mdp_info_agent1.gamma, name='reward_acc')
 
     #Error Accumulator
-    err_acc = ErrorAccumulatorBlock(name='err_acc')
+    #err_acc = ErrorAccumulatorBlock(name='err_acc')
 
     # Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_block1, control_block2,
@@ -129,8 +129,8 @@ def experiment():
     control_block1.add_input(state_ph)
     reward_acc.add_input(reward_ph)
     reward_acc.add_alarm_connection(control_block2)
-    err_acc.add_input(function_block1)
-    err_acc.add_alarm_connection(control_block2)
+    #err_acc.add_input(function_block1)
+    #err_acc.add_alarm_connection(control_block2)
     control_block1.add_reward(reward_acc)
     control_block1.add_alarm_connection(control_block2)
     function_block1.add_input(control_block1)
@@ -141,7 +141,7 @@ def experiment():
     function_block3.add_input(function_block2)
     function_block3.add_input(reward_ph)
     control_block2.add_input(function_block1)
-    control_block2.add_input(err_acc)
+    #control_block2.add_input(err_acc)
     control_block2.add_reward(function_block3)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
     core = HierarchicalCore(computational_graph)
