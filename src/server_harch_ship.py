@@ -72,7 +72,7 @@ def experiment():
     pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
 
     # Policy 2
-    sigma2 = Parameter(value=.025)
+    sigma2 = Parameter(value=.005)
     approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
@@ -109,7 +109,7 @@ def experiment():
     # Control Block 2
     dataset_callback = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=10,
+    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=20,
                                   callbacks=[dataset_callback, parameter_callback2])
 
 
