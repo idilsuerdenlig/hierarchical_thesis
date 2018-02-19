@@ -3,7 +3,7 @@ import numpy as np
 
 def lqr_cost(ins):
     q_square = 16
-    r_square = 1
+    r_square = 0
 
     error_cost = np.zeros(1)
     action_cost = np.zeros(1)
