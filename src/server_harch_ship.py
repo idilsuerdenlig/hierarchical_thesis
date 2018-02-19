@@ -61,9 +61,9 @@ def experiment():
 
     # Policy 1
     if small:
-        sigma1 = np.array([38, 38])
+        sigma1 = np.array([0.01, 0.01])
         approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
-        approximator1.set_weights(np.array([75, 75]))
+        approximator1.set_weights(np.array([110, 110]))
     else:
         sigma1 = np.array([250, 250])
         approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
