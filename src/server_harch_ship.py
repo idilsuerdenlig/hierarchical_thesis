@@ -30,6 +30,7 @@ def experiment():
     parser.add_argument("--small", help="environment size small or big", action="store_true")
     args = parser.parse_args()
     small = args.small
+    small = True
     print 'SMALL IS', small
 
     np.random.seed()
@@ -78,7 +79,7 @@ def experiment():
 
     # Agent 1
     if small:
-        learning_rate = Parameter(value=10)
+        learning_rate = AdaptiveParameter(value=5)
     else:
         learning_rate = AdaptiveParameter(value=65)
     algorithm_params = dict(learning_rate=learning_rate)
@@ -88,11 +89,11 @@ def experiment():
 
     lim = 150 if small else 1000
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
-                              action_space=spaces.Box(0,lim,(2,)), gamma=mdp.info.gamma, horizon=100)
+                              action_space=spaces.Box(0, lim, (2,)), gamma=mdp.info.gamma, horizon=100)
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params, features=features)
 
     # Agent 2
-    learning_rate = AdaptiveParameter(value=1e-4)
+    learning_rate = Parameter(value=1e-6)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
@@ -109,7 +110,7 @@ def experiment():
     # Control Block 2
     dataset_callback = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=20,
+    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=10,
                                   callbacks=[dataset_callback, parameter_callback2])
 
 
@@ -149,16 +150,16 @@ def experiment():
     # Train
     dataset_learn_visual = list()
 
-    n_eps = 5 if small else 20
+    n_eps = 10 if small else 20
     for n in xrange(n_eps):
-        print n
-        dataset_learn = core.learn(n_episodes=1000)
+        print 'ITERATION', n
+        dataset_learn = core.learn(n_episodes=1000, quiet=True)
         last_ep_dataset = pick_last_ep(dataset_learn)
         dataset_learn_visual += last_ep_dataset
         del dataset_learn
 
     # Evaluate
-    dataset_eval = core.evaluate(n_episodes=10)
+    dataset_eval = core.evaluate(n_episodes=10, quiet=True)
 
     # Save
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '/'
