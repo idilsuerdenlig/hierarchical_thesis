@@ -92,7 +92,7 @@ def experiment():
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params, features=features)
 
     # Agent 2
-    learning_rate = Parameter(value=1e-4)
+    learning_rate = AdaptiveParameter(value=1e-4)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
