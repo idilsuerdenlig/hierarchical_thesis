@@ -35,7 +35,7 @@ def experiment():
     np.random.seed()
 
     # Model Block
-    mdp = ShipSteering(small)
+    mdp = ShipSteering(small=small, hard=True)
 
     #State Placeholder
     state_ph = PlaceHolder(name='state_ph')
