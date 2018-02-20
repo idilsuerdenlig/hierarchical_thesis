@@ -80,7 +80,8 @@ def visualize_control_block(datalist_control, J = None, ep_count = None):
     for episode in range_eps:
         state_ep = state_list[episode]
         time =np.arange(len(state_ep))
-        ax1.plot(time,state_ep)
+        ax1.plot(time, state_ep)
+        #ax1.plot(time, state_ep[:,1])
         ax1.set_ylabel('state')
 
     for episode in range_eps:

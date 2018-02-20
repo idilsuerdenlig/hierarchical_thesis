@@ -61,9 +61,9 @@ def experiment():
 
     # Policy 1
     if small:
-        sigma1 = np.array([0.01, 0.01])
+        sigma1 = np.array([38, 38])
         approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
-        approximator1.set_weights(np.array([110, 110]))
+        approximator1.set_weights(np.array([75, 75]))
     else:
         sigma1 = np.array([250, 250])
         approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
@@ -78,7 +78,7 @@ def experiment():
 
     # Agent 1
     if small:
-        learning_rate = Parameter(value=0)
+        learning_rate = Parameter(value=10)
     else:
         learning_rate = AdaptiveParameter(value=65)
     algorithm_params = dict(learning_rate=learning_rate)

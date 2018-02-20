@@ -28,7 +28,7 @@ def visualize_policy_params(parameter_dataset1, parameter_dataset2, small=True):
     ax1.scatter(paramx_data[0], paramy_data[0], time[0], marker='o',color='g')
     ax1.scatter(paramx_data[-1], paramy_data[-1], time[-1], marker='o', color='r')
     ax1.set_title('pi1 parameters')
-    ax2.plot(parameter_dataset2)
+    ax2.plot(parameter_dataset2, label='proportional')
     ax2.set_title('pi2 parameters')
 
     ax3 = fig.add_subplot(223)
