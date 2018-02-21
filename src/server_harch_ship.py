@@ -20,7 +20,7 @@ from reward_accumulator import reward_accumulator_block
 from error_accumulator import ErrorAccumulatorBlock
 import datetime
 import argparse
-from mushroom.utils.folder import mk_dir_recursive
+from mushroom.utils.folder import *
 from lqr_cost import lqr_cost
 
 
@@ -60,6 +60,9 @@ def experiment():
     #Features
     features = Features(basis_list=[PolynomialBasis()])
 
+    #Features
+    features_enac = Features(basis_list=PolynomialBasis.generate(2,1))
+
     # Policy 1
     if small:
         sigma1 = np.array([38, 38])
@@ -79,7 +82,7 @@ def experiment():
 
     # Agent 1
     if small:
-        learning_rate = AdaptiveParameter(value=5)
+        learning_rate = AdaptiveParameter(value=10)
     else:
         learning_rate = AdaptiveParameter(value=65)
     algorithm_params = dict(learning_rate=learning_rate)
@@ -93,14 +96,14 @@ def experiment():
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params, features=features)
 
     # Agent 2
-    learning_rate = Parameter(value=1e-6)
+    learning_rate = Parameter(value=1e-1)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
                     'fit_params': fit_params}
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
                               action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
-    agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, params=agent_params, features=None)
+    agent2 = eNAC(policy=pi2, mdp_info=mdp_info_agent2, params=agent_params, critic_features=features_enac)
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
@@ -153,13 +156,13 @@ def experiment():
     n_eps = 10 if small else 20
     for n in xrange(n_eps):
         print 'ITERATION', n
-        dataset_learn = core.learn(n_episodes=1000, quiet=True)
+        dataset_learn = core.learn(n_episodes=1000)
         last_ep_dataset = pick_last_ep(dataset_learn)
         dataset_learn_visual += last_ep_dataset
         del dataset_learn
 
     # Evaluate
-    dataset_eval = core.evaluate(n_episodes=10, quiet=True)
+    dataset_eval = core.evaluate(n_episodes=10)
 
     # Save
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '/'
@@ -175,6 +178,7 @@ def experiment():
     np.save(subdir+'/dataset_learn_visual_file', dataset_learn_visual)
     np.save(subdir+'/dataset_eval_file', dataset_eval)
 
+    force_symlink(subdir, 'latest')
 
 
     return
