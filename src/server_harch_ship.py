@@ -79,7 +79,6 @@ def experiment():
     # Policy 2
     sigma2 = Parameter(value=.005)
     approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
-    approximator2.set_weights(np.array([-1]))
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
@@ -98,7 +97,7 @@ def experiment():
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params, features=features)
 
     # Agent 2
-    learning_rate = Parameter(value=1e-6)
+    learning_rate = AdaptiveParameter(value=1e-3)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
@@ -115,7 +114,7 @@ def experiment():
     # Control Block 2
     dataset_callback = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=10,
+    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=100,
                                   callbacks=[dataset_callback, parameter_callback2])
 
 
