@@ -27,3 +27,7 @@ class CollectPolicyParameter:
     def get_values(self):
 
         return self._p
+
+    def reset(self):
+
+        self._p = list()
