@@ -75,9 +75,11 @@ def experiment():
 
     pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
 
+
     # Policy 2
     sigma2 = Parameter(value=.005)
     approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
+    approximator2.set_weights(np.array([-1]))
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
@@ -96,7 +98,7 @@ def experiment():
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params, features=features)
 
     # Agent 2
-    learning_rate = Parameter(value=1e-8)
+    learning_rate = Parameter(value=1e-6)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
@@ -153,7 +155,7 @@ def experiment():
     # Train
     dataset_learn_visual = list()
 
-    n_eps = 2 if small else 5
+    '''n_eps = 2 if small else 5
     for n in xrange(n_eps):
         agent1.learning_rate = Parameter(value=0)
         print 'ITERATION only for low level', n
@@ -163,7 +165,7 @@ def experiment():
         dataset_learn_visual += last_ep_dataset
 
     parameter_dataset2_1 = parameter_callback2.get_values()
-    parameter_callback2.reset()
+    parameter_callback2.reset()'''
 
 
     n_eps = 5 if small else 50
@@ -183,13 +185,13 @@ def experiment():
 
     low_level_dataset = dataset_callback.get()
     parameter_dataset1 = parameter_callback1.get_values()
-    parameter_dataset2_2 = parameter_callback2.get_values()
+    parameter_dataset2 = parameter_callback2.get_values()
     mk_dir_recursive('./' + subdir)
 
     np.save(subdir+'/low_level_dataset_file', low_level_dataset)
     np.save(subdir+'/parameter_dataset1_file', parameter_dataset1)
-    np.save(subdir+'/parameter_dataset2_1_file', parameter_dataset2_1)
-    np.save(subdir+'/parameter_dataset2_2_file', parameter_dataset2_2)
+    #np.save(subdir+'/parameter_dataset2_1_file', parameter_dataset2_1)
+    np.save(subdir+'/parameter_dataset2_file', parameter_dataset2)
 
     np.save(subdir+'/dataset_learn_visual_file', dataset_learn_visual)
     np.save(subdir+'/dataset_eval_file', dataset_eval)
