@@ -153,8 +153,15 @@ def experiment():
     # Train
     dataset_learn_visual = list()
 
-    n_eps = 10 if small else 20
+    n_eps = 1 if small else 5
     for n in xrange(n_eps):
+        agent1.learning_rate = Parameter(value=0)
+        print 'ITERATION only for low level', n
+        dataset_learn = core.learn(n_episodes=1000)
+
+    n_eps = 10 if small else 50
+    for n in xrange(n_eps):
+        agent1.learning_rate = AdaptiveParameter(value=10)
         print 'ITERATION', n
         dataset_learn = core.learn(n_episodes=1000)
         last_ep_dataset = pick_last_ep(dataset_learn)
