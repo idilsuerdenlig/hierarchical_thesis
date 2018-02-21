@@ -12,14 +12,17 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1):
 
     if our_approach:
         if small:
-            low_level_dataset = np.load('low_level_dataset_file.npy')
+            low_level_dataset = np.load('latest/low_level_dataset_file.npy')
             visualize_control_block(low_level_dataset, ep_count=20)
 
-        parameter_dataset1 = np.load('parameter_dataset1_file.npy')
-        parameter_dataset2 = np.load('parameter_dataset2_file.npy')
 
-        dataset_learn_visual = np.load('dataset_learn_visual_file.npy')
-        dataset_eval = np.load('dataset_eval_file.npy')
+        parameter_dataset1 = np.load('latest/parameter_dataset1_file.npy')
+        #parameter_dataset2_1 = np.load('latest/parameter_dataset2_1_file.npy')
+        parameter_dataset2 = np.load('latest/parameter_dataset2_file.npy')
+
+
+        dataset_learn_visual = np.load('latest/dataset_learn_visual_file.npy')
+        dataset_eval = np.load('latest/dataset_eval_file.npy')
 
         visualize_policy_params(parameter_dataset1, parameter_dataset2, small=small)
         visualize_ship_steering(dataset_learn_visual, name='learn', small=small, n_gates=n_gates)
@@ -27,12 +30,12 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1):
 
     else:
 
-        act_max_q_val_tiled = np.load('act_max_q_val_tiled_file.npy')
-        max_q_val_tiled = np.load('max_q_val_tiled_file.npy')
-        low_level_dataset1 = np.load('low_level_dataset1_file.npy')
-        low_level_dataset2 = np.load('low_level_dataset2_file.npy')
-        dataset_learn = np.load('dataset_learn_file.npy')
-        dataset_eval = np.load('dataset_eval_file.npy')
+        act_max_q_val_tiled = np.load('latest/act_max_q_val_tiled_file.npy')
+        max_q_val_tiled = np.load('latest/max_q_val_tiled_file.npy')
+        low_level_dataset1 = np.load('latest/low_level_dataset1_file.npy')
+        low_level_dataset2 = np.load('latest/low_level_dataset2_file.npy')
+        dataset_learn = np.load('latest/dataset_learn_file.npy')
+        dataset_eval = np.load('latest/dataset_eval_file.npy')
 
         plot_arrows(act_max_q_val_tiled)
         fig, axis = plt.subplots()

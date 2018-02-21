@@ -5,7 +5,7 @@ from matplotlib.patches import Ellipse
 import math
 
 
-def visualize_policy_params(parameter_dataset1, parameter_dataset2, small=True):
+def visualize_policy_params(parameter_dataset1, parameter_dataset2, parameter_dataset2_2=None, small=True):
 
     #np.concatenate(self._approximator.get_weights(), self._sigma)
     #if sigmas is not None:
@@ -23,12 +23,14 @@ def visualize_policy_params(parameter_dataset1, parameter_dataset2, small=True):
     fig = plt.figure()
     ax1 = fig.add_subplot(221, projection='3d')
     ax2 = fig.add_subplot(222)
+    #ax4 = fig.add_subplot(224)
     time =np.arange(len(paramx_data))
     ax1.plot(paramx_data, paramy_data, time)
     ax1.scatter(paramx_data[0], paramy_data[0], time[0], marker='o',color='g')
     ax1.scatter(paramx_data[-1], paramy_data[-1], time[-1], marker='o', color='r')
     ax1.set_title('pi1 parameters')
-    ax2.plot(parameter_dataset2, label='proportional')
+    ax2.plot(parameter_dataset2)
+    #ax4.plot(parameter_dataset2_2)
     ax2.set_title('pi2 parameters')
 
     ax3 = fig.add_subplot(223)
