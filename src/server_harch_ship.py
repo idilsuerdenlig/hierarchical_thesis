@@ -96,7 +96,7 @@ def experiment():
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params, features=features)
 
     # Agent 2
-    learning_rate = Parameter(value=1e-1)
+    learning_rate = Parameter(value=1e-4)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
@@ -153,11 +153,17 @@ def experiment():
     # Train
     dataset_learn_visual = list()
 
-    n_eps = 1 if small else 5
+    n_eps = 5 if small else 5
     for n in xrange(n_eps):
         agent1.learning_rate = Parameter(value=0)
         print 'ITERATION only for low level', n
         dataset_learn = core.learn(n_episodes=1000)
+
+        last_ep_dataset = pick_last_ep(dataset_learn)
+        dataset_learn_visual += last_ep_dataset
+
+    parameter_dataset2_1 = parameter_callback2.get_values()
+
 
     n_eps = 10 if small else 50
     for n in xrange(n_eps):
@@ -176,7 +182,8 @@ def experiment():
 
     low_level_dataset = dataset_callback.get()
     parameter_dataset1 = parameter_callback1.get_values()
-    parameter_dataset2 = parameter_callback2.get_values()
+    parameter_dataset2_2 = parameter_callback2.get_values()
+    parameter_dataset2 = parameter_dataset2_1+parameter_dataset2_2
     mk_dir_recursive('./' + subdir)
 
     np.save(subdir+'/low_level_dataset_file', low_level_dataset)
