@@ -194,5 +194,3 @@ def server_experiment(small, i):
 
     return
 
-if __name__ == '__main__':
-    server_experiment(small=True, i=0)
