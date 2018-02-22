@@ -24,7 +24,7 @@ from mushroom.utils.folder import *
 from lqr_cost import lqr_cost
 
 
-def experiment(small, i=0):
+def server_experiment(small, i):
 
     np.random.seed()
 
@@ -195,4 +195,4 @@ def experiment(small, i=0):
     return
 
 if __name__ == '__main__':
-    experiment()
+    server_experiment(small=True, i=0)

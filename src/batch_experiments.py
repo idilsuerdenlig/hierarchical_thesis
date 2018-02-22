@@ -1,9 +1,11 @@
-from server_harch_ship import experiment
+from server_harch_ship import server_experiment
 from visualize_saved_in_server import visualize_saved_in_server
 import argparse
 from mushroom.utils.folder import *
 
-def batch_experiments(how_many=50):
+def batch_experiments():
+
+    how_many = 50
 
     parser = argparse.ArgumentParser(description='server_harch_ship')
     parser.add_argument("--small", help="environment size small or big", action="store_true")
@@ -13,5 +15,8 @@ def batch_experiments(how_many=50):
     print 'SMALL IS', small
 
     for i in xrange(how_many):
-        experiment(small, i)
+        server_experiment(small, i)
+        print 'experiment number:  ', i
 
+if __name__ == '__main__':
+    batch_experiments()
