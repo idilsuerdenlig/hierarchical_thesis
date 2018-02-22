@@ -24,14 +24,7 @@ from mushroom.utils.folder import *
 from lqr_cost import lqr_cost
 
 
-def experiment():
-
-    parser = argparse.ArgumentParser(description='server_harch_ship')
-    parser.add_argument("--small", help="environment size small or big", action="store_true")
-    args = parser.parse_args()
-    small = args.small
-    small = True
-    print 'SMALL IS', small
+def experiment(small, i=0):
 
     np.random.seed()
 
@@ -180,20 +173,21 @@ def experiment():
     dataset_eval = core.evaluate(n_episodes=10)
 
     # Save
-    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '/'
+    if i == 0:
+        subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '/'
 
     low_level_dataset = dataset_callback.get()
     parameter_dataset1 = parameter_callback1.get_values()
     parameter_dataset2 = parameter_callback2.get_values()
-    mk_dir_recursive('./' + subdir)
+    mk_dir_recursive('./' + subdir + str(i))
 
-    np.save(subdir+'/low_level_dataset_file', low_level_dataset)
-    np.save(subdir+'/parameter_dataset1_file', parameter_dataset1)
+    np.save(subdir+str(i)+'/low_level_dataset_file', low_level_dataset)
+    np.save(subdir+str(i)+'/parameter_dataset1_file', parameter_dataset1)
     #np.save(subdir+'/parameter_dataset2_1_file', parameter_dataset2_1)
-    np.save(subdir+'/parameter_dataset2_file', parameter_dataset2)
+    np.save(subdir+str(i)+'/parameter_dataset2_file', parameter_dataset2)
 
-    np.save(subdir+'/dataset_learn_visual_file', dataset_learn_visual)
-    np.save(subdir+'/dataset_eval_file', dataset_eval)
+    np.save(subdir+str(i)+'/dataset_learn_visual_file', dataset_learn_visual)
+    np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval)
 
     force_symlink(subdir, 'latest')
 
