@@ -24,7 +24,7 @@ from mushroom.utils.folder import *
 from lqr_cost import lqr_cost
 
 
-def server_experiment(small, i):
+def server_experiment(small, i, subdir):
 
     np.random.seed()
 
@@ -173,8 +173,6 @@ def server_experiment(small, i):
     dataset_eval = core.evaluate(n_episodes=10)
 
     # Save
-    if i == 0:
-        subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '/'
 
     low_level_dataset = dataset_callback.get()
     parameter_dataset1 = parameter_callback1.get_values()
@@ -188,9 +186,6 @@ def server_experiment(small, i):
 
     np.save(subdir+str(i)+'/dataset_learn_visual_file', dataset_learn_visual)
     np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval)
-
-    force_symlink(subdir, 'latest')
-
 
     return
 

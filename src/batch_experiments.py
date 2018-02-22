@@ -1,6 +1,6 @@
 from server_harch_ship import server_experiment
-from visualize_saved_in_server import visualize_saved_in_server
 import argparse
+import datetime
 from mushroom.utils.folder import *
 
 def batch_experiments():
@@ -14,9 +14,14 @@ def batch_experiments():
     small = True
     print 'SMALL IS', small
 
+    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '/'
+
     for i in xrange(how_many):
-        server_experiment(small, i)
         print 'experiment number:  ', i
+        server_experiment(small, i, subdir)
+
+    force_symlink(subdir, 'latest')
+
 
 if __name__ == '__main__':
     batch_experiments()
