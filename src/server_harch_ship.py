@@ -147,17 +147,7 @@ def server_experiment(small, i, subdir):
     # Train
     dataset_learn_visual = list()
 
-    '''n_eps = 2 if small else 5
-    for n in xrange(n_eps):
-        agent1.learning_rate = Parameter(value=0)
-        print 'ITERATION only for low level', n
-        dataset_learn = core.learn(n_episodes=1000)
 
-        last_ep_dataset = pick_last_ep(dataset_learn)
-        dataset_learn_visual += last_ep_dataset
-
-    parameter_dataset2_1 = parameter_callback2.get_values()
-    parameter_callback2.reset()'''
 
 
     n_eps = 5 if small else 50
@@ -186,6 +176,12 @@ def server_experiment(small, i, subdir):
 
     np.save(subdir+str(i)+'/dataset_learn_visual_file', dataset_learn_visual)
     np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval)
+
+    del low_level_dataset
+    del parameter_dataset1
+    del parameter_dataset2
+    del dataset_learn_visual
+    del dataset_eval
 
     return
 
