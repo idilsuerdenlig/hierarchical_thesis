@@ -5,6 +5,7 @@ from visualize_control_block_ghavamzade import visualize_control_block_ghavamzad
 from visualize_policy_parameters import visualize_policy_params
 from arrows import plot_arrows
 import numpy as np
+from tqdm import tqdm
 
 
 def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many=1, gamma=1):
@@ -61,10 +62,11 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many
         a = list()
         for i in xrange(how_many):
             a.append(list())
-        for exp_no in xrange(how_many):
-            print exp_no
+        for exp_no in tqdm(xrange(how_many), dynamic_ncols=True,
+                                   disable=False, leave=False):
             diff_len = max_leni-len(size_exp_list[exp_no])
-            for each in size_exp_list[exp_no]:
+            for each in tqdm(size_exp_list[exp_no], dynamic_ncols=True,
+                                   disable=False, leave=False):
                 a[exp_no].append(each)
             if diff_len is not 0:
                 for m in xrange(diff_len):
@@ -79,15 +81,15 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many
         for i in xrange(how_many):
             a.append(list())
 
-        for exp_no in xrange(how_many):
-            print exp_no
+        for exp_no in tqdm(xrange(how_many), dynamic_ncols=True,
+                                   disable=False, leave=False):
             diff_len = max_lenJ-len(J_exp_list[exp_no])
-            for each in J_exp_list[exp_no]:
+            for each in tqdm(J_exp_list[exp_no], dynamic_ncols=True,
+                                   disable=False, leave=False):
                 a[exp_no].append(each)
             if diff_len is not 0:
                 for m in xrange(diff_len):
                     a[exp_no].append(np.NaN)
-                    print a[exp_no]
 
         J_eps_avg = np.nanmean(a, axis=0)
         time = np.arange(max_lenJ)

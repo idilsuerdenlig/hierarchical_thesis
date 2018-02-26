@@ -147,9 +147,6 @@ def server_experiment(small, i, subdir):
     # Train
     dataset_learn_visual = list()
 
-
-
-
     n_eps = 5 if small else 50
     for n in xrange(n_eps):
         agent1.learning_rate = AdaptiveParameter(value=10)

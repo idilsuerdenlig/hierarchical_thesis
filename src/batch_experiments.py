@@ -11,7 +11,6 @@ def batch_experiments():
     parser.add_argument("--small", help="environment size small or big", action="store_true")
     args = parser.parse_args()
     small = args.small
-    small = True
     print 'SMALL IS', small
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '/'
