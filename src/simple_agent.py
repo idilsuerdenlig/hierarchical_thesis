@@ -5,7 +5,7 @@ class SimpleAgent(object):
     actions from its policy.
 
     """
-    def __init__(self, name, mdp_info, params=None, features=None, policy = None):
+    def __init__(self, name, mdp_info, params=None, features=None, policy=None):
         """
         Constructor.
 
@@ -66,7 +66,7 @@ class SimpleAgent(object):
             action = np.array([110,110])
         elif self.policy is None:
             action = np.random.choice(self.action_space.n)
-            action = np.array([action])
+            action = np.array([4])
         else:
             action = self.policy.draw_action(state)
         self.counter += 1

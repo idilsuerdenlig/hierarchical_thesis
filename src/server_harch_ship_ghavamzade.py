@@ -6,6 +6,7 @@ from mushroom.environments import *
 from mushroom.utils.parameters import *
 from mushroom.utils.callbacks import CollectDataset
 from mushroom.features.features import *
+from mushroom.features.basis import PolynomialBasis
 from mushroom.policy.gaussian_policy import *
 from mushroom.algorithms.policy_search import *
 from collect_policy_parameter import CollectPolicyParameter
@@ -24,6 +25,7 @@ from reward_accumulator import reward_accumulator_block
 import datetime
 import argparse
 from mushroom.utils.folder import mk_dir_recursive
+from simple_agent import SimpleAgent
 
 
 class TerminationCondition(object):
@@ -61,6 +63,7 @@ def experiment():
     parser.add_argument("--small", help="environment size small or big", action="store_true")
     args = parser.parse_args()
     small = args.small
+    small = True
     print 'SMALL IS', small
     np.random.seed()
 
@@ -73,7 +76,7 @@ def experiment():
     #Reward Placeholder
     reward_ph = PlaceHolder(name='reward_ph')
 
-    #FeaturesH
+    '''#FeaturesH
     tilingsH= Tiles.generate(n_tilings=1, n_tiles=[20,20], low=[0,0], high=[150,150])
     featuresH = Features(tilings=tilingsH)
 
@@ -82,9 +85,16 @@ def experiment():
     piH = EpsGreedy(epsilon=epsilon)
 
     # AgentH
-    learning_rate = Parameter(value=0.2)
+    learning_rate = Parameter(value=0.2)'''
     lim = 150 if small else 1000
 
+    mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]),
+                                                           high=np.array([lim, lim]), shape=(2,)),
+                              action_space=spaces.Discrete(8), gamma=1, horizon=10000)
+
+    agentH = SimpleAgent(mdp_info=mdp_info_agentH, name='dummy agent, action = 3')
+
+    '''lim = 150 if small else 1000
 
     mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]),
                                                            high=np.array([lim, lim]), shape=(2,)),
@@ -99,7 +109,7 @@ def experiment():
                     'algorithm_params': algorithm_params,
                     'fit_params': fit_params}
     agentH = TrueOnlineSARSALambda(policy=piH, mdp_info=mdp_info_agentH, params=agent_params, features=featuresH)
-
+'''
     # Control Block H
     dataset_callbackH = CollectDataset()
     control_blockH = ControlBlock(name='control block H', agent=agentH, n_steps_per_fit=1,
@@ -236,12 +246,12 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn = core.learn(n_episodes=80000)
+    dataset_learn = core.learn(n_episodes=20000)
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=10)
 
     # Visualize
-    hi_lev_params = agentH.Q.get_weights()
+    '''hi_lev_params = agentH.Q.get_weights()
     hi_lev_params = np.reshape(hi_lev_params, (8, 400))
     max_q_val = np.zeros(shape=(400,))
     act_max_q_val = np.zeros(shape=(400,))
@@ -249,7 +259,7 @@ def experiment():
         max_q_val[i] = np.amax(hi_lev_params[:,i])
         act_max_q_val[i] = np.argmax(hi_lev_params[:,i])
     max_q_val_tiled = np.reshape(max_q_val, (20, 20))
-    act_max_q_val_tiled = np.reshape(act_max_q_val, (20, 20))
+    act_max_q_val_tiled = np.reshape(act_max_q_val, (20, 20))'''
     low_level_dataset1 = dataset_callback1.get()
     low_level_dataset2 = dataset_callback2.get()
 
@@ -259,7 +269,7 @@ def experiment():
     np.save(subdir+'/low_level_dataset1_file', low_level_dataset1)
     np.save(subdir+'/low_level_dataset2_file', low_level_dataset2)
     np.save(subdir+'/max_q_val_tiled_file', max_q_val_tiled)
-    np.save(subdir+'/act_max_q_val_tiled_file', act_max_q_val_tiled)
+    #np.save(subdir+'/act_max_q_val_tiled_file', act_max_q_val_tiled)
     np.save(subdir+'/dataset_learn_file', dataset_learn)
     np.save(subdir+'/dataset_eval_file', dataset_eval)
 

@@ -30,10 +30,8 @@ class G_low:
 
         if close:
             plus = 100
-            print 'low level goal reached'
         elif out:
             plus = -100
-            print 'low level failiure'
 
         theta_ref = normalize_angle(np.arctan2(pos[1]-goal_pos[1], pos[0]-goal_pos[0]))
         theta = inputs[1][2]
