@@ -30,6 +30,7 @@ def visualize_policy_params(parameter_dataset1, parameter_dataset2, parameter_da
         paramsigmay_all.append(paramsigmay_data)
 
 
+
     for i in xrange(how_many):
         diff_len = max_len-len(paramx_all[i])
         if diff_len is not 0:
@@ -84,9 +85,15 @@ def visualize_policy_params(parameter_dataset1, parameter_dataset2, parameter_da
     ax2.set_title('95% interval pi1 parameters averaged')
 
     max_len2 = 0
+    unstable_count = 0
     for i in xrange(how_many):
         params2_one_experiment = parameter_dataset2[i]
+        last_val = params2_one_experiment[:]
+        if last_val > 0:
+            unstable_count += 1
         max_len2 = max(len(params2_one_experiment), max_len2)
+
+    print 'UNSTABLE COUNT:  ', unstable_count
 
     a = list()
     for i in xrange(how_many):

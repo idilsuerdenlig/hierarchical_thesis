@@ -4,6 +4,7 @@ from visualize_control_block import visualize_control_block
 from visualize_control_block_ghavamzade import visualize_control_block_ghavamzade
 from visualize_policy_parameters import visualize_policy_params
 from arrows import plot_arrows
+from mushroom.utils.dataset import compute_J
 import numpy as np
 from tqdm import tqdm
 
@@ -31,12 +32,12 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many
 
         if small:
             low_level_dataset = list()
-        for i in xrange(how_many):
+        for exp_no in xrange(how_many):
 
-            parameter_dataset1 += [np.load('latest/'+str(i)+'/parameter_dataset1_file.npy')]
-            parameter_dataset2 += [np.load('latest/'+str(i)+'/parameter_dataset2_file.npy')]
+            parameter_dataset1 += [np.load('latest/'+str(exp_no)+'/parameter_dataset1_file.npy')]
+            parameter_dataset2 += [np.load('latest/'+str(exp_no)+'/parameter_dataset2_file.npy')]
             if small:
-                low_level_dataset = np.load('latest/'+str(i)+'/low_level_dataset_file.npy')
+                low_level_dataset = np.load('latest/'+str(exp_no)+'/low_level_dataset_file.npy')
                 for dataset_step in low_level_dataset:
                     if not dataset_step[-1]:
                         df = gamma**i  #df *= gamma
@@ -60,7 +61,7 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many
                 size_eps = list()
 
         a = list()
-        for i in xrange(how_many):
+        for _ in xrange(how_many):
             a.append(list())
         for exp_no in tqdm(xrange(how_many), dynamic_ncols=True,
                                    disable=False, leave=False):
@@ -69,7 +70,7 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many
                                    disable=False, leave=False):
                 a[exp_no].append(each)
             if diff_len is not 0:
-                for m in xrange(diff_len):
+                for _ in xrange(diff_len):
                     a[exp_no].append(np.NaN)
 
         size_eps_avg = np.nanmean(a, axis=0)
@@ -78,7 +79,7 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many
         ax1.set_title('size_eps_averaged')
 
         a = list()
-        for i in xrange(how_many):
+        for _ in xrange(how_many):
             a.append(list())
 
         for exp_no in tqdm(xrange(how_many), dynamic_ncols=True,
@@ -88,7 +89,7 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many
                                    disable=False, leave=False):
                 a[exp_no].append(each)
             if diff_len is not 0:
-                for m in xrange(diff_len):
+                for _ in xrange(diff_len):
                     a[exp_no].append(np.NaN)
 
         J_eps_avg = np.nanmean(a, axis=0)
