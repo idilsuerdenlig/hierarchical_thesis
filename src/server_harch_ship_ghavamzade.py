@@ -139,7 +139,7 @@ def experiment():
     pi2 = MultivariateGaussianPolicy(mu=approximator2,sigma=sigma2)
 
     # Agent1
-    learning_rate1 = AdaptiveParameter(value=.1)
+    learning_rate1 = Parameter(value=1e-3)
     algorithm_params1 = dict(learning_rate=learning_rate1)
     fit_params1 = dict()
     agent_params1 = {'algorithm_params': algorithm_params1,
@@ -150,7 +150,7 @@ def experiment():
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params1, features=featuresL)
 
     # Agent2
-    learning_rate2 = AdaptiveParameter(value=.1)
+    learning_rate2 = AdaptiveParameter(value=1e-3)
     algorithm_params2 = dict(learning_rate=learning_rate2)
     fit_params2 = dict()
     agent_params2 = {'algorithm_params': algorithm_params2,
@@ -174,7 +174,7 @@ def experiment():
     # Control Block x
     dataset_callback2 = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=40,
+    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=100,
                                   termination_condition=termination_condition2,
                                   callbacks=[dataset_callback2, parameter_callback2])
 
@@ -246,7 +246,7 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn = core.learn(n_episodes=10000)
+    dataset_learn = core.learn(n_episodes=7500)
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=10)
 
