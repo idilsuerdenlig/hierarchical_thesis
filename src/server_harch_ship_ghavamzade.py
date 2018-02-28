@@ -246,7 +246,7 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn = core.learn(n_episodes=20000)
+    dataset_learn = core.learn(n_episodes=10000)
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=10)
 
@@ -268,8 +268,8 @@ def experiment():
 
     np.save(subdir+'/low_level_dataset1_file', low_level_dataset1)
     np.save(subdir+'/low_level_dataset2_file', low_level_dataset2)
-    #np.save(subdir+'/max_q_val_tiled_file', max_q_val_tiled)
-    #np.save(subdir+'/act_max_q_val_tiled_file', act_max_q_val_tiled)
+    '''np.save(subdir+'/max_q_val_tiled_file', max_q_val_tiled)
+    np.save(subdir+'/act_max_q_val_tiled_file', act_max_q_val_tiled)'''
     np.save(subdir+'/dataset_learn_file', dataset_learn)
     np.save(subdir+'/dataset_eval_file', dataset_eval)
 
