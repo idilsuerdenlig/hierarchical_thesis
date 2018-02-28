@@ -63,12 +63,12 @@ def experiment():
     parser.add_argument("--small", help="environment size small or big", action="store_true")
     args = parser.parse_args()
     small = args.small
-    small = True
+
     print 'SMALL IS', small
     np.random.seed()
 
     # Model Block
-    mdp = ShipSteering(small=small)
+    mdp = ShipSteering(small=small, hard=True)
 
     #State Placeholder
     state_ph = PlaceHolder(name='state_ph')
