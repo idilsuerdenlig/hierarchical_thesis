@@ -88,7 +88,7 @@ def visualize_policy_params(parameter_dataset1, parameter_dataset2, parameter_da
     unstable_count = 0
     for i in xrange(how_many):
         params2_one_experiment = parameter_dataset2[i]
-        last_val = params2_one_experiment[:]
+        last_val = params2_one_experiment[-1]
         if last_val > 0:
             unstable_count += 1
         max_len2 = max(len(params2_one_experiment), max_len2)
@@ -96,7 +96,7 @@ def visualize_policy_params(parameter_dataset1, parameter_dataset2, parameter_da
     print 'UNSTABLE COUNT:  ', unstable_count
 
     a = list()
-    for i in xrange(how_many):
+    for _ in xrange(how_many):
         a.append(list())
 
     for i in xrange(how_many):
