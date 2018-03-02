@@ -139,7 +139,7 @@ def experiment():
     pi2 = MultivariateGaussianPolicy(mu=approximator2,sigma=sigma2)
 
     # Agent1
-    learning_rate1 = Parameter(value=1e-3)
+    learning_rate1 = AdaptiveParameter(value=1e-3)
     algorithm_params1 = dict(learning_rate=learning_rate1)
     fit_params1 = dict()
     agent_params1 = {'algorithm_params': algorithm_params1,
@@ -167,7 +167,7 @@ def experiment():
     # Control Block +
     dataset_callback1 = CollectDataset()
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=40,
+    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=100,
                                   termination_condition=termination_condition1,
                                   callbacks=[dataset_callback1, parameter_callback1])
 

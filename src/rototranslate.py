@@ -15,7 +15,7 @@ class rototranslate():
         y = inputs[1][1]
         theta = inputs[1][2]
         theta_dot = inputs[1][3]
-
+        print 'ROTOTRANSLATE INPUT FROM HOLD STATE  :', inputs[2]
         x0 = inputs[2][0]
         y0 = inputs[2][1]
 
