@@ -6,7 +6,7 @@ from mushroom.utils import spaces
 from mushroom.utils.angles_utils import normalize_angle, shortest_angular_distance
 
 
-class ShipSteeringDiagonal(Environment):
+class ShipGhavamzadeDiagonal(Environment):
     """
     The Ship Steering environment as presented in:
     "Hierarchical Policy Gradient Algorithms". Ghavamzadeh M. and Mahadevan S..
@@ -24,7 +24,7 @@ class ShipSteeringDiagonal(Environment):
                                  environment is considerably harder.
 
         """
-        self.__name__ = 'ShipSteeringDiagonal'
+        self.__name__ = 'ShipGhavamzadeDiagonal'
 
         # MDP parameters
         self.field_size = 150
@@ -45,7 +45,7 @@ class ShipSteeringDiagonal(Environment):
         gamma = .99
         mdp_info = MDPInfo(observation_space, action_space, gamma, horizon)
 
-        super(ShipSteeringDiagonal, self).__init__(mdp_info)
+        super(ShipGhavamzadeDiagonal, self).__init__(mdp_info)
 
     def reset(self, state=None):
         if state is None:
@@ -74,7 +74,7 @@ class ShipSteeringDiagonal(Environment):
             reward = self._out_reward
             absorbing = True
         elif np.linalg.norm(pos - self.goal_pos) <= 10:
-            reward = 100
+            reward = self._success_reward
             absorbing = True
         else:
             reward = -1

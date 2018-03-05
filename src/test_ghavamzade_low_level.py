@@ -1,5 +1,5 @@
 import numpy as np
-from ship_ghavamzade_diagonal import ShipSteeringDiagonal
+from ship_ghavamzade_diagonal import ShipGhavamzadeDiagonal
 from ship_ghavamzade_straight import ShipSteeringStraight
 from ghavamzade_agent import GhavamzadeAgent
 from mushroom.algorithms.policy_search import REINFORCE, GPOMDP, eNAC
@@ -23,7 +23,7 @@ def experiment(n_runs, n_iterations, ep_per_run):
     np.random.seed()
 
     # MDP
-    mdp = ShipSteeringDiagonal()
+    mdp = ShipGhavamzadeDiagonal()
 
     # Policy
     high = [150, 150, np.pi, np.pi / 12]
