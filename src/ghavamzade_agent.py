@@ -18,16 +18,16 @@ class GhavamzadeAgent(Agent):
 
 
     def _update(self, state, action, reward, next_state, absorbing):
-        if absorbing:
-            self.z = np.zeros(self.policy.weights_size)
 
-        else:
-            self.z = self.z + self.policy.diff_log(state, action)
+        self.z = self.z + self.policy.diff_log(state, action)
 
         theta = self.policy.get_weights()
         print np.linalg.norm(reward*self.z)
         theta = theta + self.learning_rate(state, action)*reward*self.z
         self.policy.set_weights(theta)
+        if absorbing:
+            self.z = np.zeros(self.policy.weights_size)
+
 
 
     def _parse(self, dataset):
