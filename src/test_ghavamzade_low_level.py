@@ -43,7 +43,7 @@ def experiment(n_runs, n_iterations, ep_per_run):
     approximator = Regressor(LinearApproximator, input_shape=input_shape,
                              output_shape=mdp.info.action_space.shape,
                              params=approximator_params)
-    sigma = np.array([[1]])
+    sigma = np.array([[1.3e-2]])
     policy = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
 
     # Agent
