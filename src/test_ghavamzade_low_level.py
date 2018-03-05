@@ -14,7 +14,7 @@ from mushroom.utils.dataset import compute_J
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 from tqdm import tqdm
 from mushroom.utils.angles_utils import shortest_angular_distance, normalize_angle
-
+import matplotlib.pyplot as plt
 
 
 tqdm.monitor_interval = 0
@@ -31,7 +31,7 @@ def experiment(n_runs, n_iterations, ep_per_run):
     n_tiles = [5, 5, 36, 5]
     low = np.array(low, dtype=np.float)
     high = np.array(high, dtype=np.float)
-    n_tilings = 1
+    n_tilings = 9
 
 
     tilingsL= Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low, high=high)
@@ -69,8 +69,9 @@ def experiment(n_runs, n_iterations, ep_per_run):
 
     np.save('ship_steering_diagonal.npy', dataset_eval)
 
-
+    np.save('success_per_thousand_eps.npy', mdp.success_per_thousand_ep)
+    
 if __name__ == '__main__':
 
-    experiment(n_runs=10, n_iterations=100, ep_per_run=100)
+    experiment(n_runs=10, n_iterations=800, ep_per_run=100)
 

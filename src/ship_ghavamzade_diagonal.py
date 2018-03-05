@@ -37,11 +37,14 @@ class ShipGhavamzadeDiagonal(Environment):
         self.goal_pos = np.array([140, 140])
         self._out_reward = -100
         self._success_reward = 100
+        self.success_count = 0
+        self.ep_count = 0
+        self.success_per_thousand_ep = list()
 
         # MDP properties
         observation_space = spaces.Box(low=low, high=high)
         action_space = spaces.Box(low=-self.omega_max, high=self.omega_max)
-        horizon = 5000
+        horizon = 100000
         gamma = .99
         mdp_info = MDPInfo(observation_space, action_space, gamma, horizon)
 
@@ -74,12 +77,19 @@ class ShipGhavamzadeDiagonal(Environment):
             reward = self._out_reward
             absorbing = True
         elif np.linalg.norm(pos - self.goal_pos) <= 10:
+            self.success_count += 1
             reward = self._success_reward
             absorbing = True
         else:
             reward = -1
             absorbing = False
 
+        if absorbing:
+            self.ep_count +=1
+
+        if self.ep_count == 1000:
+            self.success_per_thousand_ep.append(self.success_count)
+            self.success_count = 0
         theta_ref = normalize_angle(np.arctan2(pos[1] - self.goal_pos[1], pos[0] - self.goal_pos[0]))
         theta = new_state[2]
         theta = normalize_angle(np.pi / 2 - theta)
