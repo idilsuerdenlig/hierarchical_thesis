@@ -11,7 +11,7 @@ from mushroom.features.features import Features
 from mushroom.features.tiles import Tiles
 from mushroom.policy import GaussianPolicy, MultivariateGaussianPolicy, MultivariateDiagonalGaussianPolicy
 from mushroom.utils.dataset import compute_J
-from mushroom.utils.parameters import Parameter, AdaptiveParameter
+from mushroom.utils.parameters import *
 from tqdm import tqdm
 from mushroom.utils.angles_utils import shortest_angular_distance, normalize_angle
 from CMAC import CMACApproximator
@@ -45,7 +45,7 @@ def experiment(n_runs, n_iterations, ep_per_run):
     policy = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
 
     # Agent
-    learning_rate = Parameter(value=1e-3)
+    learning_rate = ExponentialDecayParameter(value=1)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
@@ -71,5 +71,5 @@ def experiment(n_runs, n_iterations, ep_per_run):
 
 if __name__ == '__main__':
 
-    experiment(n_runs=1, n_iterations=800, ep_per_run=100)
+    experiment(n_runs=1, n_iterations=100, ep_per_run=100)
 

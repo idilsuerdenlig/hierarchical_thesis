@@ -1,4 +1,5 @@
 from mushroom.algorithms.agent import Agent
+from mushroom.utils.parameters import *
 import numpy as np
 
 class GhavamzadeAgent(Agent):
@@ -25,6 +26,7 @@ class GhavamzadeAgent(Agent):
         theta = self.policy.get_weights()
         #print np.linalg.norm(reward*self.z)
         theta = theta + self.learning_rate(state, action)*reward*self.z
+        #print self.learning_rate.get_value()
         self.policy.set_weights(theta)
         if absorbing:
             self.z = np.zeros(self.policy.weights_size)
