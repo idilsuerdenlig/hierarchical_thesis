@@ -14,7 +14,6 @@ from mushroom.utils.dataset import compute_J
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 from tqdm import tqdm
 from mushroom.utils.angles_utils import shortest_angular_distance, normalize_angle
-import matplotlib.pyplot as plt
 
 
 tqdm.monitor_interval = 0
