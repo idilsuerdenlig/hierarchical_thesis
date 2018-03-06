@@ -3,8 +3,9 @@ import numpy as np
 
 class GhavamzadeAgent(Agent):
 
-    def __init__(self, policy, mdp_info, params, features):
+    def __init__(self, policy, mdp_info, params, features=None):
         self.learning_rate = params['algorithm_params'].pop('learning_rate')
+
         self.z = np.zeros(policy.weights_size)
 
 

@@ -14,7 +14,7 @@ from mushroom.utils.dataset import compute_J
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 from tqdm import tqdm
 from mushroom.utils.angles_utils import shortest_angular_distance, normalize_angle
-
+from CMAC import CMACApproximator
 
 tqdm.monitor_interval = 0
 
@@ -34,14 +34,13 @@ def experiment(n_runs, n_iterations, ep_per_run):
 
 
     tilingsL= Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low, high=high)
-    featuresL = Features(tilings=tilingsL)
 
-    input_shape = (featuresL.size,)
+    input_shape = mdp.info.observation_space.shape
 
-    approximator_params = dict(input_dim=featuresL.size)
-    approximator = Regressor(LinearApproximator, input_shape=input_shape,
+    approximator_params = dict(tiles=tilingsL, input_dim=input_shape[0])
+    approximator = Regressor(CMACApproximator, input_shape=input_shape,
                              output_shape=mdp.info.action_space.shape,
-                             params=approximator_params)
+                             **approximator_params)
     sigma = np.array([[1.3e-2]])
     policy = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
 
@@ -51,7 +50,7 @@ def experiment(n_runs, n_iterations, ep_per_run):
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
                     'fit_params': fit_params}
-    agent = GhavamzadeAgent(policy, mdp.info, agent_params, featuresL)
+    agent = GhavamzadeAgent(policy, mdp.info, agent_params)
 
     # Train
     core = Core(agent, mdp)
@@ -72,5 +71,5 @@ def experiment(n_runs, n_iterations, ep_per_run):
 
 if __name__ == '__main__':
 
-    experiment(n_runs=1, n_iterations=200, ep_per_run=100)
+    experiment(n_runs=1, n_iterations=10, ep_per_run=100)
 
