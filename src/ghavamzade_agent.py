@@ -22,7 +22,7 @@ class GhavamzadeAgent(Agent):
         self.z = self.z + self.policy.diff_log(state, action)
 
         theta = self.policy.get_weights()
-        print np.linalg.norm(reward*self.z)
+        #print np.linalg.norm(reward*self.z)
         theta = theta + self.learning_rate(state, action)*reward*self.z
         self.policy.set_weights(theta)
         if absorbing:

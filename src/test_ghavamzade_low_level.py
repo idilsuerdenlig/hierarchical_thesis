@@ -70,8 +70,8 @@ def experiment(n_runs, n_iterations, ep_per_run):
     np.save('ship_steering_diagonal.npy', dataset_eval)
 
     np.save('success_per_thousand_eps.npy', mdp.success_per_thousand_ep)
-    
+
 if __name__ == '__main__':
 
-    experiment(n_runs=10, n_iterations=800, ep_per_run=100)
+    experiment(n_runs=1, n_iterations=200, ep_per_run=100)
 

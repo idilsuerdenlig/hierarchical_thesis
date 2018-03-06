@@ -90,6 +90,7 @@ class ShipGhavamzadeDiagonal(Environment):
         if self.ep_count == 1000:
             self.success_per_thousand_ep.append(self.success_count)
             self.success_count = 0
+            self.ep_count = 0
         theta_ref = normalize_angle(np.arctan2(pos[1] - self.goal_pos[1], pos[0] - self.goal_pos[0]))
         theta = new_state[2]
         theta = normalize_angle(np.pi / 2 - theta)
