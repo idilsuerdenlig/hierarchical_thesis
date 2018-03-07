@@ -40,6 +40,7 @@ class ShipGhavamzadeDiagonal(Environment):
         self.success_count = 0
         self.ep_count = 0
         self.success_per_thousand_ep = list()
+        self.step_counter = 0
 
         # MDP properties
         observation_space = spaces.Box(low=low, high=high)
@@ -59,24 +60,25 @@ class ShipGhavamzadeDiagonal(Environment):
 
         return self._state
 
+    def step_low_level(self, action):
 
-    def step(self, action):
         r = np.maximum(-self.omega_max, np.minimum(self.omega_max, action[0]))
         new_state = np.empty(4)
-        new_state[0] = self._state[0] + self._v * np.sin(self._state[2]) *\
-            self._dt
-        new_state[1] = self._state[1] + self._v * np.cos(self._state[2]) *\
-            self._dt
+        new_state[0] = self._state[0] + self._v * np.sin(self._state[2]) * \
+                       self._dt
+        new_state[1] = self._state[1] + self._v * np.cos(self._state[2]) * \
+                       self._dt
         new_state[2] = normalize_angle(self._state[2] + self._state[3] * self._dt)
-        new_state[3] = self._state[3] + (r - self._state[3]) * self._dt /\
-            self._T
+        new_state[3] = self._state[3] + (r - self._state[3]) * self._dt / \
+                       self._T
 
         pos = np.array([new_state[0], new_state[1]])
-        if new_state[0] > self.field_size or new_state[1] > self.field_size\
-           or new_state[0] < 0 or new_state[1] < 0:
+
+        if new_state[0] > self.field_size or new_state[1] > self.field_size \
+                or new_state[0] < 0 or new_state[1] < 0:
             reward = self._out_reward
             absorbing = True
-        elif np.linalg.norm(pos - self.goal_pos) <= 10:
+        elif np.linalg.norm(pos - self.goal_pos) <= 10.0:
             self.success_count += 1
             reward = self._success_reward
             absorbing = True
@@ -85,21 +87,30 @@ class ShipGhavamzadeDiagonal(Environment):
             absorbing = False
 
         if absorbing:
-            self.ep_count +=1
+            self.ep_count += 1
 
         if self.ep_count == 1000:
             self.success_per_thousand_ep.append(self.success_count)
             self.success_count = 0
             self.ep_count = 0
+
         theta_ref = normalize_angle(np.arctan2(pos[1] - self.goal_pos[1], pos[0] - self.goal_pos[0]))
         theta = new_state[2]
         theta = normalize_angle(np.pi / 2 - theta)
         del_theta = shortest_angular_distance(from_angle=theta, to_angle=theta_ref)
         power = -del_theta ** 2 / ((np.pi / 6) * (np.pi / 6))
-        reward = reward+np.expm1(power)
+        reward = reward + np.expm1(power)
 
         self._state = new_state
 
         return self._state, reward, absorbing, {}
 
+    def step(self, action):
+
+        for _ in xrange(3):
+            state, reward, absorbing,_ = self.step_low_level(action)
+            if absorbing:
+                break
+
+        return state, reward, absorbing, {}
 
