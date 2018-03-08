@@ -8,6 +8,10 @@ class rototranslate():
         self.small = small
 
     def __call__(self, inputs):
+        #print 'ROTOTRANSLATE INPUTS:    ', inputs
+        #print 'ROTOTRANSLATE INPUTS[0]: ', inputs[0]
+        #print 'ROTOTRANSLATE INPUTS[1]: ', inputs[1]
+        #print 'ROTOTRANSLATE INPUTS[2]: ', inputs[2]
 
         new_states = np.zeros(shape=(4,))
         active_direction = inputs[0]
@@ -15,7 +19,6 @@ class rototranslate():
         y = inputs[1][1]
         theta = inputs[1][2]
         theta_dot = inputs[1][3]
-        print 'ROTOTRANSLATE INPUT FROM HOLD STATE  :', inputs[2]
         x0 = inputs[2][0]
         y0 = inputs[2][1]
 

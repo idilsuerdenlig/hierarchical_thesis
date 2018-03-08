@@ -33,7 +33,7 @@ class G_low:
         elif out:
             plus = -100
 
-        theta_ref = normalize_angle(np.arctan2(pos[1]-goal_pos[1], pos[0]-goal_pos[0]))
+        theta_ref = normalize_angle(np.arctan2(goal_pos[1]-pos[1], goal_pos[0]-pos[0]))
         theta = inputs[1][2]
         theta = normalize_angle(np.pi/2-theta)
         del_theta = shortest_angular_distance(from_angle=theta,to_angle=theta_ref)

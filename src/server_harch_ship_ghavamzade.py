@@ -2,7 +2,6 @@ from hierarchical_core import HierarchicalCore
 from computational_graph import ComputationalGraph
 from control_block import ControlBlock
 from mushroom.utils import spaces
-from mushroom.environments import *
 from mushroom.utils.parameters import *
 from mushroom.utils.callbacks import CollectDataset
 from mushroom.features.features import *
@@ -26,6 +25,10 @@ import datetime
 import argparse
 from mushroom.utils.folder import mk_dir_recursive
 from simple_agent import SimpleAgent
+from CMAC import CMACApproximator
+from idilshipsteering import ShipSteering
+from mushroom.environments.environment import MDPInfo
+from ghavamzade_agent import GhavamzadeAgent
 
 
 class TerminationCondition(object):
@@ -64,11 +67,11 @@ def experiment():
     args = parser.parse_args()
     small = args.small
 
-    print 'SMALL IS', small
+    print 'ENV IS SMALL? ', small
     np.random.seed()
 
     # Model Block
-    mdp = ShipSteering(small=small, hard=True)
+    mdp = ShipSteering(small=small, hard=True, n_steps_action=3)
 
     #State Placeholder
     state_ph = PlaceHolder(name='state_ph')
@@ -76,7 +79,7 @@ def experiment():
     #Reward Placeholder
     reward_ph = PlaceHolder(name='reward_ph')
 
-    '''#FeaturesH
+    #FeaturesH
     tilingsH= Tiles.generate(n_tilings=1, n_tiles=[20,20], low=[0,0], high=[150,150])
     featuresH = Features(tilings=tilingsH)
 
@@ -85,31 +88,24 @@ def experiment():
     piH = EpsGreedy(epsilon=epsilon)
 
     # AgentH
-    learning_rate = Parameter(value=0.2)'''
+    learning_rate = Parameter(value=0.2)
+
     lim = 150 if small else 1000
 
     mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]),
                                                            high=np.array([lim, lim]), shape=(2,)),
                               action_space=spaces.Discrete(8), gamma=1, horizon=10000)
-
-    agentH = SimpleAgent(mdp_info=mdp_info_agentH, name='dummy agent, action = 3')
-
-    '''lim = 150 if small else 1000
-
-    mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]),
-                                                           high=np.array([lim, lim]), shape=(2,)),
-                              action_space=spaces.Discrete(8), gamma=1, horizon=10000)
-    approximator_params = dict(input_shape=(featuresH.size,),
+    approximator_paramsH = dict(input_shape=(featuresH.size,),
                                output_shape=mdp_info_agentH.action_space.size,
                                n_actions=mdp_info_agentH.action_space.n)
-    algorithm_params = {'learning_rate': learning_rate,
+    algorithm_paramsH = {'learning_rate': learning_rate,
                         'lambda': .9}
-    fit_params = dict()
-    agent_params = {'approximator_params': approximator_params,
-                    'algorithm_params': algorithm_params,
-                    'fit_params': fit_params}
-    agentH = TrueOnlineSARSALambda(policy=piH, mdp_info=mdp_info_agentH, params=agent_params, features=featuresH)
-'''
+    fit_paramsH = dict()
+    agent_paramsH = {'approximator_params': approximator_paramsH,
+                    'algorithm_params': algorithm_paramsH,
+                    'fit_params': fit_paramsH}
+    agentH = TrueOnlineSARSALambda(policy=piH, mdp_info=mdp_info_agentH, params=agent_paramsH, features=featuresH)
+
     # Control Block H
     dataset_callbackH = CollectDataset()
     control_blockH = ControlBlock(name='control block H', agent=agentH, n_steps_per_fit=1,
@@ -121,44 +117,38 @@ def experiment():
     n_tiles = [5, 5, 36, 5]
     low = np.array(low, dtype=np.float)
     high = np.array(high, dtype=np.float)
-    n_tilings = 1
+    n_tilings = 9
 
     tilingsL= Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low, high=high)
-    featuresL = Features(tilings=tilingsL)
 
     # Policy1
-    sigma1 = np.eye(1, 1)*0.005
-    approximator1 = Regressor(LinearApproximator, input_shape=(featuresL.size,),
-                              output_shape=mdp.info.action_space.shape)
-    pi1 = MultivariateGaussianPolicy(mu=approximator1,sigma=sigma1)
+    input_shape = mdp.info.observation_space.shape
+
+    approximator_params = dict(tiles=tilingsL, input_dim=input_shape[0])
+    approximator = Regressor(CMACApproximator, input_shape=input_shape,
+                             output_shape=mdp.info.action_space.shape,
+                             **approximator_params)
+    sigma = np.array([[1.3e-2]])
+    pi1 = MultivariateGaussianPolicy(mu=approximator,sigma=sigma)
 
     # Policy2
-    sigma2 = np.eye(1, 1)*0.005
-    approximator2 = Regressor(LinearApproximator, input_shape=(featuresL.size,),
-                              output_shape=mdp.info.action_space.shape)
-    pi2 = MultivariateGaussianPolicy(mu=approximator2,sigma=sigma2)
+    pi2 = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
 
     # Agent1
-    learning_rate1 = AdaptiveParameter(value=1e-3)
+    learning_rate1 = ExponentialDecayParameter(value=1)
     algorithm_params1 = dict(learning_rate=learning_rate1)
     fit_params1 = dict()
     agent_params1 = {'algorithm_params': algorithm_params1,
                     'fit_params': fit_params1}
-    mdp_info_agent1 = MDPInfo(observation_space=spaces.Box(low=np.array([0,0,-np.pi,-np.pi/12]),
-                                                           high=high),
-                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=10000)
-    agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params1, features=featuresL)
+    agent1 = GhavamzadeAgent(pi1, mdp.info, agent_params1)
 
     # Agent2
-    learning_rate2 = AdaptiveParameter(value=1e-3)
+    learning_rate2 = ExponentialDecayParameter(value=1)
     algorithm_params2 = dict(learning_rate=learning_rate2)
     fit_params2 = dict()
     agent_params2 = {'algorithm_params': algorithm_params2,
                     'fit_params': fit_params2}
-    mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low=np.array([0,0,-np.pi,-np.pi/12]),
-                                                           high=high),
-                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=10000)
-    agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, params=agent_params2, features=featuresL)
+    agent2 = GhavamzadeAgent(pi2, mdp.info, agent_params2)
 
     #Termination Conds
     termination_condition1 = TerminationCondition(active_dir=1, small=small)
@@ -167,16 +157,16 @@ def experiment():
     # Control Block +
     dataset_callback1 = CollectDataset()
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=100,
+    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_steps_per_fit=1,
                                   termination_condition=termination_condition1,
-                                  callbacks=[dataset_callback1, parameter_callback1])
+                                  callbacks=[parameter_callback1])
 
     # Control Block x
     dataset_callback2 = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=100,
+    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_steps_per_fit=1,
                                   termination_condition=termination_condition2,
-                                  callbacks=[dataset_callback2, parameter_callback2])
+                                  callbacks=[parameter_callback2])
 
     # Function Block 1: picks state for hi lev ctrl
     function_block1 = fBlock(phi=pick_state, name='f1 pickstate')
@@ -246,12 +236,14 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn = core.learn(n_episodes=7500)
+    dataset_learn = core.learn(n_episodes=10000)
     # Evaluate
-    dataset_eval = core.evaluate(n_episodes=10)
+    dataset_eval = core.evaluate(n_episodes=100)
+    low_level_dataset_eval1 = control_block1.dataset
+    low_level_dataset_eval2 = control_block2.dataset
 
     # Visualize
-    '''hi_lev_params = agentH.Q.get_weights()
+    hi_lev_params = agentH.Q.get_weights()
     hi_lev_params = np.reshape(hi_lev_params, (8, 400))
     max_q_val = np.zeros(shape=(400,))
     act_max_q_val = np.zeros(shape=(400,))
@@ -259,17 +251,17 @@ def experiment():
         max_q_val[i] = np.amax(hi_lev_params[:,i])
         act_max_q_val[i] = np.argmax(hi_lev_params[:,i])
     max_q_val_tiled = np.reshape(max_q_val, (20, 20))
-    act_max_q_val_tiled = np.reshape(act_max_q_val, (20, 20))'''
-    low_level_dataset1 = dataset_callback1.get()
-    low_level_dataset2 = dataset_callback2.get()
+    act_max_q_val_tiled = np.reshape(act_max_q_val, (20, 20))
+    #low_level_dataset1 = dataset_callback1.get()
+    #low_level_dataset2 = dataset_callback2.get()
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '/'
     mk_dir_recursive('./' + subdir)
 
-    np.save(subdir+'/low_level_dataset1_file', low_level_dataset1)
-    np.save(subdir+'/low_level_dataset2_file', low_level_dataset2)
-    '''np.save(subdir+'/max_q_val_tiled_file', max_q_val_tiled)
-    np.save(subdir+'/act_max_q_val_tiled_file', act_max_q_val_tiled)'''
+    np.save(subdir+'/low_level_dataset1_file', low_level_dataset_eval1)
+    np.save(subdir+'/low_level_dataset2_file', low_level_dataset_eval2)
+    np.save(subdir+'/max_q_val_tiled_file', max_q_val_tiled)
+    np.save(subdir+'/act_max_q_val_tiled_file', act_max_q_val_tiled)
     np.save(subdir+'/dataset_learn_file', dataset_learn)
     np.save(subdir+'/dataset_eval_file', dataset_eval)
 

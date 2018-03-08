@@ -71,5 +71,5 @@ def experiment(n_runs, n_iterations, ep_per_run):
 
 if __name__ == '__main__':
 
-    experiment(n_runs=1, n_iterations=500, ep_per_run=100)
+    experiment(n_runs=1, n_iterations=100, ep_per_run=100)
 

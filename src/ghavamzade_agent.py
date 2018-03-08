@@ -13,6 +13,7 @@ class GhavamzadeAgent(Agent):
         super(GhavamzadeAgent, self).__init__(policy, mdp_info, params, features)
 
     def fit(self, dataset):
+        #print len(dataset)
         assert len(dataset) == 1
 
         state, action, reward, next_state, absorbing = self._parse(dataset)

@@ -109,22 +109,22 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many
 
         for i in xrange(how_many):
 
-            #act_max_q_val_tiled = np.load('latest/'+str(i)+'/act_max_q_val_tiled_file.npy')
-            #max_q_val_tiled = np.load('latest/'+str(i)+'/max_q_val_tiled_file.npy')
+            act_max_q_val_tiled = np.load('latest/'+str(i)+'/act_max_q_val_tiled_file.npy')
+            max_q_val_tiled = np.load('latest/'+str(i)+'/max_q_val_tiled_file.npy')
             low_level_dataset1 = np.load('latest/'+str(i)+'/low_level_dataset1_file.npy')
             low_level_dataset2 = np.load('latest/'+str(i)+'/low_level_dataset2_file.npy')
             dataset_learn = np.load('latest/'+str(i)+'/dataset_learn_file.npy')
             dataset_eval = np.load('latest/'+str(i)+'/dataset_eval_file.npy')
 
-            #plot_arrows(act_max_q_val_tiled)
-            #fig, axis = plt.subplots()
-            #heatmap = axis.pcolor(max_q_val_tiled, cmap=plt.cm.Blues)
-            #plt.colorbar(heatmap)
-            visualize_control_block_ghavamzade(low_level_dataset1, ep_count=10)
+            plot_arrows(act_max_q_val_tiled)
+            fig, axis = plt.subplots()
+            heatmap = axis.pcolor(max_q_val_tiled, cmap=plt.cm.Blues)
+            plt.colorbar(heatmap)
+            visualize_control_block_ghavamzade(low_level_dataset1, ep_count=450)
             plt.suptitle('ctrl+')
-            visualize_control_block_ghavamzade(low_level_dataset2, ep_count=0)
+            visualize_control_block_ghavamzade(low_level_dataset2, ep_count=450)
             plt.suptitle('ctrlx')
-            visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(980, 995), small=small)
+            visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(900, 995), small=small)
             visualize_ship_steering(dataset_eval, name='evaluate', small=small)
 
     plt.show()

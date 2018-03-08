@@ -16,7 +16,6 @@ class MuxBlock(Block):
 
 
     def _call(self, inputs, reward, absorbing, last, learn_flag):
-
         selector = inputs[0]
         if selector < 4:
             selector = 0
@@ -58,7 +57,7 @@ class MuxBlock(Block):
                     reward = block.reward_connection.last_output[0]
                 else:
                     reward = None
-                block.last_call(inputs=state, reward=reward, absorbing=absorbing)
+                block.last_call(inputs=state, reward=reward, absorbing=absorbing, learn_flag=learn_flag)
                 state = block.last_output
 
         for block in other_block_list:
