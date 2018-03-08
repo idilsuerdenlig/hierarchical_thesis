@@ -30,3 +30,7 @@ class DatasetManager():
 
     def get(self):
         return self.dataset
+
+    def __len__(self):
+        return len(self.dataset)
+
