@@ -29,6 +29,7 @@ from CMAC import CMACApproximator
 from idilshipsteering import ShipSteering
 from mushroom.environments.environment import MDPInfo
 from ghavamzade_agent import GhavamzadeAgent
+from pick_last_ep_dataset import pick_last_ep
 
 
 class TerminationCondition(object):
