@@ -1,5 +1,7 @@
 from block import Block
 import numpy as np
+from memory_profiler import profile
+
 
 class MuxBlock(Block):
     """

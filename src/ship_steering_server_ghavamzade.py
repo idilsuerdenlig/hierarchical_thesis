@@ -1,6 +1,6 @@
-from hierarchical_core import HierarchicalCore
-from computational_graph import ComputationalGraph
-from control_block import ControlBlock
+from library.core.hierarchical_core import HierarchicalCore
+from library.blocks.computational_graph import ComputationalGraph
+from library.blocks.control_block import ControlBlock
 from mushroom.utils import spaces
 from mushroom.utils.parameters import *
 from mushroom.utils.callbacks import CollectDataset
@@ -8,29 +8,28 @@ from mushroom.features.features import *
 from mushroom.features.basis import PolynomialBasis
 from mushroom.policy.gaussian_policy import *
 from mushroom.algorithms.policy_search import *
-from collect_policy_parameter import CollectPolicyParameter
-from basic_operation_block import *
-from model_placeholder import PlaceHolder
-from mux_block import MuxBlock
+from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
+from library.blocks.basic_operation_block import *
+from library.blocks.model_placeholder import PlaceHolder
+from library.blocks.mux_block import MuxBlock
 from mushroom.algorithms.value.td import *
 from mushroom.policy import EpsGreedy
 from mushroom.features.tiles import Tiles
-from pick_state import pick_state
-from rototranslate import rototranslate
-from hold_state import hold_state
-from hi_lev_extr_rew_ghavamzade import G_high
-from low_lev_extr_rew_ghavamzade import G_low
-from reward_accumulator import reward_accumulator_block
+from library.blocks.functions.pick_state import pick_state
+from library.blocks.functions.rototranslate import rototranslate
+from library.blocks.hold_state import hold_state
+from library.blocks.functions.hi_lev_extr_rew_ghavamzade import G_high
+from library.blocks.functions.low_lev_extr_rew_ghavamzade import G_low
+from library.blocks.reward_accumulator import reward_accumulator_block
 import datetime
 import argparse
 from mushroom.utils.folder import mk_dir_recursive
-from simple_agent import SimpleAgent
-from CMAC import CMACApproximator
-from idilshipsteering import ShipSteering
+from library.approximator.CMAC import CMACApproximator
+from library.environments.idilshipsteering import ShipSteering
 from mushroom.environments.environment import MDPInfo
-from ghavamzade_agent import GhavamzadeAgent
-from pick_last_ep_dataset import pick_last_ep
-from hold_state import hold_state
+from library.agents.ghavamzade_agent import GhavamzadeAgent
+from library.utils.pick_last_ep_dataset import pick_last_ep
+from library.blocks.hold_state import hold_state
 from memory_profiler import profile
 
 class TerminationCondition(object):
@@ -95,7 +94,7 @@ def experiment():
 
     mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]),
                                                            high=np.array([lim, lim]), shape=(2,)),
-                              action_space=spaces.Discrete(8), gamma=1, horizon=10000)
+                              action_space=spaces.Discrete(4), gamma=1, horizon=10000)
     approximator_paramsH = dict(input_shape=(featuresH.size,),
                                output_shape=mdp_info_agentH.action_space.size,
                                n_actions=mdp_info_agentH.action_space.n)
@@ -143,17 +142,18 @@ def experiment():
                     'fit_params': fit_params1}
     agent1 = GhavamzadeAgent(pi1, mdp.info, agent_params1)
 
-    # Agent2
+    ''' # Agent2
     learning_rate2 = ExponentialDecayParameter(value=1)
     algorithm_params2 = dict(learning_rate=learning_rate2)
     fit_params2 = dict()
     agent_params2 = {'algorithm_params': algorithm_params2,
                     'fit_params': fit_params2}
-    agent2 = GhavamzadeAgent(pi2, mdp.info, agent_params2)
+    agent2 = GhavamzadeAgent(pi2, mdp.info, agent_params2)'''
+
 
     #Termination Conds
     termination_condition1 = TerminationCondition(active_dir=1, small=small)
-    termination_condition2 = TerminationCondition(active_dir=5, small=small)
+    #termination_condition2 = TerminationCondition(active_dir=5, small=small)
 
     # Control Block +
     dataset_callback1 = CollectDataset()
@@ -162,12 +162,12 @@ def experiment():
                                   termination_condition=termination_condition1,
                                   callbacks=[parameter_callback1])
 
-    # Control Block x
+    '''# Control Block x
     dataset_callback2 = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
     control_block2 = ControlBlock(name='control block 2', agent=agent2, n_steps_per_fit=1,
                                   termination_condition=termination_condition2,
-                                  callbacks=[parameter_callback2])
+                                  callbacks=[parameter_callback2])'''
 
     # Function Block 1: picks state for hi lev ctrl
     function_block1 = fBlock(phi=pick_state, name='f1 pickstate')
@@ -193,37 +193,41 @@ def experiment():
     #Reward Accumulator H:
     reward_acc_H = reward_accumulator_block(gamma=mdp_info_agentH.gamma, name='reward_acc_H')
 
-    #Mux_Block
+    '''#Mux_Block
     mux_block = MuxBlock(name='mux')
     mux_block.add_block_list([control_block1])
-    mux_block.add_block_list([control_block2])
+    mux_block.add_block_list([control_block2])'''
 
     # Algorithm
-    blocks = [state_ph, reward_ph, control_blockH, mux_block,
+    blocks = [state_ph, reward_ph, control_blockH,
               function_block1, function_block2, function_block3,
               function_block4, function_block5,
               function_block6, function_block7, reward_acc_H]
 
-    state_ph.add_input(mux_block)
-    reward_ph.add_input(mux_block)
+    #state_ph.add_input(mux_block)
+    #reward_ph.add_input(mux_block)
+    state_ph.add_input(control_block1)
+    reward_ph.add_input(control_block1)
     reward_acc_H.add_input(reward_ph)
     reward_acc_H.add_alarm_connection(control_block1)
-    reward_acc_H.add_alarm_connection(control_block2)
+    #reward_acc_H.add_alarm_connection(control_block2)
     control_blockH.add_input(function_block1)
     control_blockH.add_reward(function_block4)
     control_blockH.add_alarm_connection(control_block1)
-    control_blockH.add_alarm_connection(control_block2)
-    mux_block.add_input(control_blockH)
-    mux_block.add_input(function_block2)
+    #control_blockH.add_alarm_connection(control_block2)
+    #mux_block.add_input(control_blockH)
+    #mux_block.add_input(function_block2)
+    control_block1.add_input(control_blockH)
+    control_block1.add_input(function_block2)
     control_block1.add_reward(function_block5)
-    control_block2.add_reward(function_block5)
+    #control_block2.add_reward(function_block5)
     function_block1.add_input(state_ph)
     function_block2.add_input(control_blockH)
     function_block2.add_input(state_ph)
     function_block2.add_input(function_block3)
     function_block3.add_input(state_ph)
     function_block3.add_alarm_connection(control_block1)
-    function_block3.add_alarm_connection(control_block2)
+    #function_block3.add_alarm_connection(control_block2)
     function_block4.add_input(function_block6)
     function_block4.add_input(reward_acc_H)
     function_block5.add_input(reward_ph)
@@ -242,7 +246,7 @@ def experiment():
     n_eps = 1 if small else 5
     for n in xrange(n_eps):
         print 'ITERATION', n
-        dataset_learn = core.learn(n_episodes=10)
+        dataset_learn = core.learn(n_episodes=10000)
         last_ep_dataset = pick_last_ep(dataset_learn)
         print len(last_ep_dataset)
         dataset_learn_visual += last_ep_dataset
@@ -251,7 +255,7 @@ def experiment():
     # Evaluate
     dataset_eval = core.evaluate(n_episodes=100)
     low_level_dataset_eval1 = control_block1.dataset
-    low_level_dataset_eval2 = control_block2.dataset
+    #low_level_dataset_eval2 = control_block2.dataset
 
     # Visualize
     hi_lev_params = agentH.Q.get_weights()

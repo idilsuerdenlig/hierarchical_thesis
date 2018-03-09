@@ -1,6 +1,6 @@
 from tqdm import tqdm
-from computational_graph import ComputationalGraph
-from dataset_manager import DatasetManager
+from library.blocks.computational_graph import ComputationalGraph
+from library.utils.dataset_manager import DatasetManager
 import numpy as np
 
 from memory_profiler import profile
@@ -18,7 +18,7 @@ class HierarchicalCore(object):
         self._n_episodes = None
 
 
-    def learn(self, n_steps=None, n_episodes=None, render=False, quiet=False, skip=True):
+    def learn(self, n_steps=None, n_episodes=None, render=False, quiet=False, skip=False):
         return self._run(True, n_steps, n_episodes, render, quiet, skip)
 
     def evaluate(self, n_steps=None, n_episodes=None, render=False, quiet=False):

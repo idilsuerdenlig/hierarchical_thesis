@@ -11,11 +11,11 @@ from mushroom.policy.gaussian_policy import *
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.algorithms.policy_search import *
-from library.utils.callback.scollect_policy_parameter import CollectPolicyParameter
-from library.blocks.function.feature_angle_diff_ship_steering import phi
+from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
+from library.blocks.functions.feature_angle_diff_ship_steering import phi
 from library.blocks.basic_operation_block import *
 from library.blocks.model_placeholder import PlaceHolder
-from library.blocks.pick_last_ep_dataset import pick_last_ep
+from library.utils.pick_last_ep_dataset import pick_last_ep
 from library.blocks.reward_accumulator import reward_accumulator_block
 from library.blocks.error_accumulator import ErrorAccumulatorBlock
 import datetime
@@ -180,6 +180,6 @@ def server_experiment(small, i, subdir):
     del dataset_eval
 
     return
-
+'''
 if __name__ == '__main__':
-    server_experiment()
+    server_experiment()'''

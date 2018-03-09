@@ -1,6 +1,6 @@
 from block import Block
 import numpy as np
-from dataset_manager import DatasetManager
+from library.utils.dataset_manager import DatasetManager
 from memory_profiler import profile
 
 class ControlBlock(Block):
@@ -9,7 +9,6 @@ class ControlBlock(Block):
     actions from its policy.
 
     """
-    @profile
     def __init__(self, name, agent, termination_condition=None, n_eps_per_fit=None, n_steps_per_fit=None, callbacks=list()):
 
         self.agent = agent
@@ -82,14 +81,12 @@ class ControlBlock(Block):
             self.fit(self.dataset.get())
             self.dataset.empty()
 
-    @profile
     def draw_action(self, state, last):
         if not last:
             self.last_input = state
             self.last_output = self.agent.draw_action(state)
             self.ep_step_counter += 1
 
-    @profile
     def check_no_of_eps(self, dataset):
         i = 0
         size_eps = list()
@@ -102,7 +99,6 @@ class ControlBlock(Block):
                 i = 0
         return size_eps
 
-    @profile
     def fit(self, dataset):
         #if self.name == 'control block 1':
         #print self.name, 'FIT-----------------------------------------------------'

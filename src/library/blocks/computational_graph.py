@@ -1,5 +1,5 @@
 import numpy as np
-from topological_sort import topological_sort
+from library.utils.topological_sort import topological_sort
 class ComputationalGraph(object):
     """
     This class implements the computational graph for hierarchical learning.
