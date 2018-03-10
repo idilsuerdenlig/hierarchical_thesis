@@ -3,7 +3,6 @@ from library.blocks.computational_graph import ComputationalGraph
 from library.utils.dataset_manager import DatasetManager
 import numpy as np
 
-from memory_profiler import profile
 
 class HierarchicalCore(object):
     """
