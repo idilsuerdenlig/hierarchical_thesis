@@ -30,7 +30,6 @@ from mushroom.environments.environment import MDPInfo
 from library.agents.ghavamzade_agent import GhavamzadeAgent
 from library.utils.pick_last_ep_dataset import pick_last_ep
 from library.blocks.hold_state import hold_state
-from memory_profiler import profile
 
 class TerminationCondition(object):
 

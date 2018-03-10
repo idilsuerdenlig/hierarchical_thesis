@@ -1,7 +1,6 @@
 from block import Block
 import numpy as np
 from library.utils.dataset_manager import DatasetManager
-from memory_profiler import profile
 
 class ControlBlock(Block):
     """
