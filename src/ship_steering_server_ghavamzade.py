@@ -199,7 +199,7 @@ def experiment():
     mux_block.add_block_list([control_block2])'''
 
     # Algorithm
-    blocks = [state_ph, reward_ph, control_blockH,
+    blocks = [state_ph, reward_ph, control_blockH, control_block1,
               function_block1, function_block2, function_block3,
               function_block4, function_block5,
               function_block6, function_block7, reward_acc_H]
@@ -259,7 +259,7 @@ def experiment():
 
     # Visualize
     hi_lev_params = agentH.Q.get_weights()
-    hi_lev_params = np.reshape(hi_lev_params, (8, 400))
+    hi_lev_params = np.reshape(hi_lev_params, (4, 400))
     max_q_val = np.zeros(shape=(400,))
     act_max_q_val = np.zeros(shape=(400,))
     for i in xrange(400):
