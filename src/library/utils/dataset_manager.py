@@ -6,7 +6,7 @@ class DatasetManager():
         self.ss = None
         self.abs = None
         self.last = None
-        self.dataset = list()
+        self.dataset = []
 
     def add_first_sample(self, sample, skip):
         if not skip:
@@ -26,7 +26,7 @@ class DatasetManager():
             self.a = aa
 
     def empty(self):
-        self.dataset = list()
+        del self.dataset[:]
 
     def get(self):
         return self.dataset

@@ -100,13 +100,11 @@ class ControlBlock(Block):
 
     def fit(self, dataset):
         #if self.name == 'control block 1':
-        #print self.name, 'FIT-----------------------------------------------------'
         self.agent.fit(dataset)
         self.curr_episode_counter = 0
         for c in self.callbacks:
             callback_pars = dict(dataset=dataset)
             c(**callback_pars)
-
 
     def reset(self, inputs):
         if isinstance(inputs[0], np.float64):
