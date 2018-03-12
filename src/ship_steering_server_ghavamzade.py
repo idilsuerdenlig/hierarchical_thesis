@@ -93,7 +93,7 @@ def experiment():
 
     mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]),
                                                            high=np.array([lim, lim]), shape=(2,)),
-                              action_space=spaces.Discrete(4), gamma=1, horizon=10000)
+                              action_space=spaces.Discrete(8), gamma=1, horizon=10000)
     approximator_paramsH = dict(input_shape=(featuresH.size,),
                                output_shape=mdp_info_agentH.action_space.size,
                                n_actions=mdp_info_agentH.action_space.n)
@@ -120,11 +120,12 @@ def experiment():
 
     tilingsL= Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low, high=high)
 
+    featuresL = Features(tilings=tilingsL)
     # Policy1
-    input_shape = mdp.info.observation_space.shape
+    input_shape = (featuresL.size,)
 
-    approximator_params = dict(tiles=tilingsL, input_dim=input_shape[0])
-    approximator = Regressor(CMACApproximator, input_shape=input_shape,
+    approximator_params = dict(input_dim=input_shape[0])
+    approximator = Regressor(LinearApproximator, input_shape=input_shape,
                              output_shape=mdp.info.action_space.shape,
                              **approximator_params)
     sigma = np.array([[1.3e-2]])
@@ -139,20 +140,20 @@ def experiment():
     fit_params1 = dict()
     agent_params1 = {'algorithm_params': algorithm_params1,
                     'fit_params': fit_params1}
-    agent1 = GhavamzadeAgent(pi1, mdp.info, agent_params1)
+    agent1 = GhavamzadeAgent(pi1, mdp.info, agent_params1, featuresL)
 
-    ''' # Agent2
+    # Agent2
     learning_rate2 = ExponentialDecayParameter(value=1)
     algorithm_params2 = dict(learning_rate=learning_rate2)
     fit_params2 = dict()
     agent_params2 = {'algorithm_params': algorithm_params2,
                     'fit_params': fit_params2}
-    agent2 = GhavamzadeAgent(pi2, mdp.info, agent_params2)'''
+    agent2 = GhavamzadeAgent(pi2, mdp.info, agent_params2, featuresL)
 
 
     #Termination Conds
     termination_condition1 = TerminationCondition(active_dir=1, small=small)
-    #termination_condition2 = TerminationCondition(active_dir=5, small=small)
+    termination_condition2 = TerminationCondition(active_dir=5, small=small)
 
     # Control Block +
     dataset_callback1 = CollectDataset()
@@ -161,12 +162,12 @@ def experiment():
                                   termination_condition=termination_condition1,
                                   callbacks=[parameter_callback1])
 
-    '''# Control Block x
+    # Control Block x
     dataset_callback2 = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
     control_block2 = ControlBlock(name='control block 2', agent=agent2, n_steps_per_fit=1,
                                   termination_condition=termination_condition2,
-                                  callbacks=[parameter_callback2])'''
+                                  callbacks=[parameter_callback2])
 
     # Function Block 1: picks state for hi lev ctrl
     function_block1 = fBlock(phi=pick_state, name='f1 pickstate')
@@ -192,41 +193,37 @@ def experiment():
     #Reward Accumulator H:
     reward_acc_H = reward_accumulator_block(gamma=mdp_info_agentH.gamma, name='reward_acc_H')
 
-    '''#Mux_Block
+    #Mux_Block
     mux_block = MuxBlock(name='mux')
     mux_block.add_block_list([control_block1])
-    mux_block.add_block_list([control_block2])'''
+    mux_block.add_block_list([control_block2])
 
-    # Algorithm
-    blocks = [state_ph, reward_ph, control_blockH, control_block1,
+    #Algorithm
+    blocks = [state_ph, reward_ph, control_blockH, mux_block,
               function_block1, function_block2, function_block3,
               function_block4, function_block5,
               function_block6, function_block7, reward_acc_H]
 
-    #state_ph.add_input(mux_block)
-    #reward_ph.add_input(mux_block)
-    state_ph.add_input(control_block1)
-    reward_ph.add_input(control_block1)
+    state_ph.add_input(mux_block)
+    reward_ph.add_input(mux_block)
     reward_acc_H.add_input(reward_ph)
     reward_acc_H.add_alarm_connection(control_block1)
-    #reward_acc_H.add_alarm_connection(control_block2)
+    reward_acc_H.add_alarm_connection(control_block2)
     control_blockH.add_input(function_block1)
     control_blockH.add_reward(function_block4)
     control_blockH.add_alarm_connection(control_block1)
-    #control_blockH.add_alarm_connection(control_block2)
-    #mux_block.add_input(control_blockH)
-    #mux_block.add_input(function_block2)
-    control_block1.add_input(control_blockH)
-    control_block1.add_input(function_block2)
+    control_blockH.add_alarm_connection(control_block2)
+    mux_block.add_input(control_blockH)
+    mux_block.add_input(function_block2)
     control_block1.add_reward(function_block5)
-    #control_block2.add_reward(function_block5)
+    control_block2.add_reward(function_block5)
     function_block1.add_input(state_ph)
     function_block2.add_input(control_blockH)
     function_block2.add_input(state_ph)
     function_block2.add_input(function_block3)
     function_block3.add_input(state_ph)
     function_block3.add_alarm_connection(control_block1)
-    #function_block3.add_alarm_connection(control_block2)
+    function_block3.add_alarm_connection(control_block2)
     function_block4.add_input(function_block6)
     function_block4.add_input(reward_acc_H)
     function_block5.add_input(reward_ph)
@@ -245,7 +242,7 @@ def experiment():
     n_eps = 1 if small else 5
     for n in xrange(n_eps):
         print 'ITERATION', n
-        dataset_learn = core.learn(n_episodes=10000)
+        dataset_learn = core.learn(n_episodes=1000)
         last_ep_dataset = pick_last_ep(dataset_learn)
         print len(last_ep_dataset)
         dataset_learn_visual += last_ep_dataset

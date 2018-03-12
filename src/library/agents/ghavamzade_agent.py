@@ -1,10 +1,11 @@
 from mushroom.algorithms.agent import Agent
 from mushroom.utils.parameters import *
 import numpy as np
+from memory_profiler import profile
 
 class GhavamzadeAgent(Agent):
 
-    def __init__(self, policy, mdp_info, params, features=None):
+    def __init__(self, policy, mdp_info, params, features):
         self.learning_rate = params['algorithm_params'].pop('learning_rate')
 
         self.z = np.zeros(policy.weights_size)
@@ -19,8 +20,10 @@ class GhavamzadeAgent(Agent):
         state, action, reward, next_state, absorbing = self._parse(dataset)
         self._update(state, action, reward, next_state, absorbing)
 
-
     def _update(self, state, action, reward, next_state, absorbing):
+
+        if self.phi is not None:
+            state = self.phi(state)
 
         self.z = self.z + self.policy.diff_log(state, action)
 
