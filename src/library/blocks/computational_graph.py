@@ -36,10 +36,8 @@ class ComputationalGraph(object):
             alarms = list()
             #print 'INPUTS: '
             for input_block in block.input_connections:
-                #print input_block.name
-                if input_block.last_output is not None:
-                    inputs.append(input_block.last_output)
-                #print input_block.last_output
+                inputs.append(input_block.last_output)
+
             if not block.alarm_connections:
                 alarms.append(True)
             else:
@@ -62,8 +60,7 @@ class ComputationalGraph(object):
         for block in self.ordered:
             inputs = list()
             for input_block in block.input_connections:
-                if input_block.last_output is not None:
-                    inputs.append(input_block.last_output)
+                inputs.append(input_block.last_output)
             block.reset(inputs=inputs)
         self.step_counter = 0
 

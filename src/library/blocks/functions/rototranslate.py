@@ -67,5 +67,6 @@ class rototranslate():
         #print 'non_translated states:', inputs[1]
         #print 'initial_point        :', inputs[2]
         #print 'translated states    :', new_stat   es
+
         return new_states
 

@@ -32,10 +32,7 @@ class ControlBlock(Block):
 
     def _call(self, inputs, reward, absorbing, last, learn_flag):
 
-        if isinstance(inputs[0], np.float64):
-            state = inputs
-        else:
-            state = np.concatenate(inputs, axis=0)
+        state = np.concatenate(inputs, axis=0)
 
         if self.last or last:
             self.curr_episode_counter += 1
@@ -64,11 +61,8 @@ class ControlBlock(Block):
         self.alarm_output = self.last
 
     def last_call(self, inputs, reward, absorbing, learn_flag):
-        #print self.name, 'last call--------------------------'
-        if isinstance(inputs[0], np.float64):
-            state = inputs
-        else:
-            state = np.concatenate(inputs, axis=0)
+
+        state = np.concatenate(inputs, axis=0)
         sample = state, None, reward, absorbing, True
         self.dataset.add_sample(sample, False)
         #if self.name == 'control block 1':
@@ -100,6 +94,7 @@ class ControlBlock(Block):
 
     def fit(self, dataset):
         #if self.name == 'control block 1':
+        #print self.name, 'FIT-----------------------------------------------------'
         self.agent.fit(dataset)
         self.curr_episode_counter = 0
         for c in self.callbacks:
@@ -107,10 +102,7 @@ class ControlBlock(Block):
             c(**callback_pars)
 
     def reset(self, inputs):
-        if isinstance(inputs[0], np.float64):
-            state = inputs
-        else:
-            state = np.concatenate(inputs,axis=0)
+        state = np.concatenate(inputs, axis=0)
         #if self.last_input is not None and self.name != 'control block H':
         #    self.build_sample(state, 0, True, True)
         self.agent.episode_start()

@@ -25,7 +25,8 @@ class MuxBlock(Block):
             #print 'activating controller 2', absorbing, last
             selector = 1
 
-        state = inputs[1]
+        state = inputs[1:]
+        print state
 
         selected_block_list = self.block_lists[selector]
         other_block_list = self.block_lists[int(not(selector))]
@@ -33,7 +34,7 @@ class MuxBlock(Block):
 
         if self.first[selector]:
             for block in selected_block_list:
-                block.reset(inputs=inputs[1])
+                block.reset(inputs=inputs[1:])
                 self.first[selector] = False
 
         else:
@@ -50,7 +51,7 @@ class MuxBlock(Block):
                 block(inputs=state, reward=reward, absorbing=absorbing, last=last, learn_flag=learn_flag, alarms=alarms)
                 state = block.last_output
 
-        state = inputs[1]
+        state = inputs[1:]
 
         if self.last_selection is not None and self.last_selection != selector:
             for block in other_block_list:
@@ -84,7 +85,8 @@ class MuxBlock(Block):
             selector = 1
         selected_block_list = self.block_lists[selector]
 
-        state = inputs[1]
+        state = inputs[1:]
+        print state
         for block in selected_block_list:
             block.reset(inputs=state)
             state = block.last_output

@@ -5,7 +5,6 @@ class hold_state(Block):
 
     def __init__(self, name=None):
 
-        self.last_states = None
         super(hold_state, self).__init__(name=name)
 
     def __call__(self, inputs, reward, absorbing, last, learn_flag, alarms):

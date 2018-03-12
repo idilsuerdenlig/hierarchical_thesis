@@ -79,7 +79,9 @@ def experiment():
     reward_ph = PlaceHolder(name='reward_ph')
 
     #FeaturesH
-    tilingsH= Tiles.generate(n_tilings=1, n_tiles=[20,20], low=[0,0], high=[150,150])
+    lim = 150 if small else 1000
+
+    tilingsH= Tiles.generate(n_tilings=1, n_tiles=[20,20], low=[0,0], high=[lim, lim])
     featuresH = Features(tilings=tilingsH)
 
     # PolicyH
@@ -89,7 +91,6 @@ def experiment():
     # AgentH
     learning_rate = Parameter(value=0.2)
 
-    lim = 150 if small else 1000
 
     mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]),
                                                            high=np.array([lim, lim]), shape=(2,)),

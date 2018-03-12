@@ -6,9 +6,11 @@ class addBlock(fBlock):
 
     def __init__(self, name=None, phi=None):
         def summation(inputs):
+
             res = np.zeros(1)
             for i in inputs:
-                res += i
+                if i is not None:
+                    res += i
             return res
         self.phi = summation
         super(addBlock, self).__init__(phi=summation, name=name)

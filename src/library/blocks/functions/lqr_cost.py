@@ -22,7 +22,8 @@ def lqr_cost(ins):
     R = np.array([action])
 
     for r in R:
-        action_cost += -r.dot(r)
+        if r is not None:
+            action_cost += -r.dot(r)
 
     normalization_coefficient = 1/144
 
