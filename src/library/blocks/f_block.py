@@ -10,11 +10,24 @@ class fBlock(Block):
 
     def _call(self, inputs, reward, absorbing, last, learn_flag):
 
+        '''for i in inputs:
+            if i is not None:
+                if np.any(np.isnan(i)):
+                    print inputs
+                    print self.name
+                    exit()'''
+
         self.last_output = self.phi(inputs)
         self.alarm_output = None
 
 
     def reset(self, inputs):
+        '''for i in inputs:
+            if i is not None:
+                if np.any(np.isnan(i)):
+                    print inputs
+                    print self.name
+                    exit()'''
         self.last_output = self.phi(inputs)
         self.alarm_output = None
 

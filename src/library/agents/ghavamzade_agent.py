@@ -5,7 +5,7 @@ from memory_profiler import profile
 
 class GhavamzadeAgent(Agent):
 
-    def __init__(self, policy, mdp_info, params, features):
+    def __init__(self, policy, mdp_info, params, features=None):
         self.learning_rate = params['algorithm_params'].pop('learning_rate')
 
         self.z = np.zeros(policy.weights_size)
@@ -28,9 +28,15 @@ class GhavamzadeAgent(Agent):
         self.z = self.z + self.policy.diff_log(state, action)
 
         theta = self.policy.get_weights()
-        #print np.linalg.norm(reward*self.z)
+        '''print 'STATE-ACTION :', state, action
+        print 'DIFFLOG  :', np.max(self.policy.diff_log(state, action)), np.min(self.policy.diff_log(state, action))
+        print 'RW*Z :', np.linalg.norm(reward*self.z), np.max(reward*self.z)
+        print 'Z    :', np.max(self.z), np.min(self.z)'''
+        if np.isinf(np.linalg.norm(reward*self.z)):
+            print 'HELLO'
+            exit()
         theta = theta + self.learning_rate(state, action)*reward*self.z
-        #print self.learning_rate.get_value()
+        #print 'LEARNING RATE:   ', self.learning_rate.get_value()
         self.policy.set_weights(theta)
         if absorbing:
             self.z = np.zeros(self.policy.weights_size)

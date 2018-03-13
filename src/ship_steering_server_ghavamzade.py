@@ -78,6 +78,9 @@ def experiment():
     #Reward Placeholder
     reward_ph = PlaceHolder(name='reward_ph')
 
+    #Last action Placeholder
+    lastaction_ph = PlaceHolder(name='lastaction_ph')
+
     #FeaturesH
     lim = 150 if small else 1000
 
@@ -136,7 +139,7 @@ def experiment():
     pi2 = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
 
     # Agent1
-    learning_rate1 = ExponentialDecayParameter(value=1)
+    learning_rate1 = ExponentialDecayParameter(value=1e-6)
     algorithm_params1 = dict(learning_rate=learning_rate1)
     fit_params1 = dict()
     agent_params1 = {'algorithm_params': algorithm_params1,
@@ -144,7 +147,7 @@ def experiment():
     agent1 = GhavamzadeAgent(pi1, mdp.info, agent_params1, featuresL)
 
     # Agent2
-    learning_rate2 = ExponentialDecayParameter(value=1)
+    learning_rate2 = ExponentialDecayParameter(value=1e-6)
     algorithm_params2 = dict(learning_rate=learning_rate2)
     fit_params2 = dict()
     agent_params2 = {'algorithm_params': algorithm_params2,
@@ -200,13 +203,14 @@ def experiment():
     mux_block.add_block_list([control_block2])
 
     #Algorithm
-    blocks = [state_ph, reward_ph, control_blockH, mux_block,
+    blocks = [state_ph, reward_ph, lastaction_ph, control_blockH, mux_block,
               function_block1, function_block2, function_block3,
               function_block4, function_block5,
               function_block6, function_block7, reward_acc_H]
 
-    state_ph.add_input(mux_block)
-    reward_ph.add_input(mux_block)
+    #state_ph.add_input(mux_block)
+    #reward_ph.add_input(mux_block)
+    #lastaction_ph.add_input(mux_block)
     reward_acc_H.add_input(reward_ph)
     reward_acc_H.add_alarm_connection(control_block1)
     reward_acc_H.add_alarm_connection(control_block2)

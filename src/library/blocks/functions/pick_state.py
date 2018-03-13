@@ -11,6 +11,7 @@ def pick_state(inputs):
     for i in indices:
         states_needed[pos]=states[i]
         pos += 1
+
     return states_needed
 
 

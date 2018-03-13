@@ -11,8 +11,11 @@ from mushroom.approximators import *
 from mushroom.features import *
 from mushroom.features.tiles import *
 from mushroom.approximators.parametric.linear import *
-'''visualize_saved_in_server(our_approach=False, how_many=1, small=False)'''
 
+
+
+visualize_saved_in_server(our_approach=True, how_many=2, small=False)
+'''
 mdp = ShipSteering(small=False, hard=True, n_steps_action=3)
 
 
@@ -44,3 +47,6 @@ for i in xrange(100000000):
     pi1.diff_log(state, action)
 
 
+'''
+
+print np.load('success_per_thousand_eps.npy')

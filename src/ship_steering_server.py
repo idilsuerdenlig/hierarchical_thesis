@@ -2,7 +2,6 @@ from library.core.hierarchical_core import HierarchicalCore
 from library.blocks.computational_graph import ComputationalGraph
 from library.blocks.control_block import ControlBlock
 from mushroom.utils import spaces
-from mushroom.environments import *
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 from mushroom.utils.callbacks import CollectDataset
 from mushroom.features.basis import *
@@ -18,6 +17,8 @@ from library.blocks.model_placeholder import PlaceHolder
 from library.utils.pick_last_ep_dataset import pick_last_ep
 from library.blocks.reward_accumulator import reward_accumulator_block
 from library.blocks.error_accumulator import ErrorAccumulatorBlock
+from library.environments.idilshipsteering import ShipSteering
+from mushroom.environments import MDPInfo
 import datetime
 import argparse
 from mushroom.utils.folder import *
@@ -29,7 +30,7 @@ def server_experiment(small, i, subdir):
     np.random.seed()
 
     # Model Block
-    mdp = ShipSteering(small=small, hard=True)
+    mdp = ShipSteering(small=small, hard=True, n_steps_action=3)
 
     #State Placeholder
     state_ph = PlaceHolder(name='state_ph')
@@ -147,10 +148,10 @@ def server_experiment(small, i, subdir):
     # Train
     dataset_learn_visual = list()
 
-    n_eps = 5 if small else 50
+    n_eps = 5 if small else 20
     for n in xrange(n_eps):
         print 'ITERATION', n
-        dataset_learn = core.learn(n_episodes=1000)
+        dataset_learn = core.learn(n_episodes=500)
         last_ep_dataset = pick_last_ep(dataset_learn)
         dataset_learn_visual += last_ep_dataset
         del dataset_learn
@@ -180,6 +181,6 @@ def server_experiment(small, i, subdir):
     del dataset_eval
 
     return
-'''
+
 if __name__ == '__main__':
-    server_experiment()'''
+    server_experiment(small=False, i=0, subdir='latest')

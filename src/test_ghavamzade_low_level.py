@@ -1,7 +1,5 @@
 import numpy as np
-from ship_ghavamzade_diagonal import ShipGhavamzadeDiagonal
-from ship_ghavamzade_straight import ShipSteeringStraight
-from ghavamzade_agent import GhavamzadeAgent
+from library.agents.ghavamzade_agent import GhavamzadeAgent
 from mushroom.algorithms.policy_search import REINFORCE, GPOMDP, eNAC
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
@@ -14,7 +12,8 @@ from mushroom.utils.dataset import compute_J
 from mushroom.utils.parameters import *
 from tqdm import tqdm
 from mushroom.utils.angles_utils import shortest_angular_distance, normalize_angle
-from CMAC import CMACApproximator
+from library.approximator.CMAC import CMACApproximator
+from library.environments.ship_ghavamzade_diagonal import ShipGhavamzadeDiagonal
 
 tqdm.monitor_interval = 0
 
@@ -45,7 +44,7 @@ def experiment(n_runs, n_iterations, ep_per_run):
     policy = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
 
     # Agent
-    learning_rate = ExponentialDecayParameter(value=1)
+    learning_rate = ExponentialDecayParameter(value=1e-6, decay_exp=0.5, min_value=1e-8 )
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
@@ -71,5 +70,5 @@ def experiment(n_runs, n_iterations, ep_per_run):
 
 if __name__ == '__main__':
 
-    experiment(n_runs=1, n_iterations=100, ep_per_run=100)
+    experiment(n_runs=3, n_iterations=30, ep_per_run=100)
 

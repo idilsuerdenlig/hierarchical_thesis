@@ -57,10 +57,19 @@ class ControlBlock(Block):
             self.fit(self.dataset.get())
             self.dataset.empty()
 
+        #print self.name
+        if self.name != 'control block H':
+            if np.any(np.isnan(self.agent.policy.get_weights())):
+                print 'PARAMETER IS NaN!'
+                print self.name
 
         self.alarm_output = self.last
 
     def last_call(self, inputs, reward, absorbing, learn_flag):
+        '''if np.any(np.isnan(inputs)):
+            print inputs
+            print self.name
+            exit()'''
 
         state = np.concatenate(inputs, axis=0)
         sample = state, None, reward, absorbing, True
@@ -102,6 +111,12 @@ class ControlBlock(Block):
             c(**callback_pars)
 
     def reset(self, inputs):
+
+        '''if np.any(np.isnan(inputs)):
+            print inputs
+            print self.name
+            exit()'''
+
         state = np.concatenate(inputs, axis=0)
         #if self.last_input is not None and self.name != 'control block H':
         #    self.build_sample(state, 0, True, True)

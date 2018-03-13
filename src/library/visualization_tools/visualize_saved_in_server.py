@@ -36,29 +36,30 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many
 
             parameter_dataset1 += [np.load('latest/'+str(exp_no)+'/parameter_dataset1_file.npy')]
             parameter_dataset2 += [np.load('latest/'+str(exp_no)+'/parameter_dataset2_file.npy')]
-            if small:
-                low_level_dataset = np.load('latest/'+str(exp_no)+'/low_level_dataset_file.npy')
-                for dataset_step in low_level_dataset:
-                    if not dataset_step[-1]:
-                        df = gamma**i  #df *= gamma
-                        reward_step = dataset_step[2]
-                        J_eps += df*reward_step
-                        i += 1
-                    else:
-                        df = gamma**i
-                        reward_step = dataset_step[2]
-                        J_eps += df*reward_step
-                        J_eps_exp.append(J_eps)
-                        size_eps.append(i)
-                        i = 0
-                        J_eps = 0
+            low_level_dataset = np.load('latest/'+str(exp_no)+'/low_level_dataset_file.npy')
+            for dataset_step in low_level_dataset:
+                if not dataset_step[-1]:
+                    df = gamma**i  #df *= gamma
+                    reward_step = dataset_step[2]
+                    J_eps += df*reward_step
+                    i += 1
+                else:
+                    df = gamma**i
+                    reward_step = dataset_step[2]
+                    J_eps += df*reward_step
+                    J_eps_exp.append(J_eps)
+                    size_eps.append(i)
+                    i = 0
+                    J_eps = 0
 
-                J_exp_list.append(J_eps_exp)
-                size_exp_list.append(size_eps)
-                max_lenJ = max(max_lenJ, len(J_eps_exp))
-                max_leni = max(max_leni, len(size_eps))
-                J_eps_exp = list()
-                size_eps = list()
+            J_exp_list.append(J_eps_exp)
+            size_exp_list.append(size_eps)
+            max_lenJ = max(max_lenJ, len(J_eps_exp))
+            max_leni = max(max_leni, len(size_eps))
+            del J_eps_exp
+            del size_eps
+            J_eps_exp = list()
+            size_eps = list()
 
         a = list()
         for _ in xrange(how_many):

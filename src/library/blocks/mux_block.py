@@ -17,6 +17,13 @@ class MuxBlock(Block):
 
 
     def _call(self, inputs, reward, absorbing, last, learn_flag):
+
+
+        '''for i in inputs:
+            if np.any(np.isnan(i)):
+                print inputs
+                print self.name
+                exit()'''
         selector = inputs[0]
         if selector < 4:
             selector = 0
@@ -26,7 +33,6 @@ class MuxBlock(Block):
             selector = 1
 
         state = inputs[1:]
-        print state
 
         selected_block_list = self.block_lists[selector]
         other_block_list = self.block_lists[int(not(selector))]
@@ -78,6 +84,11 @@ class MuxBlock(Block):
 
     def reset(self, inputs):
 
+        '''for i in inputs:
+            if np.any(np.isnan(i)):
+                print inputs
+                print self.name
+                exit()'''
         selector = inputs[0]
         if selector < 4:
             selector = 0

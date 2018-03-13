@@ -22,6 +22,7 @@ class ComputationalGraph(object):
 
         """
         action = self.ordered[-1].last_output
+        #print action
         self.state, self.reward, self.absorbing, _ = self.model.step(action)
         self.step_counter += 1
         self.last = self.step_counter >= self.model.info.horizon or self.absorbing
@@ -34,10 +35,15 @@ class ComputationalGraph(object):
             #print 'ORDER :',index
             inputs = list()
             alarms = list()
-            #print 'INPUTS: '
             for input_block in block.input_connections:
                 inputs.append(input_block.last_output)
+            #print 'INPUTS: ', inputs
 
+            for i in inputs:
+                if i is not None:
+                    if np.any(np.isnan(i)):
+                        print inputs
+                        exit()
             if not block.alarm_connections:
                 alarms.append(True)
             else:
@@ -58,9 +64,16 @@ class ComputationalGraph(object):
         #print 'ENV RESET STATE, REW', self.state, self.reward
 
         for block in self.ordered:
+            #print 'RESET___________'
+            #print 'NAME :', block.name
             inputs = list()
             for input_block in block.input_connections:
                 inputs.append(input_block.last_output)
+            #print 'INPUTS   :', inputs
+            for i in inputs:
+                if i is not None:
+                    if np.any(np.isnan(i)):
+                        exit()
             block.reset(inputs=inputs)
         self.step_counter = 0
 
