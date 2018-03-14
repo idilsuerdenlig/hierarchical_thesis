@@ -54,7 +54,7 @@ class ShipGhavamzadeDiagonal(Environment):
     def reset(self, state=None):
         if state is None:
 
-            self._state = np.array([40, 40, 0.81709982, 0])
+            self._state = np.array([40, 40, np.random.uniform(-np.pi, np.pi), 0])
         else:
             self._state = state
 

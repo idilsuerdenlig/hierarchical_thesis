@@ -44,7 +44,7 @@ def experiment(n_runs, n_iterations, ep_per_run):
     policy = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
 
     # Agent
-    learning_rate = ExponentialDecayParameter(value=1e-6, decay_exp=0.5, min_value=1e-8 )
+    learning_rate = Parameter(value=1e-7)
     algorithm_params = dict(learning_rate=learning_rate)
     fit_params = dict()
     agent_params = {'algorithm_params': algorithm_params,
@@ -70,5 +70,5 @@ def experiment(n_runs, n_iterations, ep_per_run):
 
 if __name__ == '__main__':
 
-    experiment(n_runs=3, n_iterations=30, ep_per_run=100)
+    experiment(n_runs=2, n_iterations=250, ep_per_run=100)
 
