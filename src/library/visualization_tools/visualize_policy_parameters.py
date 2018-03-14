@@ -59,10 +59,10 @@ def visualize_policy_params(parameter_dataset1, parameter_dataset2, parameter_da
     y0 = paramy_avg[0]
     sigmax0 = paramsigmax_avg[0]
     sigmay0 = paramsigmay_avg[0]
-    x1 = paramx_avg[int(len(paramx_avg)/2)]
-    y1 = paramy_avg[int(len(paramy_avg)/2)]
-    sigmax1 = paramsigmax_avg[int(len(paramsigmax_avg)/2)]
-    sigmay1 = paramsigmay_avg[int(len(paramsigmay_avg)/2)]
+    x1 = paramx_avg[len(paramx_avg)//2]
+    y1 = paramy_avg[len(paramy_avg)//2]
+    sigmax1 = paramsigmax_avg[len(paramsigmax_avg)//2]
+    sigmay1 = paramsigmay_avg[len(paramsigmay_avg)//2]
     x2 = paramx_avg[-1]
     y2 = paramy_avg[-1]
     sigmax2 = paramsigmax_avg[-1]
@@ -86,6 +86,7 @@ def visualize_policy_params(parameter_dataset1, parameter_dataset2, parameter_da
 
     max_len2 = 0
     unstable_count = 0
+
     for i in range(how_many):
         params2_one_experiment = parameter_dataset2[i]
         last_val = params2_one_experiment[-1]

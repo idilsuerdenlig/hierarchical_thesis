@@ -30,8 +30,7 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many
         max_lenJ = 0
         max_leni = 0
 
-        if small:
-            low_level_dataset = list()
+
         for exp_no in range(how_many):
 
             parameter_dataset1 += [np.load('latest/'+str(exp_no)+'/parameter_dataset1_file.npy')]
@@ -98,13 +97,10 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many
         ax2.plot(time, J_eps_avg)
         ax2.set_title('J_eps_averaged')
 
-        dataset_learn_visual = np.load('latest/'+str(i)+'/dataset_learn_visual_file.npy')
         dataset_eval = np.load('latest/'+str(i)+'/dataset_eval_file.npy')
         visualize_policy_params(parameter_dataset1, parameter_dataset2, small=small, how_many=how_many)
-        visualize_ship_steering(dataset_learn_visual, name='learn', small=small, n_gates=n_gates, how_many= how_many)
         visualize_ship_steering(dataset_eval, 'evaluate', small=small, n_gates=n_gates, how_many=how_many)
-        if small:
-            visualize_control_block(low_level_dataset, ep_count=20, how_many=how_many)
+
 
     else:
 
@@ -113,19 +109,17 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many
             act_max_q_val_tiled = np.load('latest/'+str(i)+'/act_max_q_val_tiled_file.npy')
             max_q_val_tiled = np.load('latest/'+str(i)+'/max_q_val_tiled_file.npy')
             low_level_dataset1 = np.load('latest/'+str(i)+'/low_level_dataset1_file.npy')
-            #low_level_dataset2 = np.load('latest/'+str(i)+'/low_level_dataset2_file.npy')
-            dataset_learn = np.load('latest/'+str(i)+'/dataset_learn_file.npy')
+            low_level_dataset2 = np.load('latest/'+str(i)+'/low_level_dataset2_file.npy')
             dataset_eval = np.load('latest/'+str(i)+'/dataset_eval_file.npy')
 
             plot_arrows(act_max_q_val_tiled)
             fig, axis = plt.subplots()
             heatmap = axis.pcolor(max_q_val_tiled, cmap=plt.cm.Blues)
             plt.colorbar(heatmap)
-            visualize_control_block_ghavamzade(low_level_dataset1, ep_count=50)
+            visualize_control_block_ghavamzade(low_level_dataset1, ep_count=2)
             plt.suptitle('ctrl+')
-            #visualize_control_block_ghavamzade(low_level_dataset2, ep_count=450)
-            #plt.suptitle('ctrlx')
-            #visualize_ship_steering(dataset_learn, name='learn', range_eps=xrange(900, 995), small=small)
+            visualize_control_block_ghavamzade(low_level_dataset2, ep_count=2)
+            plt.suptitle('ctrlx')
             visualize_ship_steering(dataset_eval, name='evaluate', small=small)
 
     plt.show()

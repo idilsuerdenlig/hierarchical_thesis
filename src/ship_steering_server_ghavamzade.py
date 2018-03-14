@@ -106,9 +106,7 @@ def experiment():
                                    lambda_coeff=0.9, approximator_params=approximator_paramsH, features=featuresH)
 
     # Control Block H
-    dataset_callbackH = CollectDataset()
-    control_blockH = ControlBlock(name='control block H', agent=agentH, n_steps_per_fit=1,
-                                  callbacks=[dataset_callbackH])
+    control_blockH = ControlBlock(name='control block H', agent=agentH, n_steps_per_fit=1)
 
     #FeaturesL
     high = [15, 15, np.pi, np.pi/12] if small else [150, 150, np.pi, np.pi/12]
@@ -121,6 +119,7 @@ def experiment():
     tilingsL= Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low, high=high)
 
     featuresL = Features(tilings=tilingsL)
+
     # Policy1
     input_shape = (featuresL.size,)
 
@@ -135,11 +134,11 @@ def experiment():
     pi2 = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
 
     # Agent1
-    learning_rate1 = ExponentialDecayParameter(value=1e-6)
+    learning_rate1 = ExponentialDecayParameter(value=1e-6, decay_exp=0.5)
     agent1 = GhavamzadeAgent(pi1, mdp.info, learning_rate1, featuresL)
 
     # Agent2
-    learning_rate2 = ExponentialDecayParameter(value=1e-6)
+    learning_rate2 = ExponentialDecayParameter(value=1e-6, decay_exp=0.5)
     agent2 = GhavamzadeAgent(pi2, mdp.info, learning_rate2, featuresL)
 
 
@@ -148,18 +147,12 @@ def experiment():
     termination_condition2 = TerminationCondition(active_dir=5, small=small)
 
     # Control Block +
-    dataset_callback1 = CollectDataset()
-    parameter_callback1 = CollectPolicyParameter(pi1)
     control_block1 = ControlBlock(name='control block 1', agent=agent1, n_steps_per_fit=1,
-                                  termination_condition=termination_condition1,
-                                  callbacks=[parameter_callback1])
+                                  termination_condition=termination_condition1)
 
     # Control Block x
-    dataset_callback2 = CollectDataset()
-    parameter_callback2 = CollectPolicyParameter(pi2)
     control_block2 = ControlBlock(name='control block 2', agent=agent2, n_steps_per_fit=1,
-                                  termination_condition=termination_condition2,
-                                  callbacks=[parameter_callback2])
+                                  termination_condition=termination_condition2)
 
     # Function Block 1: picks state for hi lev ctrl
     function_block1 = fBlock(phi=pick_state, name='f1 pickstate')
@@ -230,25 +223,26 @@ def experiment():
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn_visual = list()
+    dataset_eval_visual = list()
+    low_level_dataset_eval1 = list()
+    low_level_dataset_eval2 = list()
 
-    n_eps = 1 if small else 5
-    for n in range(n_eps):
+
+    n_runs = 10
+    for n in range(n_runs):
         print('ITERATION', n)
-        dataset_learn = core.learn(n_episodes=1000)
-        last_ep_dataset = pick_last_ep(dataset_learn)
-        print(len(last_ep_dataset))
-        dataset_learn_visual += last_ep_dataset
-        del dataset_learn
+        core.learn(n_episodes=1000, skip=True)
+        dataset_eval = core.evaluate(n_episodes=10)
+        last_ep_dataset = pick_last_ep(dataset_eval)
+        dataset_eval_visual += last_ep_dataset
+        low_level_dataset_eval1 += control_block1.dataset.get()
+        low_level_dataset_eval2 += control_block2.dataset.get()
 
-    # Evaluate
-    dataset_eval = core.evaluate(n_episodes=100)
-    low_level_dataset_eval1 = control_block1.dataset
-    #low_level_dataset_eval2 = control_block2.dataset
+
 
     # Visualize
     hi_lev_params = agentH.Q.get_weights()
-    hi_lev_params = np.reshape(hi_lev_params, (4, 400))
+    hi_lev_params = np.reshape(hi_lev_params, (8, 400))
     max_q_val = np.zeros(shape=(400,))
     act_max_q_val = np.zeros(shape=(400,))
     for i in range(400):
@@ -266,8 +260,8 @@ def experiment():
     np.save(subdir+'/low_level_dataset2_file', low_level_dataset_eval2)
     np.save(subdir+'/max_q_val_tiled_file', max_q_val_tiled)
     np.save(subdir+'/act_max_q_val_tiled_file', act_max_q_val_tiled)
-    np.save(subdir+'/dataset_learn_file', dataset_learn_visual)
-    np.save(subdir+'/dataset_eval_file', dataset_eval)
+    np.save(subdir+'/dataset_eval_file', dataset_eval_visual)
+
 
     return
 

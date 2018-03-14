@@ -88,7 +88,7 @@ def server_experiment(small, i, subdir):
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=features)
 
     # Agent 2
-    learning_rate2 = AdaptiveParameter(value=1e-3)
+    learning_rate2 = Parameter(value=1e-3)
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
                               action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
     agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
@@ -99,17 +99,14 @@ def server_experiment(small, i, subdir):
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
-    dataset_callback = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
     control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=100,
-                                  callbacks=[dataset_callback, parameter_callback2])
+                                  callbacks=[parameter_callback2])
 
 
     #Reward Accumulator
     reward_acc = reward_accumulator_block(gamma=mdp_info_agent1.gamma, name='reward_acc')
 
-    #Error Accumulator
-    #err_acc = ErrorAccumulatorBlock(name='err_acc')
 
     # Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_block1, control_block2,
@@ -121,8 +118,6 @@ def server_experiment(small, i, subdir):
     control_block1.add_input(state_ph)
     reward_acc.add_input(reward_ph)
     reward_acc.add_alarm_connection(control_block2)
-    #err_acc.add_input(function_block1)
-    #err_acc.add_alarm_connection(control_block2)
     control_block1.add_reward(reward_acc)
     control_block1.add_alarm_connection(control_block2)
     function_block1.add_input(control_block1)
@@ -133,44 +128,37 @@ def server_experiment(small, i, subdir):
     function_block3.add_input(function_block2)
     function_block3.add_input(reward_ph)
     control_block2.add_input(function_block1)
-    #control_block2.add_input(err_acc)
     control_block2.add_reward(function_block3)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn_visual = list()
+    dataset_eval_visual = list()
+    low_level_dataset_eval = list()
 
-    n_eps = 5 if small else 20
-    for n in range(n_eps):
+    n_runs = 5
+    for n in range(n_runs):
         print('ITERATION', n)
-        dataset_learn = core.learn(n_episodes=500)
-        last_ep_dataset = pick_last_ep(dataset_learn)
-        dataset_learn_visual += last_ep_dataset
-        del dataset_learn
-
-    # Evaluate
-    dataset_eval = core.evaluate(n_episodes=10)
+        core.learn(n_episodes=200, skip=True)
+        dataset_eval = core.evaluate(n_episodes=10)
+        last_ep_dataset = pick_last_ep(dataset_eval)
+        dataset_eval_visual += last_ep_dataset
+        low_level_dataset_eval += control_block2.dataset.get()
 
     # Save
-
-    low_level_dataset = dataset_callback.get()
     parameter_dataset1 = parameter_callback1.get_values()
     parameter_dataset2 = parameter_callback2.get_values()
     mk_dir_recursive('./' + subdir + str(i))
 
-    np.save(subdir+str(i)+'/low_level_dataset_file', low_level_dataset)
+    np.save(subdir+str(i)+'/low_level_dataset_file', low_level_dataset_eval)
     np.save(subdir+str(i)+'/parameter_dataset1_file', parameter_dataset1)
-    #np.save(subdir+'/parameter_dataset2_1_file', parameter_dataset2_1)
     np.save(subdir+str(i)+'/parameter_dataset2_file', parameter_dataset2)
+    np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval_visual)
 
-    np.save(subdir+str(i)+'/dataset_learn_visual_file', dataset_learn_visual)
-    np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval)
-
-    del low_level_dataset
+    del low_level_dataset_eval
     del parameter_dataset1
     del parameter_dataset2
-    del dataset_learn_visual
+    del dataset_eval_visual
     del dataset_eval
 
     return

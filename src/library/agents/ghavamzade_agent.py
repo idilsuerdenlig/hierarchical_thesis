@@ -33,7 +33,7 @@ class GhavamzadeAgent(Agent):
         print 'RW*Z :', np.linalg.norm(reward*self.z), np.max(reward*self.z)
         print 'Z    :', np.max(self.z), np.min(self.z)'''
         if np.isinf(np.linalg.norm(reward*self.z)):
-            print('HELLO')
+            print('ERROR DIVERGING PARAMETER')
             exit()
         theta = theta + self.learning_rate(state, action)*reward*self.z
         #print 'LEARNING RATE:   ', self.learning_rate.get_value()
