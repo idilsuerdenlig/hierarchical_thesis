@@ -5,13 +5,13 @@ from memory_profiler import profile
 
 class GhavamzadeAgent(Agent):
 
-    def __init__(self, policy, mdp_info, params, features=None):
-        self.learning_rate = params['algorithm_params'].pop('learning_rate')
+    def __init__(self, policy, mdp_info, learning_rate, features=None):
+        self.learning_rate = learning_rate
 
         self.z = np.zeros(policy.weights_size)
 
 
-        super(GhavamzadeAgent, self).__init__(policy, mdp_info, params, features)
+        super(GhavamzadeAgent, self).__init__(policy, mdp_info, features)
 
     def fit(self, dataset):
         #print len(dataset)
