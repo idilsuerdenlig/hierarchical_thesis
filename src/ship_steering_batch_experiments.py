@@ -5,7 +5,7 @@ from mushroom.utils.folder import *
 
 def batch_experiments():
 
-    how_many = 2
+    how_many = 20
 
     parser = argparse.ArgumentParser(description='server_harch_ship')
     parser.add_argument("--small", help="environment size small or big", action="store_true")
