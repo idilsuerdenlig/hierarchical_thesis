@@ -58,7 +58,7 @@ def experiment():
     tilings = list()
     offset = (high - low) / (np.array(n_tiles) * n_tilings - n_tilings + 1.)
 
-    for i in xrange(n_tilings):
+    for i in range(n_tilings):
         x_min = low - (n_tilings - 1 - i) * offset
         x_max = high + i * offset
         x_range = [[x, y] for x, y in zip(x_min, x_max)]
@@ -69,8 +69,8 @@ def experiment():
 
     # Policy 1
     mean_tiles = np.zeros(shape=(2,n_tiles[0]*n_tiles[1]))
-    for j in xrange(n_tiles[1]):
-        for i in xrange(n_tiles[0]):
+    for j in range(n_tiles[1]):
+        for i in range(n_tiles[0]):
             index = i+j*n_tiles[0]
             mean_tiles[0][index] = ((high[0]-low[0])/(2*n_tiles[0])) + j*(high[0]-low[0])/n_tiles[0]
             mean_tiles[1][index] = ((high[1]-low[1])/(2*n_tiles[1])) + i*(high[1]-low[1])/n_tiles[1]
@@ -134,7 +134,7 @@ def experiment():
     # Train
     dataset_learn_visual = list()
     #dataset_learn_visual = core.learn(n_episodes=4000)
-    for n in xrange(3):
+    for n in range(3):
         dataset_learn = core.learn(n_episodes=1000)
         last_ep_dataset = pick_last_ep(dataset_learn)
         dataset_learn_visual += last_ep_dataset
@@ -143,7 +143,7 @@ def experiment():
     dataset_eval = core.evaluate(n_episodes=10)
 
     # Visualize
-    print np.reshape(pi1.get_weights(),(2,-1))
+    print(np.reshape(pi1.get_weights(),(2,-1)))
     low_level_dataset = dataset_callback.get()
     parameter_dataset1 = parameter_callback1.get_values()
     parameter_dataset2 = parameter_callback2.get_values()

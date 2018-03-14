@@ -1,6 +1,6 @@
-from library.core.hierarchical_core import HierarchicalCore
-from library.blocks.computational_graph import ComputationalGraph
-from library.blocks.control_block import ControlBlock
+from .library.core.hierarchical_core import HierarchicalCore
+from .library.blocks.computational_graph import ComputationalGraph
+from .library.blocks.control_block import ControlBlock
 from mushroom.utils import spaces
 from mushroom.utils.parameters import *
 from mushroom.utils.callbacks import CollectDataset
@@ -8,28 +8,28 @@ from mushroom.features.features import *
 from mushroom.features.basis import PolynomialBasis
 from mushroom.policy.gaussian_policy import *
 from mushroom.algorithms.policy_search import *
-from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
-from library.blocks.basic_operation_block import *
-from library.blocks.model_placeholder import PlaceHolder
-from library.blocks.mux_block import MuxBlock
+from .library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
+from .library.blocks.basic_operation_block import *
+from .library.blocks.model_placeholder import PlaceHolder
+from .library.blocks.mux_block import MuxBlock
 from mushroom.algorithms.value.td import *
 from mushroom.policy import EpsGreedy
 from mushroom.features.tiles import Tiles
-from library.blocks.functions.pick_state import pick_state
-from library.blocks.functions.rototranslate import rototranslate
-from library.blocks.hold_state import hold_state
-from library.blocks.functions.hi_lev_extr_rew_ghavamzade import G_high
-from library.blocks.functions.low_lev_extr_rew_ghavamzade import G_low
-from library.blocks.reward_accumulator import reward_accumulator_block
+from .library.blocks.functions.pick_state import pick_state
+from .library.blocks.functions.rototranslate import rototranslate
+from .library.blocks.hold_state import hold_state
+from .library.blocks.functions.hi_lev_extr_rew_ghavamzade import G_high
+from .library.blocks.functions.low_lev_extr_rew_ghavamzade import G_low
+from .library.blocks.reward_accumulator import reward_accumulator_block
 import datetime
 import argparse
 from mushroom.utils.folder import mk_dir_recursive
-from library.approximator.CMAC import CMACApproximator
-from library.environments.idilshipsteering import ShipSteering
+from .library.approximator.CMAC import CMACApproximator
+from .library.environments.idilshipsteering import ShipSteering
 from mushroom.environments.environment import MDPInfo
-from library.agents.ghavamzade_agent import GhavamzadeAgent
-from library.utils.pick_last_ep_dataset import pick_last_ep
-from library.blocks.hold_state import hold_state
+from .library.agents.ghavamzade_agent import GhavamzadeAgent
+from .library.utils.pick_last_ep_dataset import pick_last_ep
+from .library.blocks.hold_state import hold_state
 
 class TerminationCondition(object):
 
@@ -66,7 +66,7 @@ def experiment():
     args = parser.parse_args()
     small = args.small
 
-    print 'ENV IS SMALL? ', small
+    print('ENV IS SMALL? ', small)
     np.random.seed()
 
     # Model Block
@@ -245,11 +245,11 @@ def experiment():
     dataset_learn_visual = list()
 
     n_eps = 1 if small else 5
-    for n in xrange(n_eps):
-        print 'ITERATION', n
+    for n in range(n_eps):
+        print('ITERATION', n)
         dataset_learn = core.learn(n_episodes=1000)
         last_ep_dataset = pick_last_ep(dataset_learn)
-        print len(last_ep_dataset)
+        print(len(last_ep_dataset))
         dataset_learn_visual += last_ep_dataset
         del dataset_learn
 
@@ -263,7 +263,7 @@ def experiment():
     hi_lev_params = np.reshape(hi_lev_params, (4, 400))
     max_q_val = np.zeros(shape=(400,))
     act_max_q_val = np.zeros(shape=(400,))
-    for i in xrange(400):
+    for i in range(400):
         max_q_val[i] = np.amax(hi_lev_params[:,i])
         act_max_q_val[i] = np.argmax(hi_lev_params[:,i])
     max_q_val_tiled = np.reshape(max_q_val, (20, 20))

@@ -13,7 +13,7 @@ def visualize_policy_params(parameter_dataset1, parameter_dataset2, parameter_da
     paramsigmay_all = list()
 
     max_len = 0
-    for i in xrange(how_many):
+    for i in range(how_many):
         paramx_data = list()
         paramy_data = list()
         paramsigmax_data = list()
@@ -31,10 +31,10 @@ def visualize_policy_params(parameter_dataset1, parameter_dataset2, parameter_da
 
 
 
-    for i in xrange(how_many):
+    for i in range(how_many):
         diff_len = max_len-len(paramx_all[i])
         if diff_len is not 0:
-            for m in xrange(diff_len):
+            for m in range(diff_len):
                 paramx_all[i].append(np.NaN)
                 paramy_all[i].append(np.NaN)
                 paramsigmax_all[i].append(np.NaN)
@@ -86,25 +86,25 @@ def visualize_policy_params(parameter_dataset1, parameter_dataset2, parameter_da
 
     max_len2 = 0
     unstable_count = 0
-    for i in xrange(how_many):
+    for i in range(how_many):
         params2_one_experiment = parameter_dataset2[i]
         last_val = params2_one_experiment[-1]
         if last_val > 0:
             unstable_count += 1
         max_len2 = max(len(params2_one_experiment), max_len2)
 
-    print 'UNSTABLE COUNT:  ', unstable_count
+    print('UNSTABLE COUNT:  ', unstable_count)
 
     a = list()
-    for _ in xrange(how_many):
+    for _ in range(how_many):
         a.append(list())
 
-    for i in xrange(how_many):
+    for i in range(how_many):
         diff_len = max_len2-len(parameter_dataset2[i])
         for each in parameter_dataset2[i]:
             a[i].append(each)
         if diff_len is not 0:
-            for m in xrange(diff_len):
+            for m in range(diff_len):
                 a[i].append(np.array(np.NaN))
     param2_avg = np.nanmean(a, axis=0)
     ax3 = fig.add_subplot(222)

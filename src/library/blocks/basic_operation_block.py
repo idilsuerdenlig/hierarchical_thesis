@@ -1,4 +1,4 @@
-from f_block import fBlock
+from .f_block import fBlock
 import numpy as np
 
 

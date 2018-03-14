@@ -2,11 +2,11 @@ import numpy as np
 from mushroom.utils.spaces import Box
 from mushroom.features.basis import PolynomialBasis
 import matplotlib.pyplot as plt
-from library.visualization_tools.visualize_policy_parameters import visualize_policy_params
-from library.visualization_tools.visualize_saved_in_server import visualize_saved_in_server
+from .library.visualization_tools.visualize_policy_parameters import visualize_policy_params
+from .library.visualization_tools.visualize_saved_in_server import visualize_saved_in_server
 from mushroom.policy.gaussian_policy import *
-from library.approximator.CMAC import *
-from library.environments.idilshipsteering import ShipSteering
+from .library.approximator.CMAC import *
+from .library.environments.idilshipsteering import ShipSteering
 from mushroom.approximators import *
 from mushroom.features import *
 from mushroom.features.tiles import *
@@ -49,4 +49,4 @@ for i in xrange(100000000):
 
 '''
 
-print np.load('success_per_thousand_eps.npy')
+print(np.load('success_per_thousand_eps.npy'))

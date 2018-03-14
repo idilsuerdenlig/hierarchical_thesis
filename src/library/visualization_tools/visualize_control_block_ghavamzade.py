@@ -81,7 +81,7 @@ def visualize_control_block_ghavamzade(datalist_control, J = None, ep_count = No
     if ep_count is None:
         ep_count = n_eps
 
-    range_eps = xrange(n_eps-ep_count,n_eps)
+    range_eps = range(n_eps-ep_count,n_eps)
 
     '''for dataset_ep in dataset_list[n_eps-ep_count:n_eps]:
         print '-------------------------------------------------------------------------'

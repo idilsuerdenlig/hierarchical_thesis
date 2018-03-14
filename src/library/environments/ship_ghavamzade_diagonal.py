@@ -108,7 +108,7 @@ class ShipGhavamzadeDiagonal(Environment):
 
     def step(self, action):
 
-        for _ in xrange(3):
+        for _ in range(3):
             state, reward, absorbing,_ = self.step_low_level(action)
             if absorbing:
                 break

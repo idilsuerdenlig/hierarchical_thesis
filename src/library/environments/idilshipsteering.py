@@ -88,7 +88,7 @@ class ShipSteering(Environment):
 
     def step(self, action):
 
-        for _ in xrange(self.n_steps_action):
+        for _ in range(self.n_steps_action):
             state, reward, absorbing,_ = self.step_low_level(action)
             if absorbing:
                 break

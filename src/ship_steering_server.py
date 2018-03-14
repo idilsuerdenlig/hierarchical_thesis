@@ -1,6 +1,6 @@
-from library.core.hierarchical_core import HierarchicalCore
-from library.blocks.computational_graph import ComputationalGraph
-from library.blocks.control_block import ControlBlock
+from .library.core.hierarchical_core import HierarchicalCore
+from .library.blocks.computational_graph import ComputationalGraph
+from .library.blocks.control_block import ControlBlock
 from mushroom.utils import spaces
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 from mushroom.utils.callbacks import CollectDataset
@@ -10,19 +10,19 @@ from mushroom.policy.gaussian_policy import *
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.algorithms.policy_search import *
-from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
-from library.blocks.functions.feature_angle_diff_ship_steering import phi
-from library.blocks.basic_operation_block import *
-from library.blocks.model_placeholder import PlaceHolder
-from library.utils.pick_last_ep_dataset import pick_last_ep
-from library.blocks.reward_accumulator import reward_accumulator_block
-from library.blocks.error_accumulator import ErrorAccumulatorBlock
-from library.environments.idilshipsteering import ShipSteering
+from .library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
+from .library.blocks.functions.feature_angle_diff_ship_steering import phi
+from .library.blocks.basic_operation_block import *
+from .library.blocks.model_placeholder import PlaceHolder
+from .library.utils.pick_last_ep_dataset import pick_last_ep
+from .library.blocks.reward_accumulator import reward_accumulator_block
+from .library.blocks.error_accumulator import ErrorAccumulatorBlock
+from .library.environments.idilshipsteering import ShipSteering
 from mushroom.environments import MDPInfo
 import datetime
 import argparse
 from mushroom.utils.folder import *
-from library.blocks.functions.lqr_cost import lqr_cost
+from .library.blocks.functions.lqr_cost import lqr_cost
 
 
 def server_experiment(small, i, subdir):
@@ -149,8 +149,8 @@ def server_experiment(small, i, subdir):
     dataset_learn_visual = list()
 
     n_eps = 5 if small else 20
-    for n in xrange(n_eps):
-        print 'ITERATION', n
+    for n in range(n_eps):
+        print('ITERATION', n)
         dataset_learn = core.learn(n_episodes=500)
         last_ep_dataset = pick_last_ep(dataset_learn)
         dataset_learn_visual += last_ep_dataset

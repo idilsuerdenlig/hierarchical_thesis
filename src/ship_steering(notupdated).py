@@ -118,8 +118,8 @@ def experiment():
     # Train
     #dataset_learn_visual = core.learn(n_episodes=2000)
     dataset_learn_visual = list()
-    for n in xrange(6):
-        print n
+    for n in range(6):
+        print(n)
         dataset_learn = core.learn(n_episodes=1000)
         last_ep_dataset = pick_last_ep(dataset_learn)
         dataset_learn_visual += last_ep_dataset

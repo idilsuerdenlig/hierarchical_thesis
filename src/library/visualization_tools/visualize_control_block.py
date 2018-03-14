@@ -68,7 +68,7 @@ def visualize_control_block(datalist_control, ep_count = None, how_many=1):
     if ep_count is None:
         ep_count = n_eps
 
-    range_eps = xrange(n_eps-ep_count,n_eps)
+    range_eps = range(n_eps-ep_count,n_eps)
 
     for episode in range_eps:
         state_ep = state_list[episode]

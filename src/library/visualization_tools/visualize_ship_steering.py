@@ -88,7 +88,7 @@ def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None, n_gates
 
     maxt = 0
     if range_eps is None:
-        range_eps = xrange(len(x_list))
+        range_eps = range(len(x_list))
 
     for episode in range_eps:
         time =np.arange(len(x_list[episode]))

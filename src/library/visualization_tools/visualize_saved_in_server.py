@@ -1,9 +1,9 @@
-from visualize_ship_steering import visualize_ship_steering
+from .visualize_ship_steering import visualize_ship_steering
 import matplotlib.pyplot as plt
-from visualize_control_block import visualize_control_block
-from visualize_control_block_ghavamzade import visualize_control_block_ghavamzade
-from visualize_policy_parameters import visualize_policy_params
-from arrows import plot_arrows
+from .visualize_control_block import visualize_control_block
+from .visualize_control_block_ghavamzade import visualize_control_block_ghavamzade
+from .visualize_policy_parameters import visualize_policy_params
+from .arrows import plot_arrows
 from mushroom.utils.dataset import compute_J
 import numpy as np
 from tqdm import tqdm
@@ -32,7 +32,7 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many
 
         if small:
             low_level_dataset = list()
-        for exp_no in xrange(how_many):
+        for exp_no in range(how_many):
 
             parameter_dataset1 += [np.load('latest/'+str(exp_no)+'/parameter_dataset1_file.npy')]
             parameter_dataset2 += [np.load('latest/'+str(exp_no)+'/parameter_dataset2_file.npy')]
@@ -62,16 +62,16 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many
             size_eps = list()
 
         a = list()
-        for _ in xrange(how_many):
+        for _ in range(how_many):
             a.append(list())
-        for exp_no in tqdm(xrange(how_many), dynamic_ncols=True,
+        for exp_no in tqdm(range(how_many), dynamic_ncols=True,
                                    disable=False, leave=False):
             diff_len = max_leni-len(size_exp_list[exp_no])
             for each in tqdm(size_exp_list[exp_no], dynamic_ncols=True,
                                    disable=False, leave=False):
                 a[exp_no].append(each)
             if diff_len is not 0:
-                for _ in xrange(diff_len):
+                for _ in range(diff_len):
                     a[exp_no].append(np.NaN)
 
         size_eps_avg = np.nanmean(a, axis=0)
@@ -80,17 +80,17 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many
         ax1.set_title('size_eps_averaged')
 
         a = list()
-        for _ in xrange(how_many):
+        for _ in range(how_many):
             a.append(list())
 
-        for exp_no in tqdm(xrange(how_many), dynamic_ncols=True,
+        for exp_no in tqdm(range(how_many), dynamic_ncols=True,
                                    disable=False, leave=False):
             diff_len = max_lenJ-len(J_exp_list[exp_no])
             for each in tqdm(J_exp_list[exp_no], dynamic_ncols=True,
                                    disable=False, leave=False):
                 a[exp_no].append(each)
             if diff_len is not 0:
-                for _ in xrange(diff_len):
+                for _ in range(diff_len):
                     a[exp_no].append(np.NaN)
 
         J_eps_avg = np.nanmean(a, axis=0)
@@ -108,7 +108,7 @@ def visualize_saved_in_server(our_approach=True, small=True, n_gates=1, how_many
 
     else:
 
-        for i in xrange(how_many):
+        for i in range(how_many):
 
             act_max_q_val_tiled = np.load('latest/'+str(i)+'/act_max_q_val_tiled_file.npy')
             max_q_val_tiled = np.load('latest/'+str(i)+'/max_q_val_tiled_file.npy')

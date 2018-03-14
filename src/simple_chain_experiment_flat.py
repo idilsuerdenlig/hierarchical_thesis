@@ -18,7 +18,7 @@ from mushroom.environments import *
 
 def experiment():
     np.random.seed(3)
-    print 'hierarchical     :'
+    print('hierarchical     :')
     # MDP
     mdp = generate_simple_chain(state_n=5, goal_states=[2], prob=.8, rew=1,
                                 gamma=.9)
@@ -58,7 +58,7 @@ def experiment():
 
 def experiment2():
     np.random.seed(3)
-    print 'mushroom     :'
+    print('mushroom     :')
 
     # MDP
     mdp = generate_simple_chain(state_n=5, goal_states=[2], prob=.8, rew=1,
@@ -90,7 +90,7 @@ def experiment2():
 if __name__ == '__main__':
     Q1=experiment()
     Q2=experiment2()
-    print Q1
-    print Q2
+    print(Q1)
+    print(Q2)
     assert np.array_equal(Q1,Q2)
 

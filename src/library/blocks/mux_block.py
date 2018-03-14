@@ -1,4 +1,4 @@
-from block import Block
+from .block import Block
 import numpy as np
 
 
@@ -97,7 +97,7 @@ class MuxBlock(Block):
         selected_block_list = self.block_lists[selector]
 
         state = inputs[1:]
-        print state
+        print(state)
         for block in selected_block_list:
             block.reset(inputs=state)
             state = block.last_output
@@ -109,7 +109,7 @@ class MuxBlock(Block):
 
 
     def init(self):
-        for index in xrange(len(self.block_lists)):
+        for index in range(len(self.block_lists)):
             self.first[index] = True
         self.last_selection = None
         self.last_output = None

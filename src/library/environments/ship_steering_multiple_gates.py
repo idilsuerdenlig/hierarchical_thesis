@@ -120,7 +120,7 @@ class ShipSteeringMultiGate(Environment):
 
     def _through_gate(self, start, end):
 
-        for i in xrange(self.no_of_gates):
+        for i in range(self.no_of_gates):
             r = self._gate_e[i] - self._gate_s[i]
             s = end - start
             den = self._cross_2d(vecr=r, vecs=s)

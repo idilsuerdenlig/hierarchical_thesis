@@ -38,7 +38,7 @@ class SimpleAgent(object):
 
         """
         self.counter = 0
-        for k, v in mdp_info.iteritems():
+        for k, v in mdp_info.items():
             self.mdp_info[k] = v
 
     def fit(self, dataset):

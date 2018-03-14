@@ -2,7 +2,7 @@ import numpy as np
 
 from hierarchical_core import HierarchicalCore
 from computational_graph import ComputationalGraph
-from library.blocks.model_placeholder import ModelPlaceholder
+from .library.blocks.model_placeholder import ModelPlaceholder
 from blocks.control_block import ControlBlock
 
 from mushroom.algorithms.value.td import QLearning, DoubleQLearning,\
@@ -20,7 +20,7 @@ from visualize_control_block import VisualizeControlBlock
 
 def experiment():
     np.random.seed(3)
-    print 'hierarchical     :'
+    print('hierarchical     :')
 
     mdp = GridWorldVanHasselt()
 
@@ -61,7 +61,7 @@ def experiment():
 
 def experiment2():
     np.random.seed(3)
-    print 'mushroom     :'
+    print('mushroom     :')
 
     mdp = GridWorldVanHasselt()
 

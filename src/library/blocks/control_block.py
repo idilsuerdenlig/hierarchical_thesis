@@ -1,4 +1,4 @@
-from block import Block
+from .block import Block
 import numpy as np
 from library.utils.dataset_manager import DatasetManager
 
@@ -60,8 +60,8 @@ class ControlBlock(Block):
         #print self.name
         if self.name != 'control block H':
             if np.any(np.isnan(self.agent.policy.get_weights())):
-                print 'PARAMETER IS NaN!'
-                print self.name
+                print('PARAMETER IS NaN!')
+                print(self.name)
 
         self.alarm_output = self.last
 

@@ -1,4 +1,4 @@
-from ship_steering_server import server_experiment
+from .ship_steering_server import server_experiment
 import argparse
 import datetime
 from mushroom.utils.folder import *
@@ -11,12 +11,12 @@ def batch_experiments():
     parser.add_argument("--small", help="environment size small or big", action="store_true")
     args = parser.parse_args()
     small = args.small
-    print 'SMALL IS', small
+    print('SMALL IS', small)
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '/'
 
-    for i in xrange(how_many):
-        print 'experiment number:  ', i
+    for i in range(how_many):
+        print('experiment number:  ', i)
         server_experiment(small, i, subdir)
 
     force_symlink(subdir, 'latest')

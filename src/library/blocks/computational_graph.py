@@ -42,7 +42,7 @@ class ComputationalGraph(object):
             for i in inputs:
                 if i is not None:
                     if np.any(np.isnan(i)):
-                        print inputs
+                        print(inputs)
                         exit()
             if not block.alarm_connections:
                 alarms.append(True)
