@@ -139,7 +139,7 @@ def server_experiment(small, i, subdir):
     n_runs = 5
     for n in range(n_runs):
         print('ITERATION', n)
-        core.learn(n_episodes=200, skip=True)
+        core.learn(n_episodes=1000, skip=True)
         dataset_eval = core.evaluate(n_episodes=10)
         last_ep_dataset = pick_last_ep(dataset_eval)
         dataset_eval_visual += last_ep_dataset
