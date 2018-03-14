@@ -97,7 +97,6 @@ class MuxBlock(Block):
         selected_block_list = self.block_lists[selector]
 
         state = inputs[1:]
-        print(state)
         for block in selected_block_list:
             block.reset(inputs=state)
             state = block.last_output

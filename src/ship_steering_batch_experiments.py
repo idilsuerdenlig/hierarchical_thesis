@@ -1,4 +1,4 @@
-from .ship_steering_server import server_experiment
+from ship_steering_server import server_experiment
 import argparse
 import datetime
 from mushroom.utils.folder import *

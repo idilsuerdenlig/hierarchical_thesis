@@ -1,6 +1,6 @@
-from .library.core.hierarchical_core import HierarchicalCore
-from .library.blocks.computational_graph import ComputationalGraph
-from .library.blocks.control_block import ControlBlock
+from library.core.hierarchical_core import HierarchicalCore
+from library.blocks.computational_graph import ComputationalGraph
+from library.blocks.control_block import ControlBlock
 from mushroom.utils import spaces
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 from mushroom.utils.callbacks import CollectDataset
@@ -10,19 +10,19 @@ from mushroom.policy.gaussian_policy import *
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.algorithms.policy_search import *
-from .library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
-from .library.blocks.functions.feature_angle_diff_ship_steering import phi
-from .library.blocks.basic_operation_block import *
-from .library.blocks.model_placeholder import PlaceHolder
-from .library.utils.pick_last_ep_dataset import pick_last_ep
-from .library.blocks.reward_accumulator import reward_accumulator_block
-from .library.blocks.error_accumulator import ErrorAccumulatorBlock
-from .library.environments.idilshipsteering import ShipSteering
+from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
+from library.blocks.functions.feature_angle_diff_ship_steering import phi
+from library.blocks.basic_operation_block import *
+from library.blocks.model_placeholder import PlaceHolder
+from library.utils.pick_last_ep_dataset import pick_last_ep
+from library.blocks.reward_accumulator import reward_accumulator_block
+from library.blocks.error_accumulator import ErrorAccumulatorBlock
+from library.environments.idilshipsteering import ShipSteering
 from mushroom.environments import MDPInfo
 import datetime
 import argparse
 from mushroom.utils.folder import *
-from .library.blocks.functions.lqr_cost import lqr_cost
+from library.blocks.functions.lqr_cost import lqr_cost
 
 
 def server_experiment(small, i, subdir):
@@ -77,28 +77,21 @@ def server_experiment(small, i, subdir):
 
     # Agent 1
     if small:
-        learning_rate = AdaptiveParameter(value=10)
+        learning_rate1 = AdaptiveParameter(value=10)
     else:
-        learning_rate = AdaptiveParameter(value=65)
-    algorithm_params = dict(learning_rate=learning_rate)
-    fit_params = dict()
-    agent_params = {'algorithm_params': algorithm_params,
-                    'fit_params': fit_params}
+        learning_rate1 = AdaptiveParameter(value=65)
+
 
     lim = 150 if small else 1000
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(0, lim, (2,)), gamma=mdp.info.gamma, horizon=100)
-    agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params, features=features)
+    agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=features)
 
     # Agent 2
-    learning_rate = AdaptiveParameter(value=1e-3)
-    algorithm_params = dict(learning_rate=learning_rate)
-    fit_params = dict()
-    agent_params = {'algorithm_params': algorithm_params,
-                    'fit_params': fit_params}
+    learning_rate2 = AdaptiveParameter(value=1e-3)
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
                               action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
-    agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, params=agent_params)
+    agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)

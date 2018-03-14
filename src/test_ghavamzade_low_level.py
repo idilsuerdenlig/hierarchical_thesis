@@ -1,5 +1,5 @@
 import numpy as np
-from .library.agents.ghavamzade_agent import GhavamzadeAgent
+from library.agents.ghavamzade_agent import GhavamzadeAgent
 from mushroom.algorithms.policy_search import REINFORCE, GPOMDP, eNAC
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
@@ -12,8 +12,8 @@ from mushroom.utils.dataset import compute_J
 from mushroom.utils.parameters import *
 from tqdm import tqdm
 from mushroom.utils.angles_utils import shortest_angular_distance, normalize_angle
-from .library.approximator.CMAC import CMACApproximator
-from .library.environments.ship_ghavamzade_diagonal import ShipGhavamzadeDiagonal
+from library.approximator.CMAC import CMACApproximator
+from library.environments.ship_ghavamzade_diagonal import ShipGhavamzadeDiagonal
 
 tqdm.monitor_interval = 0
 
@@ -45,11 +45,7 @@ def experiment(n_runs, n_iterations, ep_per_run):
 
     # Agent
     learning_rate = Parameter(value=1e-7)
-    algorithm_params = dict(learning_rate=learning_rate)
-    fit_params = dict()
-    agent_params = {'algorithm_params': algorithm_params,
-                    'fit_params': fit_params}
-    agent = GhavamzadeAgent(policy, mdp.info, agent_params)
+    agent = GhavamzadeAgent(policy, mdp.info, learning_rate)
 
     # Train
     core = Core(agent, mdp)
@@ -70,5 +66,5 @@ def experiment(n_runs, n_iterations, ep_per_run):
 
 if __name__ == '__main__':
 
-    experiment(n_runs=2, n_iterations=250, ep_per_run=100)
+    experiment(n_runs=2, n_iterations=2, ep_per_run=100)
 
