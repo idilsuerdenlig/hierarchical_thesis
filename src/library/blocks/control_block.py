@@ -107,6 +107,7 @@ class ControlBlock(Block):
             if np.any(dataset_step[1]) is None:
                 print('action none')
                 print(self.name)
+                np.save('dataset_action_none.npy',dataset)
                 exit()
         #if self.name == 'control block 1':
         #print self.name, 'FIT-----------------------------------------------------'
