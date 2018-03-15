@@ -134,11 +134,11 @@ def experiment():
     pi2 = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
 
     # Agent1
-    learning_rate1 = ExponentialDecayParameter(value=1e-8, decay_exp=0.5)
+    learning_rate1 = AdaptiveParameter(value=1e-5)
     agent1 = GhavamzadeAgent(pi1, mdp.info, learning_rate1, featuresL)
 
     # Agent2
-    learning_rate2 = ExponentialDecayParameter(value=1e-8, decay_exp=0.5)
+    learning_rate2 = AdaptiveParameter(value=1e-5)
     agent2 = GhavamzadeAgent(pi2, mdp.info, learning_rate2, featuresL)
 
 
@@ -147,11 +147,11 @@ def experiment():
     termination_condition2 = TerminationCondition(active_dir=5, small=small)
 
     # Control Block +
-    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_steps_per_fit=1,
+    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=50,
                                   termination_condition=termination_condition1)
 
     # Control Block x
-    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_steps_per_fit=1,
+    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=50,
                                   termination_condition=termination_condition2)
 
     # Function Block 1: picks state for hi lev ctrl

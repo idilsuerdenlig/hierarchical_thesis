@@ -25,12 +25,12 @@ from mushroom.utils.folder import *
 from library.blocks.functions.lqr_cost import lqr_cost
 
 
-def server_experiment(small, i, subdir):
+def server_experiment(i, subdir):
 
     np.random.seed()
 
     # Model Block
-    mdp = ShipSteering(small=small, hard=True, n_steps_action=3)
+    mdp = ShipSteering(small=False, hard=True, n_steps_action=3)
 
     #State Placeholder
     state_ph = PlaceHolder(name='state_ph')
@@ -54,18 +54,10 @@ def server_experiment(small, i, subdir):
     #Features
     features = Features(basis_list=[PolynomialBasis()])
 
-    #Features
-    features_enac = Features(basis_list=PolynomialBasis.generate(2,1))
-
     # Policy 1
-    if small:
-        sigma1 = np.array([38, 38])
-        approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
-        approximator1.set_weights(np.array([75, 75]))
-    else:
-        sigma1 = np.array([250, 250])
-        approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
-        approximator1.set_weights(np.array([500, 500]))
+    sigma1 = np.array([250, 250])
+    approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
+    approximator1.set_weights(np.array([500, 500]))
 
     pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
 
@@ -76,13 +68,8 @@ def server_experiment(small, i, subdir):
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
-    if small:
-        learning_rate1 = AdaptiveParameter(value=10)
-    else:
-        learning_rate1 = AdaptiveParameter(value=65)
-
-
-    lim = 150 if small else 1000
+    learning_rate1 = AdaptiveParameter(value=100)
+    lim = 1000
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(0, lim, (2,)), gamma=mdp.info.gamma, horizon=100)
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=features)
@@ -95,7 +82,7 @@ def server_experiment(small, i, subdir):
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=10,
+    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=100,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
@@ -139,8 +126,8 @@ def server_experiment(small, i, subdir):
     n_runs = 5
     for n in range(n_runs):
         print('ITERATION', n)
-        core.learn(n_episodes=1000, skip=True)
-        dataset_eval = core.evaluate(n_episodes=10)
+        core.learn(n_episodes=5000, skipi=True)
+        dataset_eval = core.evaluate(n_episodes=100)
         last_ep_dataset = pick_last_ep(dataset_eval)
         dataset_eval_visual += last_ep_dataset
         low_level_dataset_eval += control_block2.dataset.get()
@@ -164,4 +151,4 @@ def server_experiment(small, i, subdir):
     return
 
 if __name__ == '__main__':
-    server_experiment(small=False, i=0, subdir='latest')
+    server_experiment(i=0, subdir='latest')

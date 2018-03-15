@@ -44,7 +44,7 @@ def experiment(n_runs, n_iterations, ep_per_run):
     policy = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
 
     # Agent
-    learning_rate = Parameter(value=1e-7)
+    learning_rate = Parameter(value=1e-10)
     agent = GhavamzadeAgent(policy, mdp.info, learning_rate)
 
     # Train
