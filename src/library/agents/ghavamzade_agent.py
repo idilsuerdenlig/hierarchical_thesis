@@ -1,7 +1,6 @@
 from mushroom.algorithms.agent import Agent
 from mushroom.utils.parameters import *
 import numpy as np
-from memory_profiler import profile
 
 class GhavamzadeAgent(Agent):
 

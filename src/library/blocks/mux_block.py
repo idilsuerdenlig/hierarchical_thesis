@@ -18,12 +18,6 @@ class MuxBlock(Block):
 
     def _call(self, inputs, reward, absorbing, last, learn_flag):
 
-
-        '''for i in inputs:
-            if np.any(np.isnan(i)):
-                print inputs
-                print self.name
-                exit()'''
         selector = inputs[0]
         if selector < 4:
             selector = 0
@@ -41,7 +35,7 @@ class MuxBlock(Block):
         if self.first[selector]:
             for block in selected_block_list:
                 block.reset(inputs=inputs[1:])
-                self.first[selector] = False
+            self.first[selector] = False
 
         else:
             for block in selected_block_list:
@@ -59,7 +53,8 @@ class MuxBlock(Block):
 
         state = inputs[1:]
 
-        if self.last_selection is not None and self.last_selection != selector:
+        #problem when more than two blocks
+        if self.last_selection is not None and self.last_selection != selector and not self.first[int(not(selector))]:
             for block in other_block_list:
                 if block.reward_connection is not None:
                     reward = block.reward_connection.last_output[0]
@@ -101,6 +96,8 @@ class MuxBlock(Block):
             block.reset(inputs=state)
             state = block.last_output
         self.first[selector] = False
+        self.first[int(not(selector))] = True
+
 
         self.last_selection = selector
 

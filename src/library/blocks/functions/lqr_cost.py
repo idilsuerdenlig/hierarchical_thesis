@@ -2,8 +2,8 @@ import numpy as np
 
 
 def lqr_cost(ins):
-    q_square = 1
-    r_square = 0.25
+    q_square = 16
+    r_square = 1
 
     error_cost = np.zeros(1)
     action_cost = np.zeros(1)
@@ -25,7 +25,7 @@ def lqr_cost(ins):
         if r is not None:
             action_cost += -r.dot(r)
 
-    normalization_coefficient = 1/144
+    normalization_coefficient = 144
 
-    lqr_cost = r_square * action_cost + q_square * normalization_coefficient * error_cost
+    lqr_cost = r_square * action_cost * normalization_coefficient + q_square * error_cost
     return lqr_cost

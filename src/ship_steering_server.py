@@ -68,26 +68,26 @@ def server_experiment(i, subdir):
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
-    learning_rate1 = AdaptiveParameter(value=100)
+    learning_rate1 = AdaptiveParameter(value=65)
     lim = 1000
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(0, lim, (2,)), gamma=mdp.info.gamma, horizon=100)
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=features)
 
     # Agent 2
-    learning_rate2 = Parameter(value=1e-3)
+    learning_rate2 = AdaptiveParameter(value=1e-3)
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
                               action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
     agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=100,
+    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=20,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=100,
+    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=500,
                                   callbacks=[parameter_callback2])
 
 
@@ -126,8 +126,8 @@ def server_experiment(i, subdir):
     n_runs = 5
     for n in range(n_runs):
         print('ITERATION', n)
-        core.learn(n_episodes=5000, skipi=True)
-        dataset_eval = core.evaluate(n_episodes=100)
+        core.learn(n_episodes=1000, skip=True)
+        dataset_eval = core.evaluate(n_episodes=10)
         last_ep_dataset = pick_last_ep(dataset_eval)
         dataset_eval_visual += last_ep_dataset
         low_level_dataset_eval += control_block2.dataset.get()
@@ -137,10 +137,10 @@ def server_experiment(i, subdir):
     parameter_dataset2 = parameter_callback2.get_values()
     mk_dir_recursive('./' + subdir + str(i))
 
-    np.save(subdir+str(i)+'/low_level_dataset_file', low_level_dataset_eval)
-    np.save(subdir+str(i)+'/parameter_dataset1_file', parameter_dataset1)
-    np.save(subdir+str(i)+'/parameter_dataset2_file', parameter_dataset2)
-    np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval_visual)
+    np.save(subdir+'/'+str(i)+'/low_level_dataset_file', low_level_dataset_eval)
+    np.save(subdir+'/'+str(i)+'/parameter_dataset1_file', parameter_dataset1)
+    np.save(subdir+'/'+str(i)+'/parameter_dataset2_file', parameter_dataset2)
+    np.save(subdir+'/'+str(i)+'/dataset_eval_file', dataset_eval_visual)
 
     del low_level_dataset_eval
     del parameter_dataset1

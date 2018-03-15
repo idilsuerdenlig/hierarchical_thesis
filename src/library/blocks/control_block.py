@@ -33,13 +33,13 @@ class ControlBlock(Block):
     def _call(self, inputs, reward, absorbing, last, learn_flag):
 
         state = np.concatenate(inputs, axis=0)
-
+        if last and not absorbing:
+            print(self.name, 'horizon reached')
         if self.last or last:
             self.curr_episode_counter += 1
 
         if self.last:
             if not self.terminated:
-
                 self.last_call(inputs, reward, absorbing, learn_flag)
             self.reset(inputs)
         else:
@@ -51,6 +51,7 @@ class ControlBlock(Block):
             self.dataset.add_sample(sample, False)
 
             self.last = self.ep_step_counter >= self.horizon or self.termination_condition(state)
+
 
         if learn_flag and \
             (len(self.dataset) == self.n_steps_per_fit or self.curr_episode_counter == self.n_eps_per_fit):
