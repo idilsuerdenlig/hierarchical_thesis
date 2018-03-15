@@ -102,6 +102,12 @@ class ControlBlock(Block):
         return size_eps
 
     def fit(self, dataset):
+
+        for dataset_step in dataset:
+            if np.any(dataset_step[1]) is None:
+                print('action none')
+                print(self.name)
+                exit()
         #if self.name == 'control block 1':
         #print self.name, 'FIT-----------------------------------------------------'
         self.agent.fit(dataset)
