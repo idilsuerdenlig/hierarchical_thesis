@@ -27,7 +27,6 @@ from mushroom.utils.folder import mk_dir_recursive
 from library.approximator.CMAC import CMACApproximator
 from library.environments.idilshipsteering import ShipSteering
 from mushroom.environments.environment import MDPInfo
-from library.agents.ghavamzade_agent import GhavamzadeAgent
 from library.utils.pick_last_ep_dataset import pick_last_ep
 from library.blocks.hold_state import hold_state
 
@@ -135,11 +134,11 @@ def experiment():
 
     # Agent1
     learning_rate1 = AdaptiveParameter(value=1e-5)
-    agent1 = GhavamzadeAgent(pi1, mdp.info, learning_rate1, featuresL)
+    agent1 = GPOMDP(pi1, mdp.info, learning_rate1, featuresL)
 
     # Agent2
     learning_rate2 = AdaptiveParameter(value=1e-5)
-    agent2 = GhavamzadeAgent(pi2, mdp.info, learning_rate2, featuresL)
+    agent2 = GPOMDP(pi2, mdp.info, learning_rate2, featuresL)
 
 
     #Termination Conds
