@@ -63,13 +63,13 @@ def server_experiment_tiles(i, subdir):
 
 
     # Policy 1
-    mean_tiles = np.zeros(shape=(2,n_tiles[0]*n_tiles[1]))
+    mean_tiles = np.zeros(shape=(n_tiles[0]*n_tiles[1], 2))
     for j in range(n_tiles[1]):
         for i in range(n_tiles[0]):
             index = i+j*n_tiles[0]
-            mean_tiles[0][index] = ((high[0]-low[0])/(2*n_tiles[0])) + j*(high[0]-low[0])/n_tiles[0]
-            mean_tiles[1][index] = ((high[1]-low[1])/(2*n_tiles[1])) + i*(high[1]-low[1])/n_tiles[1]
-
+            mean_tiles[index][0] = ((high[0]-low[0])/(2*n_tiles[0])) + i*(high[0]-low[0])/n_tiles[0]
+            mean_tiles[index][1] = ((high[1]-low[1])/(2*n_tiles[1])) + j*(high[1]-low[1])/n_tiles[1]
+    print(mean_tiles)
     sigma1 = np.eye(2, 2)*100
     approximator1 = Regressor(LinearApproximator, weights=mean_tiles, input_shape=(featuresH.size,), output_shape=(2,))
     approximator1.set_weights(mean_tiles)
@@ -96,12 +96,12 @@ def server_experiment_tiles(i, subdir):
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=50,
+    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=20,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=500,
+    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=200,
                                   callbacks=[parameter_callback2])
 
     # Reward Accumulator
@@ -138,8 +138,8 @@ def server_experiment_tiles(i, subdir):
     n_runs = 5
     for n in range(n_runs):
         print('ITERATION', n)
-        core.learn(n_episodes=1000, skip=True)
-        dataset_eval = core.evaluate(n_episodes=10)
+        core.learn(n_episodes=2000, skip=True)
+        dataset_eval = core.evaluate(n_episodes=20)
         last_ep_dataset = pick_last_ep(dataset_eval)
         dataset_eval_visual += last_ep_dataset
         low_level_dataset_eval += control_block2.dataset.get()
@@ -164,4 +164,6 @@ def server_experiment_tiles(i, subdir):
 
 
 if __name__ == '__main__':
-    server_experiment_tiles(i=0, subdir='latest')
+    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '/'
+
+    server_experiment_tiles(i=0, subdir=subdir)
