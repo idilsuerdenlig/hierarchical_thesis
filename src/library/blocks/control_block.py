@@ -33,8 +33,8 @@ class ControlBlock(Block):
     def _call(self, inputs, reward, absorbing, last, learn_flag):
 
         state = np.concatenate(inputs, axis=0)
-        if last and not absorbing:
-            print(self.name, 'horizon reached')
+        #if last and not absorbing:
+            #print(self.name, 'horizon reached')
         if self.last or last:
             self.curr_episode_counter += 1
 

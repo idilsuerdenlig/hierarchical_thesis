@@ -68,7 +68,7 @@ def server_experiment(i, subdir):
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
-    learning_rate1 = AdaptiveParameter(value=65)
+    learning_rate1 = AdaptiveParameter(value=100)
     lim = 1000
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(0, lim, (2,)), gamma=mdp.info.gamma, horizon=100)
@@ -82,7 +82,7 @@ def server_experiment(i, subdir):
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=20,
+    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=50,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
