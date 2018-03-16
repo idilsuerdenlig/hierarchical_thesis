@@ -1,71 +1,66 @@
-from hierarchical_core import HierarchicalCore
-from computational_graph import ComputationalGraph
-from control_block import ControlBlock
+from library.core.hierarchical_core import HierarchicalCore
+from library.blocks.computational_graph import ComputationalGraph
+from library.blocks.control_block import ControlBlock
 from mushroom.utils import spaces
-from mushroom.environments import *
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 from mushroom.utils.callbacks import CollectDataset
 from mushroom.features.basis import *
 from mushroom.features.features import *
+from mushroom.features.tiles import Tiles
 from mushroom.policy.gaussian_policy import *
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.algorithms.policy_search import *
-from visualize_ship_steering import visualize_ship_steering
-import matplotlib.pyplot as plt
-from visualize_control_block import visualize_control_block
-from collect_policy_parameter import CollectPolicyParameter
-from visualize_policy_params import visualize_policy_params
-from feature_angle_diff_ship_steering import phi
-from basic_operation_block import *
-from model_placeholder import PlaceHolder
-from mushroom.features.tiles import Tiles
-from pick_last_ep_dataset import pick_last_ep
+from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
+from library.blocks.functions.feature_angle_diff_ship_steering import phi
+from library.blocks.basic_operation_block import *
+from library.blocks.model_placeholder import PlaceHolder
+from library.utils.pick_last_ep_dataset import pick_last_ep
+from library.blocks.reward_accumulator import reward_accumulator_block
+from library.blocks.error_accumulator import ErrorAccumulatorBlock
+from library.environments.idilshipsteering import ShipSteering
+from mushroom.environments import MDPInfo
+import datetime
+import argparse
+from mushroom.utils.folder import *
+from library.blocks.functions.lqr_cost import lqr_cost
 
 
+def server_experiment_tiles(i, subdir):
+    print('TIILEEEEEEEEEEEEEEEES')
 
-def experiment():
     np.random.seed()
 
-
     # Model Block
-    mdp = ShipSteering()
+    mdp = ShipSteering(small=False, hard=True, n_steps_action=3)
 
     #State Placeholder
-    state_ph = PlaceHolder()
+    state_ph = PlaceHolder(name='state_ph')
 
     #Reward Placeholder
-    reward_ph = PlaceHolder()
+    reward_ph = PlaceHolder(name='reward_ph')
+
+    #Last_In Placeholder
+    lastaction_ph = PlaceHolder(name='lastaction_ph')
 
     # Function Block 1
-    function_block1 = fBlock(wake_time=1, phi=phi)
+    function_block1 = fBlock(name='f1 (angle difference)',phi=phi)
 
     # Function Block 2
-    function_block2 = squarednormBlock(wake_time=1)
+    function_block2 = fBlock(name='f2 (lqr cost)', phi=lqr_cost)
 
     # Function Block 3
-    function_block3 = plusBlock(wake_time=1)
+    function_block3 = addBlock(name='f3 (summation)')
 
-    #Tiles
 
+    # FeaturesH
+    n_tiles = [3, 3]
     low = [0, 0]
-    high = [150, 150]
-    n_tiles = [20, 20]
-    low = np.array(low, dtype=np.float)
-    high = np.array(high, dtype=np.float)
-    n_tilings = 1
+    high = [1000, 1000]
 
-    tilings = list()
-    offset = (high - low) / (np.array(n_tiles) * n_tilings - n_tilings + 1.)
+    tilingsH = Tiles.generate(n_tilings=1, n_tiles=n_tiles, low=low, high=high)
+    featuresH = Features(tilings=tilingsH)
 
-    for i in range(n_tilings):
-        x_min = low - (n_tilings - 1 - i) * offset
-        x_max = high + i * offset
-        x_range = [[x, y] for x, y in zip(x_min, x_max)]
-        tilings.append(Tiles(x_range, n_tiles))
-
-    #Features
-    features = Features(tilings=tilings)
 
     # Policy 1
     mean_tiles = np.zeros(shape=(2,n_tiles[0]*n_tiles[1]))
@@ -75,85 +70,98 @@ def experiment():
             mean_tiles[0][index] = ((high[0]-low[0])/(2*n_tiles[0])) + j*(high[0]-low[0])/n_tiles[0]
             mean_tiles[1][index] = ((high[1]-low[1])/(2*n_tiles[1])) + i*(high[1]-low[1])/n_tiles[1]
 
-    sigma1 = np.eye(2, 2)*1.9
-    approximator1 = Regressor(LinearApproximator, weights=mean_tiles, input_shape=(features.size,), output_shape=(2,))
+    sigma1 = np.eye(2, 2)*100
+    approximator1 = Regressor(LinearApproximator, weights=mean_tiles, input_shape=(featuresH.size,), output_shape=(2,))
     approximator1.set_weights(mean_tiles)
     pi1 = MultivariateGaussianPolicy(mu=approximator1,sigma=sigma1)
 
+
     # Policy 2
-    sigma2 = Parameter(value=.1)
+    sigma2 = Parameter(value=.005)
     approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
-    #pi2.set_weights(np.array([-0.01]))
 
     # Agent 1
-    learning_rate = AdaptiveParameter(value=0.6)
-    algorithm_params = dict(learning_rate=learning_rate)
-    fit_params = dict()
-    agent_params = {'algorithm_params': algorithm_params,
-                    'fit_params': fit_params}
-    mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space, action_space=spaces.Box(0,150,(2,)), gamma=mdp.info.gamma, horizon=100)
-    agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, params=agent_params, features=features)
+    learning_rate1 = AdaptiveParameter(value=65)
+    lim = 1000
+    mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
+                              action_space=spaces.Box(0, lim, (2,)), gamma=mdp.info.gamma, horizon=100)
+    agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=featuresH)
 
     # Agent 2
-    learning_rate = AdaptiveParameter(value=.001)
-    algorithm_params = dict(learning_rate=learning_rate)
-    fit_params = dict()
-    agent_params = {'algorithm_params': algorithm_params,
-                    'fit_params': fit_params}
-    mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi,np.pi,(1,)), action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
-    agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, params=agent_params, features=None)
+    learning_rate2 = AdaptiveParameter(value=1e-3)
+    mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
+                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
+    agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(wake_time=10, agent=agent1, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[parameter_callback1])
+    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=50,
+                                  callbacks=[parameter_callback1])
 
     # Control Block 2
-    dataset_callback = CollectDataset()
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(wake_time=1, agent=agent2, n_eps_per_fit=10, n_steps_per_fit=None, callbacks=[dataset_callback, parameter_callback2])
+    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=500,
+                                  callbacks=[parameter_callback2])
 
+    # Reward Accumulator
+    reward_acc = reward_accumulator_block(gamma=mdp_info_agent1.gamma, name='reward_acc')
 
     # Algorithm
-    blocks = [state_ph, reward_ph, control_block1, control_block2, function_block1, function_block2, function_block3]
-    order = [0, 1, 2, 4, 5, 6, 3]
+    blocks = [state_ph, reward_ph, lastaction_ph, control_block1, control_block2,
+              function_block1, function_block2, function_block3, reward_acc]
+
     state_ph.add_input(control_block2)
     reward_ph.add_input(control_block2)
+    lastaction_ph.add_input(control_block2)
     control_block1.add_input(state_ph)
-    control_block1.add_reward(reward_ph)
+    reward_acc.add_input(reward_ph)
+    reward_acc.add_alarm_connection(control_block2)
+    control_block1.add_reward(reward_acc)
+    control_block1.add_alarm_connection(control_block2)
     function_block1.add_input(control_block1)
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
+    function_block2.add_input(lastaction_ph)
+    function_block3.add_input(function_block1)
     function_block3.add_input(function_block2)
-    #function_block3.add_input(reward_ph)
+    function_block3.add_input(reward_ph)
     control_block2.add_input(function_block1)
     control_block2.add_reward(function_block3)
-    computational_graph = ComputationalGraph(blocks=blocks, order=order, model=mdp)
+    computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_learn_visual = list()
-    #dataset_learn_visual = core.learn(n_episodes=4000)
-    for n in range(3):
-        dataset_learn = core.learn(n_episodes=1000)
-        last_ep_dataset = pick_last_ep(dataset_learn)
-        dataset_learn_visual += last_ep_dataset
-        del dataset_learn
-    # Evaluate
-    dataset_eval = core.evaluate(n_episodes=10)
+    dataset_eval_visual = list()
+    low_level_dataset_eval = list()
 
-    # Visualize
-    print(np.reshape(pi1.get_weights(),(2,-1)))
-    low_level_dataset = dataset_callback.get()
+    n_runs = 5
+    for n in range(n_runs):
+        print('ITERATION', n)
+        core.learn(n_episodes=1000, skip=True)
+        dataset_eval = core.evaluate(n_episodes=10)
+        last_ep_dataset = pick_last_ep(dataset_eval)
+        dataset_eval_visual += last_ep_dataset
+        low_level_dataset_eval += control_block2.dataset.get()
+
+    # Save
     parameter_dataset1 = parameter_callback1.get_values()
     parameter_dataset2 = parameter_callback2.get_values()
-    visualize_policy_params(parameter_dataset1, parameter_dataset2)
-    visualize_control_block(low_level_dataset, ep_count=20)
-    visualize_ship_steering(dataset_learn_visual, 'learn')
-    visualize_ship_steering(dataset_eval, 'evaluate')
-    plt.show()
+    mk_dir_recursive('./' + subdir + str(i))
+
+    np.save(subdir + '/' + str(i) + '/low_level_dataset_file', low_level_dataset_eval)
+    np.save(subdir + '/' + str(i) + '/parameter_dataset1_file', parameter_dataset1)
+    np.save(subdir + '/' + str(i) + '/parameter_dataset2_file', parameter_dataset2)
+    np.save(subdir + '/' + str(i) + '/dataset_eval_file', dataset_eval_visual)
+
+    del low_level_dataset_eval
+    del parameter_dataset1
+    del parameter_dataset2
+    del dataset_eval_visual
+    del dataset_eval
 
     return
 
+
 if __name__ == '__main__':
-    experiment()
+    server_experiment_tiles(i=0, subdir='latest')

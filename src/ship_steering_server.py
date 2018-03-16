@@ -52,6 +52,14 @@ def server_experiment(i, subdir):
 
 
     #Features
+'''
+    # FeaturesH
+    lim = 150 if small else 1000
+
+    tilingsH = Tiles.generate(n_tilings=1, n_tiles=[20, 20], low=[0, 0], high=[lim, lim])
+    featuresH = Features(tilings=tilingsH)'''
+
+
     features = Features(basis_list=[PolynomialBasis()])
 
     # Policy 1
