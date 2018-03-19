@@ -1,6 +1,6 @@
 from .block import Block
 import numpy as np
-
+from .control_block import ControlBlock
 
 class MuxBlock(Block):
     """
@@ -54,13 +54,16 @@ class MuxBlock(Block):
         state = inputs[1:]
 
         #problem when more than two blocks
-        if self.last_selection is not None and self.last_selection != selector and not self.first[int(not(selector))]:
+        if self.last_selection is not None and self.last_selection != selector:
             for block in other_block_list:
                 if block.reward_connection is not None:
                     reward = block.reward_connection.last_output[0]
                 else:
                     reward = None
-                block.last_call(inputs=state, reward=reward, absorbing=absorbing, learn_flag=learn_flag)
+                if isinstance(block, ControlBlock):
+                    block.last_call(inputs=state, reward=reward, absorbing=absorbing, learn_flag=learn_flag)
+                else:
+                    block(inputs=state, reward=reward, absorbing=absorbing, learn_flag=learn_flag)
                 state = block.last_output
 
         for block in other_block_list:

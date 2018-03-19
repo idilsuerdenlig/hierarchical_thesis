@@ -39,27 +39,15 @@ class TerminationCondition(object):
 
     def __call__(self, state):
         if self.active_direction <= 4:
-            if self.small:
-                goal_pos = np.array([14, 7.5])
-            else:
-                goal_pos = np.array([140, 75])
+            goal_pos = np.array([140, 75])
         else:
-            if self.small:
-                goal_pos = np.array([14, 14])
-            else:
-                goal_pos = np.array([140, 140])
+            goal_pos = np.array([140, 140])
 
         pos = np.array([state[0], state[1]])
-        if self.small:
-            if np.linalg.norm(pos-goal_pos) <= 1 or pos[0] > 15 or pos[0] < 0 or pos[1] > 15 or pos[1] < 0:
-                return True
-            else:
-                return False
+        if np.linalg.norm(pos-goal_pos) <= 10 or pos[0] > 150 or pos[0] < 0 or pos[1] > 150 or pos[1] < 0:
+            return True
         else:
-            if np.linalg.norm(pos-goal_pos) <= 10 or pos[0] > 150 or pos[0] < 0 or pos[1] > 150 or pos[1] < 0:
-                return True
-            else:
-                return False
+            return False
 def experiment():
     parser = argparse.ArgumentParser(description='server_harch_ship')
     parser.add_argument("--small", help="environment size small or big", action="store_true")
@@ -231,8 +219,8 @@ def experiment():
     n_runs = 10
     for n in range(n_runs):
         print('ITERATION', n)
-        core.learn(n_episodes=8000, skip=True)
-        dataset_eval = core.evaluate(n_episodes=10)
+        core.learn(n_episodes=5000, skip=True)
+        dataset_eval = core.evaluate(n_episodes=100)
         last_ep_dataset = pick_last_ep(dataset_eval)
         dataset_eval_visual += last_ep_dataset
         low_level_dataset_eval1 += control_block1.dataset.get()

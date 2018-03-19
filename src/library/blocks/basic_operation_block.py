@@ -15,7 +15,7 @@ class addBlock(fBlock):
         self.phi = summation
         super(addBlock, self).__init__(phi=summation, name=name)
 
-class minusBlock(fBlock):
+class signBlock(fBlock):
 
     def __init__(self, name=None, phi=None):
         def minus(inputs):

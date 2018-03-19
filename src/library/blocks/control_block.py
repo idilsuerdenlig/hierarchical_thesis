@@ -1,6 +1,7 @@
 from .block import Block
 import numpy as np
 from library.utils.dataset_manager import DatasetManager
+from library.agents.ghavamzade_agent import GhavamzadeAgent
 
 class ControlBlock(Block):
     """
@@ -35,6 +36,7 @@ class ControlBlock(Block):
         state = np.concatenate(inputs, axis=0)
         #if last and not absorbing:
             #print(self.name, 'horizon reached')
+
         if self.last or last:
             self.curr_episode_counter += 1
 
@@ -79,6 +81,7 @@ class ControlBlock(Block):
         #    print self.name, 'LAST STEP-----------------------------------------------------'
         #    print sample
         self.terminated = True
+        self.last = True
         if learn_flag and \
             (len(self.dataset) == self.n_steps_per_fit or self.curr_episode_counter == self.n_eps_per_fit):
             self.fit(self.dataset.get())
@@ -103,6 +106,9 @@ class ControlBlock(Block):
         return size_eps
 
     def fit(self, dataset):
+        '''if isinstance(self.agent, GhavamzadeAgent):
+            print(self.name)
+            print(dataset)'''
 
         for dataset_step in dataset:
             if np.any(dataset_step[1]) is None:

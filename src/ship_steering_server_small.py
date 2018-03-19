@@ -6,7 +6,6 @@ from mushroom.utils.parameters import Parameter, AdaptiveParameter
 from mushroom.utils.callbacks import CollectDataset
 from mushroom.features.basis import *
 from mushroom.features.features import *
-from mushroom.features.tiles import Tiles
 from mushroom.policy.gaussian_policy import *
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
@@ -21,18 +20,19 @@ from library.blocks.error_accumulator import ErrorAccumulatorBlock
 from library.environments.idilshipsteering import ShipSteering
 from mushroom.environments import MDPInfo
 import datetime
+from joblib import Parallel, delayed
+
 import argparse
 from mushroom.utils.folder import *
 from library.blocks.functions.lqr_cost import lqr_cost
 
 
-def server_experiment_tiles(exp_no, subdir):
-    print('TIILEEEEEEEEEEEEEEEES')
+def server_experiment_small(i, subdir):
 
     np.random.seed()
 
     # Model Block
-    mdp = ShipSteering(small=False, hard=True, n_steps_action=3)
+    mdp = ShipSteering(small=True, hard=True, n_steps_action=3)
 
     #State Placeholder
     state_ph = PlaceHolder(name='state_ph')
@@ -53,28 +53,15 @@ def server_experiment_tiles(exp_no, subdir):
     function_block3 = addBlock(name='f3 (summation)')
 
 
-    # FeaturesH
-    n_tiles = [20, 20]
-    low = [0, 0]
-    high = [1000, 1000]
-
-    tilingsH = Tiles.generate(n_tilings=1, n_tiles=n_tiles, low=low, high=high)
-    featuresH = Features(tilings=tilingsH)
-
+    #Features
+    features = Features(basis_list=[PolynomialBasis()])
 
     # Policy 1
-    mean_tiles = np.zeros(shape=(n_tiles[0]*n_tiles[1], 2))
-    for j in range(n_tiles[1]):
-        for i in range(n_tiles[0]):
-            index = i+j*n_tiles[0]
-            mean_tiles[index][0] = ((high[0]-low[0])/(2*n_tiles[0])) + i*(high[0]-low[0])/n_tiles[0]
-            mean_tiles[index][1] = ((high[1]-low[1])/(2*n_tiles[1])) + j*(high[1]-low[1])/n_tiles[1]
-    print(mean_tiles)
+    sigma1 = np.array([38, 38])
+    approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
+    approximator1.set_weights(np.array([75, 75]))
 
-    sigma1 = np.eye(2, 2)*25
-    approximator1 = Regressor(LinearApproximator, weights=mean_tiles, input_shape=(featuresH.size,), output_shape=(2,))
-    approximator1.set_weights(mean_tiles)
-    pi1 = MultivariateGaussianPolicy(mu=approximator1, sigma=sigma1)
+    pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
 
 
     # Policy 2
@@ -83,30 +70,32 @@ def server_experiment_tiles(exp_no, subdir):
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
-    learning_rate1 = AdaptiveParameter(value=65)
-    lim = 1000
+    learning_rate1 = AdaptiveParameter(value=10)
+    lim = 150
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(0, lim, (2,)), gamma=mdp.info.gamma, horizon=100)
-    agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=featuresH)
+    agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=features)
 
     # Agent 2
-    learning_rate2 = AdaptiveParameter(value=1e-4)
+    learning_rate2 = AdaptiveParameter(value=1e-3)
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
-                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=25)
+                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=300)
     agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=100,
+    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=10,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=200,
+    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=100,
                                   callbacks=[parameter_callback2])
 
-    # Reward Accumulator
+
+    #Reward Accumulator
     reward_acc = reward_accumulator_block(gamma=mdp_info_agent1.gamma, name='reward_acc')
+
 
     # Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_block1, control_block2,
@@ -132,12 +121,6 @@ def server_experiment_tiles(exp_no, subdir):
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
     core = HierarchicalCore(computational_graph)
 
-    print('learningrate1 = 10')
-    print('sigma1 = 40')
-    print('TILES 3 by 3 to 10 by 10')
-    print('learningrate2 = 1e-3')
-    print('n_eps_per fit high = 20')
-    print('n_eps_per fit low = 500')
     # Train
     dataset_eval_visual = list()
     low_level_dataset_eval = list()
@@ -146,7 +129,7 @@ def server_experiment_tiles(exp_no, subdir):
     for n in range(n_runs):
         print('ITERATION', n)
         core.learn(n_episodes=1000, skip=True)
-        dataset_eval = core.evaluate(n_episodes=20)
+        dataset_eval = core.evaluate(n_episodes=10)
         last_ep_dataset = pick_last_ep(dataset_eval)
         dataset_eval_visual += last_ep_dataset
         low_level_dataset_eval += control_block2.dataset.get()
@@ -156,10 +139,10 @@ def server_experiment_tiles(exp_no, subdir):
     parameter_dataset2 = parameter_callback2.get_values()
     mk_dir_recursive('./' + subdir + str(i))
 
-    np.save(subdir + '/' + str(i) + '/low_level_dataset_file', low_level_dataset_eval)
-    #np.save(subdir + '/' + str(i) + '/parameter_dataset1_file', parameter_dataset1)
-    np.save(subdir + '/' + str(i) + '/parameter_dataset2_file', parameter_dataset2)
-    np.save(subdir + '/' + str(i) + '/dataset_eval_file', dataset_eval_visual)
+    np.save(subdir+str(i)+'/low_level_dataset_file', low_level_dataset_eval)
+    np.save(subdir+str(i)+'/parameter_dataset1_file', parameter_dataset1)
+    np.save(subdir+str(i)+'/parameter_dataset2_file', parameter_dataset2)
+    np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval_visual)
 
     del low_level_dataset_eval
     del parameter_dataset1
@@ -169,8 +152,7 @@ def server_experiment_tiles(exp_no, subdir):
 
     return
 
-
 if __name__ == '__main__':
-    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '/'
-
-    server_experiment_tiles(exp_no=0, subdir=subdir)
+    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small/'
+    n_experiment = 4
+    Js = Parallel(n_jobs=-1)(delayed(server_experiment_small)(i=i, subdir=subdir) for i in range(n_experiment))
