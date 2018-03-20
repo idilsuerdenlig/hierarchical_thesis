@@ -77,7 +77,7 @@ def server_experiment_small(i, subdir):
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=features)
 
     # Agent 2
-    learning_rate2 = AdaptiveParameter(value=1e-3)
+    learning_rate2 = AdaptiveParameter(value=5e-4)
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
                               action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=300)
     agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
@@ -124,14 +124,16 @@ def server_experiment_small(i, subdir):
     # Train
     dataset_eval_visual = list()
     low_level_dataset_eval = list()
+    dataset_eval = list()
 
-    n_runs = 5
+    n_runs = 10
     for n in range(n_runs):
         print('ITERATION', n)
         core.learn(n_episodes=1000, skip=True)
-        dataset_eval = core.evaluate(n_episodes=10)
-        last_ep_dataset = pick_last_ep(dataset_eval)
+        dataset_eval_run = core.evaluate(n_episodes=10)
+        last_ep_dataset = pick_last_ep(dataset_eval_run)
         dataset_eval_visual += last_ep_dataset
+        dataset_eval += dataset_eval_run
         low_level_dataset_eval += control_block2.dataset.get()
 
     # Save
@@ -142,7 +144,8 @@ def server_experiment_small(i, subdir):
     np.save(subdir+str(i)+'/low_level_dataset_file', low_level_dataset_eval)
     np.save(subdir+str(i)+'/parameter_dataset1_file', parameter_dataset1)
     np.save(subdir+str(i)+'/parameter_dataset2_file', parameter_dataset2)
-    np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval_visual)
+    np.save(subdir+str(i)+'/dataset_eval_visual_file', dataset_eval_visual)
+    np.save(subdir + str(i) + '/dataset_eval_file', dataset_eval)
 
     del low_level_dataset_eval
     del parameter_dataset1
@@ -154,5 +157,5 @@ def server_experiment_small(i, subdir):
 
 if __name__ == '__main__':
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small/'
-    n_experiment = 4
+    n_experiment = 50
     Js = Parallel(n_jobs=-1)(delayed(server_experiment_small)(i=i, subdir=subdir) for i in range(n_experiment))
