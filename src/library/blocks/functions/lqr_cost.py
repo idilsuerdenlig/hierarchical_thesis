@@ -25,7 +25,6 @@ def lqr_cost(ins):
         if r is not None:
             action_cost += -r.dot(r)
 
-    normalization_coefficient = 144
 
-    lqr_cost = r_square * action_cost * normalization_coefficient + q_square * error_cost
+    lqr_cost = r_square * action_cost + q_square * error_cost
     return lqr_cost
