@@ -70,14 +70,14 @@ def server_experiment_small(i, subdir):
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
-    learning_rate1 = AdaptiveParameter(value=10)
+    learning_rate1 = AdaptiveParameter(value=15)
     lim = 150
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(0, lim, (2,)), gamma=mdp.info.gamma, horizon=100)
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=features)
 
     # Agent 2
-    learning_rate2 = AdaptiveParameter(value=1e-3)
+    learning_rate2 = AdaptiveParameter(value=5e-4)
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
                               action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
     agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
@@ -126,7 +126,7 @@ def server_experiment_small(i, subdir):
     low_level_dataset_eval = list()
     dataset_eval = list()
 
-    n_runs = 40
+    n_runs = 80
     for n in range(n_runs):
         print('ITERATION', n)
         core.learn(n_episodes=1000, skip=True)
