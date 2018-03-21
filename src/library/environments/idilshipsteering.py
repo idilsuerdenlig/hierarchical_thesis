@@ -30,6 +30,7 @@ class ShipSteering(Environment):
         low = np.array([0, 0, -np.pi, -np.pi / 12.])
         high = np.array([self.field_size, self.field_size, np.pi, np.pi / 12.])
         self.omega_max = np.array([np.pi / 12.])
+        self.hard = hard
         self._v = 3.
         self._T = 5.
         self._dt = .2
@@ -39,7 +40,9 @@ class ShipSteering(Environment):
         self._gate_s[1] = 120 if small else 920
         self._gate_e[0] = 120 if small else 920
         self._gate_e[1] = 100 if small else 900
-        self._out_reward = -100 if hard else -10000
+        self._out_reward = -100 if self.hard else -10000
+        self._success_reward = 0 if self.hard else 100
+
         self.n_steps_action = n_steps_action
         # MDP properties
         observation_space = spaces.Box(low=low, high=high)
@@ -71,15 +74,20 @@ class ShipSteering(Environment):
                        self._T
 
 
+
         if new_state[0] > self.field_size or new_state[1] > self.field_size\
            or new_state[0] < 0 or new_state[1] < 0:
             reward = self._out_reward
             absorbing = True
+
         elif self._through_gate(self._state[:2], new_state[:2]):
-            reward = 0
+            reward = self._success_reward
             absorbing = True
         else:
-            reward = -1
+            if self.hard:
+                reward = -1
+            else:
+                reward = (-0.001)*np.linalg.norm(new_state[:2] - np.array([910, 910]))
             absorbing = False
 
         self._state = new_state

@@ -126,7 +126,7 @@ def server_experiment_small(i, subdir):
     low_level_dataset_eval = list()
     dataset_eval = list()
 
-    n_runs = 10
+    n_runs = 40
     for n in range(n_runs):
         print('ITERATION', n)
         core.learn(n_episodes=1000, skip=True)

@@ -12,7 +12,6 @@ class ComputationalGraph(object):
         self.state = list()
         self.reward = None
         self.absorbing = False
-        self.first = True
         self.last = False
         self.step_counter = 0
 

@@ -6,7 +6,6 @@ class GhavamzadeAgent(Agent):
 
     def __init__(self, policy, mdp_info, learning_rate, features=None):
         self.learning_rate = learning_rate
-
         self.z = np.zeros(policy.weights_size)
 
 
@@ -15,6 +14,8 @@ class GhavamzadeAgent(Agent):
     def fit(self, dataset):
         #print len(dataset)
         assert len(dataset) == 1
+        print(dataset)
+
 
         state, action, reward, next_state, absorbing = self._parse(dataset)
         self._update(state, action, reward, next_state, absorbing)
@@ -27,15 +28,12 @@ class GhavamzadeAgent(Agent):
         self.z = self.z + self.policy.diff_log(state, action)
 
         theta = self.policy.get_weights()
-        '''print 'STATE-ACTION :', state, action
-        print 'DIFFLOG  :', np.max(self.policy.diff_log(state, action)), np.min(self.policy.diff_log(state, action))
-        print 'RW*Z :', np.linalg.norm(reward*self.z), np.max(reward*self.z)
-        print 'Z    :', np.max(self.z), np.min(self.z)'''
         if np.isinf(np.linalg.norm(reward*self.z)):
             print('ERROR DIVERGING PARAMETER')
             exit()
-        theta = theta + self.learning_rate(state, action)*reward*self.z
-        #print 'LEARNING RATE:   ', self.learning_rate.get_value()
+
+        gradient = reward*self.z
+        theta = theta + self.learning_rate(gradient)*gradient
         self.policy.set_weights(theta)
         if absorbing:
             self.z = np.zeros(self.policy.weights_size)
