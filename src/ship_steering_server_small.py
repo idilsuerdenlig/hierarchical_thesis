@@ -77,9 +77,9 @@ def server_experiment_small(i, subdir):
     agent1 = GPOMDP(policy=pi1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=features)
 
     # Agent 2
-    learning_rate2 = AdaptiveParameter(value=5e-4)
+    learning_rate2 = AdaptiveParameter(value=1e-3)
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
-                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=300)
+                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
     agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
 
     # Control Block 1
