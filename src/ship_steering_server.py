@@ -30,7 +30,7 @@ def server_experiment(i, subdir):
     np.random.seed()
 
     # Model Block
-    mdp = ShipSteering(small=False, hard=True, n_steps_action=3)
+    mdp = ShipSteering(small=False, hard=False, n_steps_action=3)
 
     #State Placeholder
     state_ph = PlaceHolder(name='state_ph')
@@ -52,18 +52,10 @@ def server_experiment(i, subdir):
 
 
     #Features
-'''
-    # FeaturesH
-    lim = 150 if small else 1000
-
-    tilingsH = Tiles.generate(n_tilings=1, n_tiles=[20, 20], low=[0, 0], high=[lim, lim])
-    featuresH = Features(tilings=tilingsH)'''
-
-
     features = Features(basis_list=[PolynomialBasis()])
 
     # Policy 1
-    sigma1 = np.array([250, 250])
+    sigma1 = np.array([500, 500])
     approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
     approximator1.set_weights(np.array([500, 500]))
 
@@ -76,7 +68,7 @@ def server_experiment(i, subdir):
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
-    learning_rate1 = AdaptiveParameter(value=100)
+    learning_rate1 = Parameter(value=10)
     lim = 1000
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(0, lim, (2,)), gamma=mdp.info.gamma, horizon=100)
@@ -85,17 +77,17 @@ def server_experiment(i, subdir):
     # Agent 2
     learning_rate2 = AdaptiveParameter(value=1e-3)
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
-                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
+                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=900)
     agent2 = GPOMDP(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=50,
+    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=10,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=500,
+    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=100,
                                   callbacks=[parameter_callback2])
 
 
@@ -131,11 +123,21 @@ def server_experiment(i, subdir):
     dataset_eval_visual = list()
     low_level_dataset_eval = list()
 
+    print('NO TILES')
+    print('learningrate1 = 65')
+    print('sigma1 = 500')
+    print('learningrate2 = 1e-3')
+    print('n_eps_per fit high = 50')
+    print('n_eps_per fit low = 50')
+    print('horizon for low level = 1000')
+    print('lqr error ')
+
     n_runs = 5
     for n in range(n_runs):
         print('ITERATION', n)
-        core.learn(n_episodes=1000, skip=True)
+        core.learn(n_episodes=10000, skip=True)
         dataset_eval = core.evaluate(n_episodes=10)
+
         last_ep_dataset = pick_last_ep(dataset_eval)
         dataset_eval_visual += last_ep_dataset
         low_level_dataset_eval += control_block2.dataset.get()
@@ -159,4 +161,6 @@ def server_experiment(i, subdir):
     return
 
 if __name__ == '__main__':
-    server_experiment(i=0, subdir='latest')
+    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '/'
+
+    server_experiment(i=0, subdir=subdir)

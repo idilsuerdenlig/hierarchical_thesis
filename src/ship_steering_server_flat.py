@@ -35,10 +35,10 @@ def experiment(alg, n_runs, n_iterations, ep_per_run, subdir, i):
 
     high = [15, 15, np.pi, np.pi/12]
     low = [0, 0, -np.pi, -np.pi/12]
-    n_tiles = [5, 5, 36, 5]
+    n_tiles = [5, 5, 6, 1]
     low = np.array(low, dtype=np.float)
     high = np.array(high, dtype=np.float)
-    n_tilings = 3
+    n_tilings = 9
 
     tilings = Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low, high=high)
     phi = Features(tilings=tilings)
@@ -55,7 +55,7 @@ def experiment(alg, n_runs, n_iterations, ep_per_run, subdir, i):
     policy = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
 
     # Agent
-    learning_rate = AdaptiveParameter(value=.01)
+    learning_rate = AdaptiveParameter(value=1)
     algorithm_params = dict(learning_rate=learning_rate)
     agent = alg(policy, mdp.info, features=phi, **algorithm_params)
 
@@ -69,6 +69,7 @@ def experiment(alg, n_runs, n_iterations, ep_per_run, subdir, i):
 
 
     for n in range(n_runs):
+        print('ITERATION    :', n)
         core.learn(n_episodes=n_iterations * ep_per_run,
                    n_episodes_per_fit=ep_per_run)
         dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
@@ -85,4 +86,4 @@ if __name__ == '__main__':
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_flat/'
     n_experiment = 1
-    Js = Parallel(n_jobs=1)(delayed(experiment)(alg=GPOMDP, n_runs=40, n_iterations=100, ep_per_run=10, subdir=subdir, i=i) for i in range(n_experiment))
+    Js = Parallel(n_jobs=1)(delayed(experiment)(alg=GPOMDP, n_runs=80, n_iterations=100, ep_per_run=10, subdir=subdir, i=i) for i in range(n_experiment))

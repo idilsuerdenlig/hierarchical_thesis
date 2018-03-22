@@ -23,9 +23,11 @@ import datetime
 import argparse
 from mushroom.utils.folder import *
 from library.blocks.functions.lqr_cost import lqr_cost
+from joblib import Parallel, delayed
 
 
-def server_experiment(i, subdir):
+
+def server_experiment(i, subdir, n_runs, n_iterations, n_eps_run):
 
     np.random.seed()
 
@@ -68,7 +70,7 @@ def server_experiment(i, subdir):
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
-    learning_rate1 = Parameter(value=10)
+    learning_rate1 = AdaptiveParameter(value=80)
     lim = 1000
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(0, lim, (2,)), gamma=mdp.info.gamma, horizon=100)
@@ -124,11 +126,11 @@ def server_experiment(i, subdir):
     low_level_dataset_eval = list()
 
 
-    n_runs = 5
+
     for n in range(n_runs):
         print('ITERATION', n)
-        core.learn(n_episodes=10000, skip=True)
-        dataset_eval = core.evaluate(n_episodes=10)
+        core.learn(n_episodes=n_eps_run*n_iterations, skip=True)
+        dataset_eval = core.evaluate(n_episodes=n_eps_run)
 
         last_ep_dataset = pick_last_ep(dataset_eval)
         dataset_eval_visual += last_ep_dataset
@@ -153,6 +155,6 @@ def server_experiment(i, subdir):
     return
 
 if __name__ == '__main__':
-    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '/'
-
-    server_experiment(i=0, subdir=subdir)
+    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_bonarini/'
+    n_experiment = 1
+    Js = Parallel(n_jobs=-1)(delayed(server_experiment)(i=i, subdir=subdir, n_runs=10, n_eps_run=10, n_iterations=100)for i in range(n_experiment))
