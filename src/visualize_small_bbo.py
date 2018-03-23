@@ -8,7 +8,7 @@ import numpy as np
 from tqdm import tqdm
 
 
-def visualize_small_flat(gamma=1, range_vis=None):
+def visualize_small_bbo(gamma=1, range_vis=None):
 
     experiment_params = np.load('latest/experiment_params_dictionary.npy')
     how_many = experiment_params.item(0).get('how_many')
@@ -71,4 +71,4 @@ def visualize_small_flat(gamma=1, range_vis=None):
 
 if __name__ == '__main__':
     # range_vis must be a range()
-    visualize_small_flat(gamma=0.99, range_vis=None)
+    visualize_small_bbo(gamma=0.99, range_vis=None)
