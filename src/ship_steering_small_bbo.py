@@ -47,7 +47,7 @@ def experiment(alg, params, subdir, exp_no):
     policy = DeterministicPolicy(mu=approximator)
 
     mu = np.zeros(policy.weights_size)
-    sigma = 4e-3 * np.ones(policy.weights_size)
+    sigma = 4e-2 * np.ones(policy.weights_size)
     distribution = GaussianDiagonalDistribution(mu, sigma)
 
     # Agent
@@ -74,13 +74,17 @@ def experiment(alg, params, subdir, exp_no):
 
 
 if __name__ == '__main__':
-    learning_rate = AdaptiveParameter(value=0.05)
     how_many = 1
-    n_runs = 50
+    n_jobs = 1
+    n_runs = 10
     n_iterations = 10
     ep_per_run = 10
+
     algs = [REPS, RWR, PGPE]
-    params = [{'eps': 0.5}, {'beta': 1}, {'learning_rate': learning_rate}]
+    params = [{'eps': 0.5},
+              {'beta': 1},
+              {'learning_rate': AdaptiveParameter(value=0.05)}]
+
     for alg, params in zip(algs, params):
         subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + \
                  '_small_bbo/' + alg.__name__ + '/'
@@ -93,5 +97,5 @@ if __name__ == '__main__':
         np.save(subdir + '/experiment_params_dictionary', experiment_params)
         print('---------------------------------------------------------------')
         print(alg.__name__)
-        Parallel(n_jobs=1)(delayed(experiment)(alg, params, subdir, exp_no=i)
+        Parallel(n_jobs=n_jobs)(delayed(experiment)(alg, params, subdir, i)
                                 for i in range(how_many))
