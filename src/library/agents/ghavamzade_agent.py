@@ -14,7 +14,6 @@ class GhavamzadeAgent(Agent):
     def fit(self, dataset):
         #print len(dataset)
         assert len(dataset) == 1
-        print(dataset)
 
 
         state, action, reward, next_state, absorbing = self._parse(dataset)
