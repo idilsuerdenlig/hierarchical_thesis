@@ -15,9 +15,9 @@ def visualize_bonarini_hierarchical(gamma=1, range_vis=None):
     ax2 = fig.add_subplot(122)
 
     experiment_params = np.load('latest/experiment_params_dictionary.npy')
-    how_many = experiment_params.item(0).get('how_many')
-    n_runs = experiment_params.item(1).get('n_runs')
-    ep_per_run = experiment_params.item(3).get('ep_per_run')
+    how_many = experiment_params.item().get('how_many')
+    n_runs = experiment_params.item().get('n_runs')
+    ep_per_run = experiment_params.item().get('ep_per_run')
     parameter_dataset1 = list()
     parameter_dataset2 = list()
     size_eps = list()
@@ -63,7 +63,7 @@ def visualize_bonarini_hierarchical(gamma=1, range_vis=None):
     ax2.errorbar(x=np.arange(n_runs) + 1, y=size_all_avg, yerr=size_all_avg_err)
     ax2.set_title('size_eps_averaged')
 
-    dataset_eval = np.load('latest/' + str(how_many - 1) + '/dataset_eval_visual_file.npy')
+    dataset_eval = np.load('latest/' + str(how_many - 1) + '/dataset_eval_file.npy')
     low_level_dataset = np.load('latest/' + str(exp_no) + '/low_level_dataset_file.npy')
 
     small = False

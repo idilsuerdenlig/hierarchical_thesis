@@ -28,7 +28,7 @@ using policy gradient algorithms.
 tqdm.monitor_interval = 0
 
 
-def experiment(alg, params, n_runs, n_iterations, ep_per_run ,subdir, i, how_many):
+def experiment(alg, params, experiment_params ,subdir, i):
 
     np.random.seed()
 
@@ -66,6 +66,7 @@ def experiment(alg, params, n_runs, n_iterations, ep_per_run ,subdir, i, how_man
 
     dataset_eval_visual = list()
     dataset_eval = list()
+    print(how_many, n_runs, n_iterations, ep_per_run)
 
     for n in range(n_runs):
         print('ITERATION    :', n)
@@ -80,12 +81,7 @@ def experiment(alg, params, n_runs, n_iterations, ep_per_run ,subdir, i, how_man
     np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval)
     np.save(subdir+str(i)+'/parameter_dataset_file', parameter_dataset)
     np.save(subdir+str(i)+'/dataset_eval_visual_file', dataset_eval_visual)
-    if i is 0:
-        np.save(subdir+'/algorithm_params_dictionary', params)
-        experiment_params = [{'how_many': how_many}, {'n_runs': n_runs},
-                             {'n_iterations': n_iterations},
-                             {'ep_per_run': ep_per_run}]
-        np.save(subdir+'/experiment_params_dictionary', experiment_params)
+
 
 
 if __name__ == '__main__':
@@ -97,9 +93,13 @@ if __name__ == '__main__':
     n_runs = 10
     n_iterations = 10
     ep_per_run = 2
+    mk_dir_recursive('./' + subdir)
     params = {'learning_rate': learning_rate}
-
+    np.save(subdir + '/algorithm_params_dictionary', params)
+    experiment_params = {'how_many': how_many, 'n_runs': n_runs,
+                         'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
+    np.save(subdir + '/experiment_params_dictionary', experiment_params)
 
     Js = Parallel(n_jobs=1)(delayed(experiment)(alg=alg, params=params,
-                                                n_runs=n_runs, n_iterations=n_iterations, ep_per_run=ep_per_run,
-                                                subdir=subdir, i=i, how_many=how_many) for i in range(how_many))
+                                                experiment_params=experiment_params,
+                                                subdir=subdir, i=i) for i in range(how_many))

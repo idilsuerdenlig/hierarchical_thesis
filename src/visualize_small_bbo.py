@@ -11,9 +11,9 @@ from tqdm import tqdm
 def visualize_small_bbo(gamma=1, range_vis=None):
 
     experiment_params = np.load('latest/experiment_params_dictionary.npy')
-    how_many = experiment_params.item(0).get('how_many')
-    n_runs = experiment_params.item(1).get('n_runs')
-    ep_per_run = experiment_params.item(3).get('ep_per_run')
+    how_many = experiment_params.item().get('how_many')
+    n_runs = experiment_params.item().get('n_runs')
+    ep_per_run = experiment_params.item().get('ep_per_run')
 
     fig = plt.figure()
     ax1 = fig.add_subplot(121)
@@ -33,6 +33,7 @@ def visualize_small_bbo(gamma=1, range_vis=None):
         dataset_eval = np.load('latest/' + str(exp_no) + '/dataset_eval_file.npy')
 
         J_runs_eps = compute_J(dataset_eval, gamma)
+
         for i in range(n_runs):
             J_avg[i] = np.mean(J_runs_eps[ep_per_run * i:ep_per_run * i + ep_per_run], axis=0)
 
@@ -71,4 +72,4 @@ def visualize_small_bbo(gamma=1, range_vis=None):
 
 if __name__ == '__main__':
     # range_vis must be a range()
-    visualize_small_bbo(gamma=0.99, range_vis=None)
+    visualize_small_bbo(gamma=1, range_vis=None)

@@ -27,7 +27,7 @@ from joblib import Parallel, delayed
 
 
 
-def experiment_bonarini_hierarchical(alg_high, alg_low, params, n_runs, n_iterations, ep_per_run ,subdir, i, how_many):
+def experiment_bonarini_hierarchical(alg_high, alg_low, params, experiment_parameters ,subdir, i):
 
     np.random.seed()
 
@@ -61,7 +61,7 @@ def experiment_bonarini_hierarchical(alg_high, alg_low, params, n_runs, n_iterat
     approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
     approximator1.set_weights(np.array([500, 500]))
 
-    pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
+    pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,std=sigma1)
 
 
     # Policy 2
@@ -70,14 +70,14 @@ def experiment_bonarini_hierarchical(alg_high, alg_low, params, n_runs, n_iterat
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
-    learning_rate1 = params[0].get('learning_rate_high')
+    learning_rate1 = params.get('learning_rate_high')
     lim = 1000
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(0, lim, (2,)), gamma=mdp.info.gamma, horizon=100)
     agent1 = alg_high(policy=pi1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=features)
 
     # Agent 2
-    learning_rate2 = params[1].get('learning_rate_low')
+    learning_rate2 = params.get('learning_rate_low')
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
                               action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=900)
     agent2 = alg_low(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
@@ -140,17 +140,10 @@ def experiment_bonarini_hierarchical(alg_high, alg_low, params, n_runs, n_iterat
     parameter_dataset1 = parameter_callback1.get_values()
     parameter_dataset2 = parameter_callback2.get_values()
     mk_dir_recursive('./' + subdir + str(i))
-
     np.save(subdir+'/'+str(i)+'/low_level_dataset_file', low_level_dataset_eval)
     np.save(subdir+'/'+str(i)+'/parameter_dataset1_file', parameter_dataset1)
     np.save(subdir+'/'+str(i)+'/parameter_dataset2_file', parameter_dataset2)
     np.save(subdir+'/'+str(i)+'/dataset_eval_file', dataset_eval_visual)
-    if i is 0:
-        np.save(subdir+'/algorithm_params_dictionary', params)
-        experiment_params = [{'how_many': how_many}, {'n_runs': n_runs},
-                             {'n_iterations': n_iterations},
-                             {'ep_per_run': ep_per_run}]
-        np.save(subdir+'/experiment_params_dictionary', experiment_params)
 
     del low_level_dataset_eval
     del parameter_dataset1
@@ -168,12 +161,15 @@ if __name__ == '__main__':
     learning_rate_high = AdaptiveParameter(value=65)
     learning_rate_low = AdaptiveParameter(value=5e-4)
     how_many = 1
-    n_runs = 2
+    n_runs = 5
     n_iterations = 10
     ep_per_run = 5
-    params = [{'learning_rate_high': learning_rate_high}, {'learning_rate_low': learning_rate_low}]
+    mk_dir_recursive('./' + subdir)
+
+    params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low}
+    experiment_params = {'how_many': how_many, 'n_runs': n_runs,
+                         'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
+    np.save(subdir + '/experiment_params_dictionary', experiment_params)
+
     Js = Parallel(n_jobs=1)(delayed(experiment_bonarini_hierarchical)(alg_high, alg_low, params,
-                                                             n_runs, n_iterations,
-                                                             ep_per_run,
-                                                             subdir, i,
-                                                             how_many) for i in range(how_many))
+                                                             experiment_params, subdir, i) for i in range(how_many))

@@ -54,7 +54,7 @@ class TerminationCondition(object):
             return False
 
 
-def experiment_bonarini_ghavamzade(alg_high, alg_low, params, n_runs, n_iterations, ep_per_run ,subdir, i, how_many):
+def experiment_bonarini_ghavamzade(alg_high, alg_low, params, experiment_params ,subdir, i):
 
     np.random.seed()
 
@@ -84,7 +84,7 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, n_runs, n_iteratio
     piH = EpsGreedy(epsilon=epsilon)
 
     # AgentH
-    learning_rate = params[0].get('learning_rate_high')
+    learning_rate = params.get('learning_rate_high')
 
 
     mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]),
@@ -126,11 +126,11 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, n_runs, n_iteratio
     pi2 = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
 
     # Agent1
-    learning_rate1 = params[1].get('learning_rate_low')
+    learning_rate1 = params.get('learning_rate_low')
     agent1 = alg_low(pi1, mdp.info, learning_rate1, featuresL)
 
     # Agent2
-    learning_rate2 = params[1].get('learning_rate_low')
+    learning_rate2 = params.get('learning_rate_low')
     agent2 = alg_low(pi2, mdp.info, learning_rate2, featuresL)
 
 
@@ -251,12 +251,7 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, n_runs, n_iteratio
     np.save(subdir+str(i)+'/max_q_val_tiled_file', max_q_val_tiled)
     np.save(subdir+str(i)+'/act_max_q_val_tiled_file', act_max_q_val_tiled)
     np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval_visual)
-    if i is 0:
-        np.save(subdir+'/algorithm_params_dictionary', params)
-        experiment_params = [{'how_many': how_many}, {'n_runs': n_runs},
-                             {'n_iterations': n_iterations},
-                             {'ep_per_run': ep_per_run}]
-        np.save(subdir+'/experiment_params_dictionary', experiment_params)
+
     return
 
 
@@ -270,9 +265,12 @@ if __name__ == '__main__':
     n_runs = 2
     n_iterations = 2
     ep_per_run = 5
-    params = [{'learning_rate_high': learning_rate_high}, {'learning_rate_low': learning_rate_low}]
+    mk_dir_recursive('./' + subdir)
+
+    params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low}
+    experiment_params = {'how_many': how_many, 'n_runs': n_runs,
+                         'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
+    np.save(subdir + '/experiment_params_dictionary', experiment_params)
     Js = Parallel(n_jobs=1)(delayed(experiment_bonarini_ghavamzade)(alg_high, alg_low, params,
-                                                                      n_runs, n_iterations,
-                                                                      ep_per_run,
-                                                                      subdir, i,
-                                                                      how_many) for i in range(how_many))
+                                                                    experiment_params,
+                                                                    subdir, i) for i in range(how_many))

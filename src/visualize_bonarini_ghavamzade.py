@@ -8,12 +8,12 @@ from mushroom.utils.dataset import compute_J
 import numpy as np
 from tqdm import tqdm
 
-def visualize_bonarini_hierarchical(gamma=1, ep_count=2, how_many=1):
+def visualize_bonarini_hierarchical(gamma=1, ep_count=2):
 
-    #experiment_params = np.load('latest/experiment_params_dictionary.npy')
-    #how_many = experiment_params.item(0).get('how_many')
-    #n_runs = experiment_params.item(1).get('n_runs')
-    #ep_per_run = experiment_params.item(3).get('ep_per_run')
+    experiment_params = np.load('latest/experiment_params_dictionary.npy')
+    how_many = experiment_params.item().get('how_many')
+    n_runs = experiment_params.item().get('n_runs')
+    ep_per_run = experiment_params.item().get('ep_per_run')
 
     for i in range(how_many):
 
@@ -36,4 +36,4 @@ def visualize_bonarini_hierarchical(gamma=1, ep_count=2, how_many=1):
 
 if __name__ == '__main__':
     # range_vis must be a range()
-    visualize_bonarini_hierarchical(gamma=0.99, ep_count=2, how_many=1)
+    visualize_bonarini_hierarchical(gamma=0.99, ep_count=2)
