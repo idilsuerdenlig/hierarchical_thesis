@@ -163,10 +163,10 @@ if __name__ == '__main__':
     alg_low = GPOMDP
     learning_rate_high = AdaptiveParameter(value=15)
     learning_rate_low = AdaptiveParameter(value=5e-4)
-    how_many = 1
-    n_runs = 5
-    n_iterations = 10
-    ep_per_run = 5
+    how_many = 40
+    n_runs = 50
+    n_iterations = 100
+    ep_per_run = 10
     mk_dir_recursive('./' + subdir)
 
     params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low}
