@@ -8,9 +8,9 @@ import numpy as np
 from tqdm import tqdm
 
 
-def visualize_small_bbo(gamma=1, range_vis=None):
+def visualize_small_bbo(folder, gamma=1, range_vis=None):
 
-    experiment_params = np.load('latest/experiment_params_dictionary.npy')
+    experiment_params = np.load(folder + 'experiment_params_dictionary.npy')
     how_many = experiment_params.item().get('how_many')
     n_runs = experiment_params.item().get('n_runs')
     ep_per_run = experiment_params.item().get('ep_per_run')
@@ -19,8 +19,6 @@ def visualize_small_bbo(gamma=1, range_vis=None):
     ax1 = fig.add_subplot(121)
     ax2 = fig.add_subplot(122)
 
-
-    parameter_dataset = list()
     size_eps = list()
     size_exp_list = list()
     J_avg = np.zeros((n_runs,))
@@ -30,7 +28,7 @@ def visualize_small_bbo(gamma=1, range_vis=None):
 
     for exp_no in range(how_many):
 
-        dataset_eval = np.load('latest/' + str(exp_no) + '/dataset_eval_file.npy')
+        dataset_eval = np.load(folder + str(exp_no) + '/dataset_eval_file.npy')
 
         J_runs_eps = compute_J(dataset_eval, gamma)
 
@@ -63,7 +61,7 @@ def visualize_small_bbo(gamma=1, range_vis=None):
     ax2.errorbar(x=np.arange(n_runs) + 1, y=size_all_avg, yerr=size_all_avg_err)
     ax2.set_title('size_eps_averaged')
 
-    dataset_eval = np.load('latest/' + str(how_many - 1) + '/dataset_eval_file.npy')
+    dataset_eval = np.load(folder + str(how_many - 1) + '/dataset_eval_file.npy')
     visualize_ship_steering(dataset_eval, 'evaluate', small=True, range_eps=range_vis,
                             n_gates=1, how_many=how_many)
 
@@ -72,4 +70,10 @@ def visualize_small_bbo(gamma=1, range_vis=None):
 
 if __name__ == '__main__':
     # range_vis must be a range()
-    visualize_small_bbo(gamma=1, range_vis=None)
+    base_folder = 'latest/'
+
+    algs = ['REPS', 'RWR', 'PGPE']
+
+    for alg in algs:
+        folder = base_folder + alg + '/'
+        visualize_small_bbo(folder, gamma=1, range_vis=None)
