@@ -65,7 +65,7 @@ def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir
 
 
     # Policy 2
-    sigma2 = Parameter(value=.005)
+    sigma2 = Parameter(value=1e-4)
     approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
