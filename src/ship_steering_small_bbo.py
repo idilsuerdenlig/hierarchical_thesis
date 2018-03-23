@@ -81,7 +81,6 @@ if __name__ == '__main__':
     ep_per_run = 10
     algs = [REPS, RWR, PGPE]
     params = [{'eps': 0.5}, {'beta': 1}, {'learning_rate': learning_rate}]
-
     for alg, params in zip(algs, params):
         subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + \
                  '_small_bbo/' + alg.__name__ + '/'

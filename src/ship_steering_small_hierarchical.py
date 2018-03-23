@@ -65,7 +65,7 @@ def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir
 
 
     # Policy 2
-    sigma2 = Parameter(value=.005)
+    sigma2 = Parameter(value=1e-4)
     approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
@@ -163,10 +163,10 @@ if __name__ == '__main__':
     alg_low = GPOMDP
     learning_rate_high = AdaptiveParameter(value=15)
     learning_rate_low = AdaptiveParameter(value=5e-4)
-    how_many = 1
-    n_runs = 5
-    n_iterations = 10
-    ep_per_run = 5
+    how_many = 40
+    n_runs = 50
+    n_iterations = 100
+    ep_per_run = 10
     mk_dir_recursive('./' + subdir)
 
     params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low}
@@ -175,6 +175,6 @@ if __name__ == '__main__':
                          'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
 
-    Js = Parallel(n_jobs=1)(delayed(server_experiment_small)(alg_high, alg_low, params,
+    Js = Parallel(n_jobs=-1)(delayed(server_experiment_small)(alg_high, alg_low, params,
                                                               experiment_params,
                                                               subdir, i) for i in range(how_many))
