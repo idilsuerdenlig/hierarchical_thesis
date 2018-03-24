@@ -89,7 +89,7 @@ def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir
 
     # Control Block 2
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=100,
+    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=150,
                                   callbacks=[parameter_callback2])
 
 
@@ -161,8 +161,8 @@ if __name__ == '__main__':
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_hierarchical/'
     alg_high = GPOMDP
     alg_low = GPOMDP
-    learning_rate_high = AdaptiveParameter(value=15)
-    learning_rate_low = AdaptiveParameter(value=5e-4)
+    learning_rate_high = AdaptiveParameter(value=20)
+    learning_rate_low = AdaptiveParameter(value=1e-3)
     how_many = 1
     n_runs = 50
     n_iterations = 100
