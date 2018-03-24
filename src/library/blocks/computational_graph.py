@@ -1,5 +1,7 @@
 import numpy as np
 from library.utils.topological_sort import topological_sort
+from library.blocks.control_block import ControlBlock
+
 class ComputationalGraph(object):
     """
     This class implements the computational graph for hierarchical learning.
@@ -63,12 +65,12 @@ class ComputationalGraph(object):
         #print 'ENV RESET STATE, REW', self.state, self.reward
 
         for block in self.ordered:
-            #print 'RESET___________'
-            #print 'NAME :', block.name
+            print('RESET___________')
+            print('NAME :', block.name)
             inputs = list()
             for input_block in block.input_connections:
                 inputs.append(input_block.last_output)
-            #print 'INPUTS   :', inputs
+            #print('INPUTS   :', inputs)
             for i in inputs:
                 if i is not None:
                     if np.any(np.isnan(i)):
@@ -88,3 +90,10 @@ class ComputationalGraph(object):
         for block in self.ordered:
             block.init()
         self.step_counter = 0
+
+
+    def stop(self):
+        self.model.stop()
+        for block in self.ordered:
+            if isinstance(block, ControlBlock):
+                block.stop()

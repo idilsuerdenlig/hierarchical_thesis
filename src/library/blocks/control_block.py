@@ -88,7 +88,11 @@ class ControlBlock(Block):
             self.dataset.empty()
 
     def draw_action(self, state, last):
+        print(self.name, 'asks for draw action from draw action to mushroom agent')
+
         if not last:
+            print(self.name, 'asks for draw action from draw action to mushroom agent')
+
             self.last_input = state
             self.last_output = self.agent.draw_action(state)
             self.ep_step_counter += 1
@@ -126,16 +130,12 @@ class ControlBlock(Block):
 
     def reset(self, inputs):
 
-        '''if np.any(np.isnan(inputs)):
-            print inputs
-            print self.name
-            exit()'''
-
         state = np.concatenate(inputs, axis=0)
         #if self.last_input is not None and self.name != 'control block H':
         #    self.build_sample(state, 0, True, True)
         self.agent.episode_start()
         self.ep_step_counter = 0
+        print(self.name, 'asks for draw action from reset with state :', state)
         self.draw_action(state, False)
         sample = state, self.last_output
         self.dataset.add_first_sample(sample, False)
@@ -150,3 +150,6 @@ class ControlBlock(Block):
         self.last_output = None
         self.last = False
         self.terminated = False
+
+    def stop(self):
+        self.agent.stop()

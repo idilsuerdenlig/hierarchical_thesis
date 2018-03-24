@@ -46,5 +46,5 @@ class HierarchicalCore(object):
                 while not last:
                     absorbing, last = self.computational_graph.call_blocks(learn_flag=learn_flag)
                     dataset_manager.add_sample(self.computational_graph.get_sample(), skip)
-
+        self.computational_graph.stop()
         return dataset_manager.dataset
