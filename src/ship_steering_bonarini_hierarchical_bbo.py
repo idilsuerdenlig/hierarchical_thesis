@@ -10,13 +10,11 @@ from mushroom.policy.gaussian_policy import *
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.algorithms.policy_search import *
-from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
 from library.blocks.functions.feature_angle_diff_ship_steering import phi
 from library.blocks.basic_operation_block import *
 from library.blocks.model_placeholder import PlaceHolder
 from library.utils.pick_last_ep_dataset import pick_last_ep
 from library.blocks.reward_accumulator import reward_accumulator_block
-from library.blocks.error_accumulator import ErrorAccumulatorBlock
 from library.environments.bonarinishipsteering import BonariniShipSteering
 from mushroom.distributions import GaussianDiagonalDistribution
 from mushroom.environments import MDPInfo
@@ -25,7 +23,6 @@ import datetime
 from mushroom.utils.folder import *
 from library.blocks.functions.lqr_cost import lqr_cost
 from mushroom.policy import DeterministicPolicy
-
 from joblib import Parallel, delayed
 
 
@@ -71,7 +68,7 @@ def experiment_bonarini_hierarchical(alg_high, alg_low, params, experiment_param
     lim = 1000
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(0, lim, (2,)), gamma=mdp.info.gamma, horizon=100)
-    agent1 = alg_high(distribution1, policy1, mdp_info_agent1, learning_rate1, features=phi)
+    agent1 = alg_high(distribution1, policy1, mdp_info_agent1, learning_rate1, features=features)
 
     # Policy 2
     approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
@@ -133,20 +130,18 @@ def experiment_bonarini_hierarchical(alg_high, alg_low, params, experiment_param
     for n in range(n_runs):
         print('ITERATION', n)
         core.learn(n_episodes=ep_per_run*n_iterations, skip=True)
-        dataset_eval = core.evaluate(n_episodes=ep_per_run)
+        dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
+        J =  compute_J(dataset_eval_run, mdp.info.gamma)
         print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
-        last_ep_dataset = pick_last_ep(dataset_eval)
-        dataset_eval_visual += last_ep_dataset
+        dataset_eval += dataset_eval_run
         low_level_dataset_eval += control_block2.dataset.get()
 
     # Save
     mk_dir_recursive('./' + subdir + str(i))
     np.save(subdir+'/'+str(i)+'/low_level_dataset_file', low_level_dataset_eval)
-    np.save(subdir+'/'+str(i)+'/dataset_eval_file', dataset_eval_visual)
+    np.save(subdir+'/'+str(i)+'/dataset_eval_file', dataset_eval)
 
     del low_level_dataset_eval
-    del parameter_dataset1
-    del parameter_dataset2
     del dataset_eval_visual
     del dataset_eval
 
@@ -154,15 +149,15 @@ def experiment_bonarini_hierarchical(alg_high, alg_low, params, experiment_param
 
 if __name__ == '__main__':
 
-    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_bonarini_hierarchical/'
-    alg_high = PGPE
-    alg_low = PGPE
-    learning_rate_high = AdaptiveParameter(value=65)
+    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_bonarini_hierarchical_PGPE/'
+    alg_high = REPS
+    alg_low = REPS
+    learning_rate_high = Parameter(value=5)
     learning_rate_low = AdaptiveParameter(value=0.05)
     how_many = 1
     n_runs = 5
-    n_iterations = 10
-    ep_per_run = 5
+    n_iterations = 100
+    ep_per_run = 10
     mk_dir_recursive('./' + subdir)
 
     params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low}
