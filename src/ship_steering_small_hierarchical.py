@@ -130,8 +130,6 @@ def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir
         print('ITERATION', n)
         core.learn(n_episodes=n_iterations*ep_per_run, skip=True)
         dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
-        last_ep_dataset = pick_last_ep(dataset_eval_run)
-        dataset_eval_visual += last_ep_dataset
         dataset_eval += dataset_eval_run
         low_level_dataset_eval += control_block2.dataset.get()
 
@@ -143,7 +141,7 @@ def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir
     np.save(subdir+str(i)+'/low_level_dataset_file', low_level_dataset_eval)
     np.save(subdir+str(i)+'/parameter_dataset1_file', parameter_dataset1)
     np.save(subdir+str(i)+'/parameter_dataset2_file', parameter_dataset2)
-    np.save(subdir+str(i)+'/dataset_eval_visual_file', dataset_eval_visual)
+    np.save(subdir+str(i)+'/dataset_eval_visual_file', dataset_eval_run)
     np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval)
 
 
