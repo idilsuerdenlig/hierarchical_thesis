@@ -9,7 +9,7 @@ from mushroom.features.tiles import Tiles
 from mushroom.features.features import Features
 from mushroom.policy import DeterministicPolicy
 from mushroom.utils.dataset import compute_J
-from mushroom.utils.parameters import AdaptiveParameter
+from mushroom.utils.parameters import AdaptiveParameter, Parameter
 from library.environments.idilshipsteering import ShipSteering
 import datetime
 from joblib import Parallel, delayed
@@ -30,7 +30,7 @@ def experiment(alg, params, subdir, exp_no):
     n_tiles = [5, 5, 6]
     low = np.array(low, dtype=np.float)
     high = np.array(high, dtype=np.float)
-    n_tilings = 9
+    n_tilings = 1
 
     tilings = Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low,
                              high=high)
@@ -47,7 +47,7 @@ def experiment(alg, params, subdir, exp_no):
     policy = DeterministicPolicy(mu=approximator)
 
     mu = np.zeros(policy.weights_size)
-    sigma = 4e-2 * np.ones(policy.weights_size)
+    sigma = 4e-1 * np.ones(policy.weights_size)
     distribution = GaussianDiagonalDistribution(mu, sigma)
 
     # Agent
@@ -56,7 +56,7 @@ def experiment(alg, params, subdir, exp_no):
     # Train
     core = Core(agent, mdp)
     dataset_eval = core.evaluate(n_episodes=ep_per_run)
-    print('distribution parameters: ', distribution.get_parameters())
+    #print('distribution parameters: ', distribution.get_parameters())
     J = compute_J(dataset_eval, gamma=mdp.info.gamma)
     print('J at start : ' + str(np.mean(J)))
 
@@ -71,24 +71,31 @@ def experiment(alg, params, subdir, exp_no):
 
     mk_dir_recursive('./' + subdir + str(exp_no))
     np.save(subdir+str(exp_no)+'/dataset_eval_file', dataset_eval_all)
+    #print('distribution parameters: ', distribution.get_parameters())
 
 
 if __name__ == '__main__':
-    how_many = 1
-    n_jobs = 1
+    how_many = 100
+    n_jobs = -1
     n_runs = 10
     n_iterations = 10
     ep_per_run = 10
 
-    algs = [REPS, RWR, PGPE]
-    params = [{'eps': 0.5},
-              {'beta': 1},
-              {'learning_rate': AdaptiveParameter(value=0.05)}]
+    algs_and_params = [
+        (REPS, {'eps': 0.5}),
+        (RWR, {'beta': 0.8}),
+        (PGPE, {'learning_rate': AdaptiveParameter(value=4.0)}),
+        ]
 
-    for alg, params in zip(algs, params):
-        subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + \
-                 '_small_bbo/' + alg.__name__ + '/'
+
+    base_dir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') +  '_small_bbo/'
+    mk_dir_recursive('./' + base_dir)
+    force_symlink(base_dir, './latest')
+
+    for alg, params in algs_and_params:
+        subdir = base_dir + alg.__name__ + '/'
         mk_dir_recursive('./' + subdir)
+
 
         np.save(subdir + '/algorithm_params_dictionary', params)
         experiment_params = {'how_many': how_many, 'n_runs': n_runs,
