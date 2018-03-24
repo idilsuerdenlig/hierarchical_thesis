@@ -88,11 +88,8 @@ class ControlBlock(Block):
             self.dataset.empty()
 
     def draw_action(self, state, last):
-        print(self.name, 'asks for draw action from draw action to mushroom agent')
 
         if not last:
-            print(self.name, 'asks for draw action from draw action to mushroom agent')
-
             self.last_input = state
             self.last_output = self.agent.draw_action(state)
             self.ep_step_counter += 1
@@ -135,7 +132,6 @@ class ControlBlock(Block):
         #    self.build_sample(state, 0, True, True)
         self.agent.episode_start()
         self.ep_step_counter = 0
-        print(self.name, 'asks for draw action from reset with state :', state)
         self.draw_action(state, False)
         sample = state, self.last_output
         self.dataset.add_first_sample(sample, False)
