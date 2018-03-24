@@ -150,9 +150,9 @@ def experiment_bonarini_hierarchical(alg_high, alg_low, params, experiment_param
 if __name__ == '__main__':
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_bonarini_hierarchical_PGPE/'
-    alg_high = REPS
-    alg_low = REPS
-    learning_rate_high = Parameter(value=5)
+    alg_high = PGPE
+    alg_low = PGPE
+    learning_rate_high = Parameter(value=4)
     learning_rate_low = AdaptiveParameter(value=0.05)
     how_many = 1
     n_runs = 5
