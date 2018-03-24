@@ -6,9 +6,9 @@ from library.visualization_tools.arrows import plot_arrows
 from mushroom.utils.dataset import compute_J
 import numpy as np
 from tqdm import tqdm
+from library.utils.pick_last_ep_dataset import pick_last_ep
 
-
-def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
+def visualize_bonarini_hierarchical(gamma=1, range_vis=None):
 
     fig = plt.figure()
     ax1 = fig.add_subplot(121)
@@ -29,8 +29,6 @@ def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
 
     for exp_no in range(how_many):
 
-        parameter_dataset1 += [np.load('latest/' + str(exp_no) + '/parameter_dataset1_file.npy')]
-        parameter_dataset2 += [np.load('latest/' + str(exp_no) + '/parameter_dataset2_file.npy')]
         dataset_eval = np.load('latest/' + str(exp_no) + '/dataset_eval_file.npy')
 
         J_runs_eps = compute_J(dataset_eval, gamma)
@@ -65,15 +63,15 @@ def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
 
     dataset_eval = np.load('latest/' + str(how_many - 1) + '/dataset_eval_file.npy')
     low_level_dataset = np.load('latest/' + str(exp_no) + '/low_level_dataset_file.npy')
+    dataset_eval_last = pick_last_ep(dataset_eval)
 
-    small=True
+    small = False
 
-    visualize_policy_params(parameter_dataset1, parameter_dataset2, small=small, how_many=how_many)
-    visualize_ship_steering(dataset_eval, 'evaluate', small=small, range_eps=range_vis, n_gates=1, how_many=how_many)
+    visualize_ship_steering(dataset_eval_last, 'evaluate', small=small, range_eps=range_vis, n_gates=1, how_many=how_many)
     visualize_control_block(datalist_control=low_level_dataset, ep_count=5, how_many=how_many)
 
     plt.show()
 
 if __name__ == '__main__':
     # range_vis must be a range()
-    visualize_small_hierarchical(gamma=0.99, range_vis=None)
+    visualize_bonarini_hierarchical(gamma=0.99, range_vis=None)
