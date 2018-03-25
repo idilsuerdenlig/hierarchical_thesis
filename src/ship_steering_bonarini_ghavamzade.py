@@ -3,12 +3,9 @@ from library.blocks.computational_graph import ComputationalGraph
 from library.blocks.control_block import ControlBlock
 from mushroom.utils import spaces
 from mushroom.utils.parameters import *
-from mushroom.utils.callbacks import CollectDataset
 from mushroom.features.features import *
-from mushroom.features.basis import PolynomialBasis
 from mushroom.policy.gaussian_policy import *
 from mushroom.algorithms.policy_search import *
-from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
 from library.blocks.basic_operation_block import *
 from library.blocks.model_placeholder import PlaceHolder
 from library.blocks.mux_block import MuxBlock
@@ -17,21 +14,16 @@ from mushroom.policy import EpsGreedy
 from mushroom.features.tiles import Tiles
 from library.blocks.functions.pick_state import pick_state
 from library.blocks.functions.rototranslate import rototranslate
-from library.blocks.hold_state import hold_state
 from library.blocks.functions.hi_lev_extr_rew_ghavamzade import G_high
 from library.blocks.functions.low_lev_extr_rew_ghavamzade import G_low
 from library.blocks.reward_accumulator import reward_accumulator_block
 from mushroom.utils.dataset import compute_J
-import datetime
-import argparse
 from mushroom.utils.folder import mk_dir_recursive
-from library.approximator.CMAC import CMACApproximator
 from library.environments.bonarinishipsteering import BonariniShipSteering
 from mushroom.environments.environment import MDPInfo
 from library.agents.ghavamzade_agent import GhavamzadeAgent
 from library.blocks.hold_state import hold_state
 import datetime
-import argparse
 from mushroom.utils.folder import *
 from joblib import Parallel, delayed
 
@@ -54,7 +46,7 @@ class TerminationCondition(object):
             return False
 
 
-def experiment_bonarini_ghavamzade(alg_high, alg_low, params, experiment_params ,subdir, i):
+def experiment_bonarini_ghavamzade(alg_high, alg_low, params, subdir, i):
 
     np.random.seed()
 
@@ -101,29 +93,35 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, experiment_params 
     control_blockH = ControlBlock(name='control block H', agent=agentH, n_steps_per_fit=1)
 
     #FeaturesL
-    high = [150, 150, np.pi, np.pi/12]
-    low = [0, 0, -np.pi, -np.pi/12]
-    n_tiles = [5, 5, 36, 5]
+    high = [150, 150, np.pi]
+    low = [0, 0, -np.pi]
+    n_tiles = [5, 5, 6]
     low = np.array(low, dtype=np.float)
     high = np.array(high, dtype=np.float)
-    n_tilings = 9
+    n_tilings = 1
 
     tilingsL= Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low, high=high)
 
     featuresL = Features(tilings=tilingsL)
 
-    # Policy1
+
+    # Approximators
     input_shape = (featuresL.size,)
 
     approximator_params = dict(input_dim=input_shape[0])
-    approximator = Regressor(LinearApproximator, input_shape=input_shape,
-                             output_shape=mdp.info.action_space.shape,
-                             **approximator_params)
-    sigma = np.array([[1.3e-2]])
-    pi1 = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
+    approximator1 = Regressor(LinearApproximator, input_shape=input_shape,
+                              output_shape=mdp.info.action_space.shape,
+                              **approximator_params)
+    approximator2 = Regressor(LinearApproximator, input_shape=input_shape,
+                              output_shape=mdp.info.action_space.shape,
+                              **approximator_params)
+
+    # Policy1
+    sigma = np.array([[1e-4]])
+    pi1 = MultivariateGaussianPolicy(mu=approximator1, sigma=sigma)
 
     # Policy2
-    pi2 = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
+    pi2 = MultivariateGaussianPolicy(mu=approximator2, sigma=sigma)
 
     # Agent1
     learning_rate1 = params.get('learning_rate_low')
@@ -268,9 +266,9 @@ if __name__ == '__main__':
     learning_rate_high = Parameter(value=0.2)
     learning_rate_low = ExponentialDecayParameter(value=1e-8, decay_exp=0.5)
     how_many = 1
-    n_runs = 2
-    n_iterations = 2
-    ep_per_run = 5
+    n_runs = 10
+    n_iterations = 50
+    ep_per_run = 10
     mk_dir_recursive('./' + subdir)
 
     params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low}
@@ -278,5 +276,4 @@ if __name__ == '__main__':
                          'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
     Js = Parallel(n_jobs=1)(delayed(experiment_bonarini_ghavamzade)(alg_high, alg_low, params,
-                                                                    experiment_params,
                                                                     subdir, i) for i in range(how_many))
