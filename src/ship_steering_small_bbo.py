@@ -54,23 +54,24 @@ def experiment(alg, params, subdir, exp_no):
     agent = alg(distribution, policy, mdp.info, features=phi, **params)
 
     # Train
+    dataset_eval = list()
     core = Core(agent, mdp)
-    dataset_eval = core.evaluate(n_episodes=ep_per_run)
+    dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
     #print('distribution parameters: ', distribution.get_parameters())
-    J = compute_J(dataset_eval, gamma=mdp.info.gamma)
+    J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
     print('J at start : ' + str(np.mean(J)))
+    dataset_eval += dataset_eval_run
 
-    dataset_eval_all = dataset_eval
     for n in range(n_runs):
         core.learn(n_episodes=n_iterations * ep_per_run,
                    n_episodes_per_fit=ep_per_run)
-        dataset_eval = core.evaluate(n_episodes=ep_per_run)
-        J = compute_J(dataset_eval, gamma=mdp.info.gamma)
+        dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
+        J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
         print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
-        dataset_eval_all += dataset_eval
+        dataset_eval += dataset_eval_run
 
     mk_dir_recursive('./' + subdir + str(exp_no))
-    np.save(subdir+str(exp_no)+'/dataset_eval_file', dataset_eval_all)
+    np.save(subdir+str(exp_no)+'/dataset_eval_file', dataset_eval)
     #print('distribution parameters: ', distribution.get_parameters())
 
 

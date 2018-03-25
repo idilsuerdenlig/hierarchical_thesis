@@ -4,6 +4,8 @@ from library.visualization_tools.visualize_control_block import visualize_contro
 from library.visualization_tools.visualize_control_block_ghavamzade import visualize_control_block_ghavamzade
 from library.visualization_tools.visualize_policy_parameters import visualize_policy_params
 from library.visualization_tools.arrows import plot_arrows
+from library.utils.pick_last_ep_dataset import pick_last_ep
+from library.utils.pick_eps import pick_eps
 from mushroom.utils.dataset import compute_J
 import numpy as np
 from tqdm import tqdm
@@ -30,7 +32,15 @@ def visualize_bonarini_hierarchical(gamma=1, ep_count=2):
         plt.suptitle('ctrl+')
         visualize_control_block_ghavamzade(low_level_dataset2, ep_count=ep_count)
         plt.suptitle('ctrlx')
-        visualize_ship_steering(dataset_eval, name='evaluate', small=False)
+        dataset_eval_eps = list()
+        dataset_vis = list()
+        dataset_eval_vis = list()
+        for run in range(n_runs):
+            dataset_eval_run = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
+            last_ep_of_run = pick_last_ep(dataset_eval_run)
+            for step in last_ep_of_run:
+                dataset_eval_vis.append(step)
+        visualize_ship_steering(dataset_vis, name='evaluate', small=False, n_runs=n_runs, ep_per_run=ep_per_run)
 
     plt.show()
 

@@ -29,7 +29,6 @@ from library.approximator.CMAC import CMACApproximator
 from library.environments.bonarinishipsteering import BonariniShipSteering
 from mushroom.environments.environment import MDPInfo
 from library.agents.ghavamzade_agent import GhavamzadeAgent
-from library.utils.pick_last_ep_dataset import pick_last_ep
 from library.blocks.hold_state import hold_state
 import datetime
 import argparse
@@ -216,7 +215,6 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, experiment_params 
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_eval_visual = list()
     low_level_dataset_eval1 = list()
     low_level_dataset_eval2 = list()
     dataset_eval = list()
@@ -224,11 +222,8 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, experiment_params 
     dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
     # print('distribution parameters: ', distribution.get_parameters())
     J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
-    last_ep_dataset = pick_last_ep(dataset_eval_run)
-    dataset_eval_visual += last_ep_dataset
     dataset_eval += dataset_eval_run
     print('J at start : ' + str(np.mean(J)))
-
 
     for n in range(n_runs):
         print('ITERATION', n)
@@ -236,8 +231,7 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, experiment_params 
         dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
         J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
         print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
-        last_ep_dataset = pick_last_ep(dataset_eval)
-        dataset_eval_visual += last_ep_dataset
+        dataset_eval += dataset_eval_run
         low_level_dataset_eval1 += control_block1.dataset.get()
         low_level_dataset_eval2 += control_block2.dataset.get()
 
@@ -261,7 +255,7 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, experiment_params 
     np.save(subdir+str(i)+'/low_level_dataset2_file', low_level_dataset_eval2)
     np.save(subdir+str(i)+'/max_q_val_tiled_file', max_q_val_tiled)
     np.save(subdir+str(i)+'/act_max_q_val_tiled_file', act_max_q_val_tiled)
-    np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval_visual)
+    np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval)
 
     return
 

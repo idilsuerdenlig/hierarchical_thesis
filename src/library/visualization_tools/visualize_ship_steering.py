@@ -3,7 +3,8 @@ import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
-def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None, n_gates=1, small=True, how_many=1):
+
+def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None, n_gates=1, small=True, how_many=1, n_runs=1, ep_per_run=1):
 
     plt.figure()
 
@@ -48,6 +49,12 @@ def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None, n_gates
     thetadot_list = list()
     ep_size = 0
     n_eps = 0
+    dataset_eval_eps = list()
+    dataset_ep = list()
+
+
+
+
 
     for dataset_step in datalist_eval:
         if not dataset_step[-1]:
@@ -85,10 +92,11 @@ def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None, n_gates
             reward_ep = []
             n_eps += 1
 
-
     maxt = 0
     if range_eps is None:
         range_eps = range(len(x_list))
+
+
 
     for episode in range_eps:
         time =np.arange(len(x_list[episode]))
@@ -138,7 +146,7 @@ def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None, n_gates
         ax3.set_ylabel('y')
         ax4.plot(time,theta_ep)
         ax4.set_ylabel('theta')
-        ax5.plot(time,thetadot_ep)
+        ax5.plot(time, thetadot_ep)
         ax5.set_ylabel('thetadot')
         ax5.set_xlabel('time')
 

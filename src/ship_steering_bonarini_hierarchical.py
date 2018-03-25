@@ -123,15 +123,12 @@ def experiment_bonarini_hierarchical(alg_high, alg_low, params, experiment_param
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_eval_visual = list()
     low_level_dataset_eval = list()
     dataset_eval = list()
 
     dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
     # print('distribution parameters: ', distribution.get_parameters())
     J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
-    last_ep_dataset = pick_last_ep(dataset_eval_run)
-    dataset_eval_visual += last_ep_dataset
     dataset_eval += dataset_eval_run
     print('J at start : ' + str(np.mean(J)))
 
@@ -143,8 +140,6 @@ def experiment_bonarini_hierarchical(alg_high, alg_low, params, experiment_param
         J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
         print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
         dataset_eval += dataset_eval_run
-        last_ep_dataset = pick_last_ep(dataset_eval_run)
-        dataset_eval_visual += last_ep_dataset
         low_level_dataset_eval += control_block2.dataset.get()
 
     # Save
@@ -154,13 +149,8 @@ def experiment_bonarini_hierarchical(alg_high, alg_low, params, experiment_param
     np.save(subdir+'/'+str(i)+'/low_level_dataset_file', low_level_dataset_eval)
     np.save(subdir+'/'+str(i)+'/parameter_dataset1_file', parameter_dataset1)
     np.save(subdir+'/'+str(i)+'/parameter_dataset2_file', parameter_dataset2)
-    np.save(subdir+'/'+str(i)+'/dataset_eval_file', dataset_eval_visual)
+    np.save(subdir+'/'+str(i)+'/dataset_eval_file', dataset_eval)
 
-    del low_level_dataset_eval
-    del parameter_dataset1
-    del parameter_dataset2
-    del dataset_eval_visual
-    del dataset_eval
 
     return
 

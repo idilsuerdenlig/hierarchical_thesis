@@ -4,6 +4,9 @@ from library.visualization_tools.visualize_control_block import visualize_contro
 from library.visualization_tools.visualize_policy_parameters import visualize_policy_params
 from library.visualization_tools.arrows import plot_arrows
 from mushroom.utils.dataset import compute_J
+from library.utils.pick_last_ep_dataset import pick_last_ep
+from library.utils.pick_eps import pick_eps
+
 import numpy as np
 from tqdm import tqdm
 
@@ -32,7 +35,6 @@ def visualize_small_flat(gamma=1, range_vis=None):
 
         parameter_dataset += [np.load('latest/' + str(exp_no) + '/parameter_dataset_file.npy')]
         dataset_eval = np.load('latest/' + str(exp_no) + '/dataset_eval_file.npy')
-
         J_runs_eps = compute_J(dataset_eval, gamma)
         for i in range(n_runs):
             J_avg[i] = np.mean(J_runs_eps[ep_per_run * i:ep_per_run * i + ep_per_run], axis=0)
@@ -65,8 +67,14 @@ def visualize_small_flat(gamma=1, range_vis=None):
 
     dataset_eval = np.load('latest/' + str(how_many - 1) + '/dataset_eval_file.npy')
     visualize_policy_params(parameter_dataset, parameter_dataset2=None, small=True, how_many=how_many)
-    visualize_ship_steering(dataset_eval, 'evaluate', small=True, range_eps=range_vis,
-                            n_gates=1, how_many=how_many)
+    dataset_eval_vis = list()
+    for run in range(n_runs):
+        dataset_eval_run = pick_eps(dataset_eval, start=run*ep_per_run, end=run*ep_per_run+ep_per_run)
+        last_ep_of_run = pick_last_ep(dataset_eval_run)
+        for step in last_ep_of_run:
+            dataset_eval_vis.append(step)
+    visualize_ship_steering(dataset_eval_vis, 'evaluate', small=True, range_eps=range_vis,
+                            n_gates=1, how_many=how_many, n_runs=n_runs, ep_per_run=ep_per_run)
 
     plt.show()
 

@@ -66,14 +66,10 @@ def experiment(alg, params, experiment_params ,subdir, i):
     core = Core(agent, mdp, callbacks=[parameter_dataset])
 
 
-    dataset_eval_visual = list()
     dataset_eval = list()
-
     dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
     # print('distribution parameters: ', distribution.get_parameters())
-    J = compute_J(dataset_eval, gamma=mdp.info.gamma)
-    last_ep_dataset = pick_last_ep(dataset_eval_run)
-    dataset_eval_visual += last_ep_dataset
+    J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
     dataset_eval += dataset_eval_run
     print('J at start : ' + str(np.mean(J)))
 
@@ -84,14 +80,12 @@ def experiment(alg, params, experiment_params ,subdir, i):
         dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
         J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
         print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
-        last_ep_dataset = pick_last_ep(dataset_eval_run)
-        dataset_eval_visual += last_ep_dataset
         dataset_eval += dataset_eval_run
 
     mk_dir_recursive('./' + subdir + str(i))
     np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval)
     np.save(subdir+str(i)+'/parameter_dataset_file', parameter_dataset)
-    np.save(subdir+str(i)+'/dataset_eval_visual_file', dataset_eval_visual)
+
 
 
 
