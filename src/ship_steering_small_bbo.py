@@ -78,7 +78,7 @@ def experiment(alg, params, subdir, exp_no):
 if __name__ == '__main__':
     how_many = 100
     n_jobs = -1
-    n_runs = 10
+    n_runs = 20
     n_iterations = 10
     ep_per_run = 10
 
