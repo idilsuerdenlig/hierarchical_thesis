@@ -27,7 +27,7 @@ from joblib import Parallel, delayed
 
 
 
-def experiment_bonarini_hierarchical(alg_high, alg_low, params, experiment_parameters ,subdir, i):
+def experiment_bonarini_hierarchical(alg_high, alg_low, params, subdir, i):
 
     np.random.seed()
 
@@ -57,24 +57,24 @@ def experiment_bonarini_hierarchical(alg_high, alg_low, params, experiment_param
     features = Features(basis_list=[PolynomialBasis()])
 
     # Policy 1
+    sigma1 = np.array([500, 500])
     approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
-    policy1 = DeterministicPolicy(mu=approximator1)
-    mu1 = np.zeros(policy1.weights_size)
-    sigma1 = 4e-2 * np.ones(policy1.weights_size)
-    distribution1 = GaussianDiagonalDistribution(mu1, sigma1)
+    approximator1.set_weights(np.array([500, 500]))
+
+    policy1 = MultivariateDiagonalGaussianPolicy(mu=approximator1, std=sigma1)
 
     # Agent 1
     learning_rate1 = params.get('learning_rate_high')
     lim = 1000
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(0, lim, (2,)), gamma=mdp.info.gamma, horizon=100)
-    agent1 = alg_high(distribution1, policy1, mdp_info_agent1, learning_rate1, features=features)
+    agent1 = alg_high(policy1, mdp_info_agent1, learning_rate1, features=features)
 
     # Policy 2
     approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
     policy2 = DeterministicPolicy(mu=approximator2)
     mu2 = np.zeros(policy2.weights_size)
-    sigma2 = 4e-2 * np.ones(policy2.weights_size)
+    sigma2 = 2e-3* np.ones(policy2.weights_size)
     distribution2 = GaussianDiagonalDistribution(mu2, sigma2)
 
     # Agent 2
@@ -148,7 +148,7 @@ def experiment_bonarini_hierarchical(alg_high, alg_low, params, experiment_param
 if __name__ == '__main__':
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_bonarini_hierarchical_PGPE/'
-    alg_high = PGPE
+    alg_high = GPOMDP
     alg_low = PGPE
     learning_rate_high = Parameter(value=4)
     learning_rate_low = AdaptiveParameter(value=0.05)
@@ -164,4 +164,4 @@ if __name__ == '__main__':
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
 
     Js = Parallel(n_jobs=1)(delayed(experiment_bonarini_hierarchical)(alg_high, alg_low, params,
-                                                             experiment_params, subdir, i) for i in range(how_many))
+                                                                      subdir, i) for i in range(how_many))

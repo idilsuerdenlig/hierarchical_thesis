@@ -28,7 +28,7 @@ from joblib import Parallel, delayed
 
 
 
-def experiment_bonarini_hierarchical(alg_high, alg_low, params, experiment_parameters ,subdir, i):
+def experiment_bonarini_hierarchical(alg_high, alg_low, params, subdir, i):
 
     np.random.seed()
 
@@ -166,6 +166,7 @@ if __name__ == '__main__':
     n_iterations = 10
     ep_per_run = 5
     mk_dir_recursive('./' + subdir)
+    force_symlink('./' + subdir, './latest')
 
     params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low}
     experiment_params = {'how_many': how_many, 'n_runs': n_runs,
@@ -173,4 +174,4 @@ if __name__ == '__main__':
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
 
     Js = Parallel(n_jobs=1)(delayed(experiment_bonarini_hierarchical)(alg_high, alg_low, params,
-                                                             experiment_params, subdir, i) for i in range(how_many))
+                                                                      subdir, i) for i in range(how_many))
