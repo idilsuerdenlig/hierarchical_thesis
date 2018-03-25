@@ -1,31 +1,31 @@
-from library.core.hierarchical_core import HierarchicalCore
-from library.blocks.computational_graph import ComputationalGraph
-from library.blocks.control_block import ControlBlock
+import datetime
+from joblib import Parallel, delayed
+
+from mushroom.environments.environment import MDPInfo
+from mushroom.algorithms.policy_search import *
+from mushroom.algorithms.value.td import *
+from mushroom.features.features import *
+from mushroom.features.tiles import Tiles
+from mushroom.policy.gaussian_policy import *
+from mushroom.policy import EpsGreedy
 from mushroom.utils import spaces
 from mushroom.utils.parameters import *
-from mushroom.features.features import *
-from mushroom.policy.gaussian_policy import *
-from mushroom.algorithms.policy_search import *
-from library.blocks.basic_operation_block import *
-from library.blocks.model_placeholder import PlaceHolder
-from library.blocks.mux_block import MuxBlock
-from mushroom.algorithms.value.td import *
-from mushroom.policy import EpsGreedy
-from mushroom.features.tiles import Tiles
+from mushroom.utils.dataset import compute_J
+from mushroom.utils.folder import *
+
+from library.core.hierarchical_core import HierarchicalCore
+from library.environments.bonarinishipsteering import BonariniShipSteering
+from library.blocks.computational_graph import ComputationalGraph
+from library.blocks.control_block import ControlBlock
 from library.blocks.functions.pick_state import pick_state
 from library.blocks.functions.rototranslate import rototranslate
 from library.blocks.functions.hi_lev_extr_rew_ghavamzade import G_high
 from library.blocks.functions.low_lev_extr_rew_ghavamzade import G_low
 from library.blocks.reward_accumulator import reward_accumulator_block
-from mushroom.utils.dataset import compute_J
-from mushroom.utils.folder import mk_dir_recursive
-from library.environments.bonarinishipsteering import BonariniShipSteering
-from mushroom.environments.environment import MDPInfo
-from library.agents.ghavamzade_agent import GhavamzadeAgent
+from library.blocks.basic_operation_block import *
+from library.blocks.model_placeholder import PlaceHolder
+from library.blocks.mux_block import MuxBlock
 from library.blocks.hold_state import hold_state
-import datetime
-from mushroom.utils.folder import *
-from joblib import Parallel, delayed
 
 class TerminationCondition(object):
 
@@ -72,7 +72,7 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, subdir, i):
     featuresH = Features(tilings=tilingsH)
 
     # PolicyH
-    epsilon = LinearDecayParameter(value=0.1, min_value=0.0, n=10000)
+    epsilon = ExponentialDecayParameter(value=0.1, decay_exp=0.51)
     piH = EpsGreedy(epsilon=epsilon)
 
     # AgentH
@@ -104,6 +104,9 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, subdir, i):
 
     featuresL = Features(tilings=tilingsL)
 
+    mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]),
+                                                           high=np.array([150, 150]), shape=(2,)),
+                              action_space=mdp.info.action_space, gamma=0.99, horizon=10000)
 
     # Approximators
     input_shape = (featuresL.size,)
@@ -137,11 +140,11 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, subdir, i):
     termination_condition2 = TerminationCondition(active_dir=5, small=small)
 
     # Control Block +
-    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_steps_per_fit=1,
+    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=20,
                                   termination_condition=termination_condition1)
 
     # Control Block x
-    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_steps_per_fit=1,
+    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=20,
                                   termination_condition=termination_condition2)
 
     # Function Block 1: picks state for hi lev ctrl
@@ -262,14 +265,15 @@ if __name__ == '__main__':
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_bonarini_ghavamzade/'
     alg_high = TrueOnlineSARSALambda
-    alg_low = GhavamzadeAgent
-    learning_rate_high = Parameter(value=0.2)
-    learning_rate_low = ExponentialDecayParameter(value=1e-8, decay_exp=0.5)
+    alg_low = GPOMDP
+    learning_rate_high = ExponentialDecayParameter(value=1.0, decay_exp=0.8)
+    learning_rate_low = AdaptiveParameter(value=1e-3)
     how_many = 1
-    n_runs = 10
+    n_runs = 5
     n_iterations = 50
     ep_per_run = 10
     mk_dir_recursive('./' + subdir)
+    force_symlink('./' + subdir, './latest')
 
     params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low}
     experiment_params = {'how_many': how_many, 'n_runs': n_runs,
