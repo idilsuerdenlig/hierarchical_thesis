@@ -94,7 +94,7 @@ if __name__ == '__main__':
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_flat/'
     alg = GPOMDP
     learning_rate = AdaptiveParameter(value=1e-4)
-    how_many = 1
+    how_many = 100
     n_runs = 10
     n_iterations = 10
     ep_per_run = 20
@@ -105,6 +105,6 @@ if __name__ == '__main__':
                          'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
 
-    Js = Parallel(n_jobs=1)(delayed(experiment)(alg=alg, params=params,
+    Js = Parallel(n_jobs=-1)(delayed(experiment)(alg=alg, params=params,
                                                 experiment_params=experiment_params,
                                                 subdir=subdir, i=i) for i in range(how_many))
