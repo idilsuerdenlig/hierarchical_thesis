@@ -25,7 +25,7 @@ def experiment(alg, params, subdir, exp_no):
     # MDP
     mdp = ShipSteering(small=True, hard=True, n_steps_action=3)
 
-    high = [15, 15, np.pi]
+    high = [150, 150, np.pi]
     low = [0, 0, -np.pi]
     n_tiles = [5, 5, 6]
     low = np.array(low, dtype=np.float)
@@ -78,14 +78,14 @@ def experiment(alg, params, subdir, exp_no):
 if __name__ == '__main__':
     how_many = 100
     n_jobs = -1
-    n_runs = 20
+    n_runs = 25
     n_iterations = 10
-    ep_per_run = 10
+    ep_per_run = 20
 
     algs_and_params = [
-        (REPS, {'eps': 0.5}),
-        (RWR, {'beta': 0.8}),
-        (PGPE, {'learning_rate': AdaptiveParameter(value=4.0)}),
+        (REPS, {'eps': 1.0}),
+        (RWR, {'beta': 0.7}),
+        (PGPE, {'learning_rate': AdaptiveParameter(value=1.5)}),
         ]
 
 
