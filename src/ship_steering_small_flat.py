@@ -54,7 +54,7 @@ def experiment(alg, params, experiment_params ,subdir, i):
                              params=approximator_params)
 
     sigma = np.array([[1e-4]])
-    #std = 1e-4*np.ones(shape=(,))
+    #std = np.array([1e-2])
     #policy = MultivariateDiagonalGaussianPolicy(mu=approximator, std=std)
     policy = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
 
@@ -93,11 +93,11 @@ if __name__ == '__main__':
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_flat/'
     alg = GPOMDP
-    learning_rate = AdaptiveParameter(value=.001)
+    learning_rate = AdaptiveParameter(value=1e-4)
     how_many = 1
     n_runs = 10
     n_iterations = 10
-    ep_per_run = 10
+    ep_per_run = 20
     mk_dir_recursive('./' + subdir)
     params = {'learning_rate': learning_rate}
     np.save(subdir + '/algorithm_params_dictionary', params)
