@@ -60,7 +60,7 @@ def experiment(alg, params, subdir, exp_no):
     J = compute_J(dataset_eval, gamma=mdp.info.gamma)
     print('J at start : ' + str(np.mean(J)))
 
-    dataset_eval_all = list()
+    dataset_eval_all = dataset_eval
     for n in range(n_runs):
         core.learn(n_episodes=n_iterations * ep_per_run,
                    n_episodes_per_fit=ep_per_run)

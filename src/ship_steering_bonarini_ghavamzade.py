@@ -21,6 +21,7 @@ from library.blocks.hold_state import hold_state
 from library.blocks.functions.hi_lev_extr_rew_ghavamzade import G_high
 from library.blocks.functions.low_lev_extr_rew_ghavamzade import G_low
 from library.blocks.reward_accumulator import reward_accumulator_block
+from mushroom.utils.dataset import compute_J
 import datetime
 import argparse
 from mushroom.utils.folder import mk_dir_recursive
@@ -218,13 +219,23 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, experiment_params 
     dataset_eval_visual = list()
     low_level_dataset_eval1 = list()
     low_level_dataset_eval2 = list()
+    dataset_eval = list()
+
+    dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
+    # print('distribution parameters: ', distribution.get_parameters())
+    J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
+    last_ep_dataset = pick_last_ep(dataset_eval_run)
+    dataset_eval_visual += last_ep_dataset
+    dataset_eval += dataset_eval_run
+    print('J at start : ' + str(np.mean(J)))
 
 
-    n_runs = 5
     for n in range(n_runs):
         print('ITERATION', n)
         core.learn(n_episodes=n_iterations*ep_per_run, skip=True)
-        dataset_eval = core.evaluate(n_episodes=ep_per_run)
+        dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
+        J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
+        print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
         last_ep_dataset = pick_last_ep(dataset_eval)
         dataset_eval_visual += last_ep_dataset
         low_level_dataset_eval1 += control_block1.dataset.get()
@@ -256,6 +267,7 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, experiment_params 
 
 
 if __name__ == '__main__':
+
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_bonarini_ghavamzade/'
     alg_high = TrueOnlineSARSALambda
     alg_low = GhavamzadeAgent

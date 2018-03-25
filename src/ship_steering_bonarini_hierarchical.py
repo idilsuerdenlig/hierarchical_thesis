@@ -4,6 +4,7 @@ from library.blocks.control_block import ControlBlock
 from mushroom.utils import spaces
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 from mushroom.utils.callbacks import CollectDataset
+from mushroom.utils.dataset import compute_J
 from mushroom.features.basis import *
 from mushroom.features.features import *
 from mushroom.policy.gaussian_policy import *
@@ -124,15 +125,25 @@ def experiment_bonarini_hierarchical(alg_high, alg_low, params, experiment_param
     # Train
     dataset_eval_visual = list()
     low_level_dataset_eval = list()
+    dataset_eval = list()
 
+    dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
+    # print('distribution parameters: ', distribution.get_parameters())
+    J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
+    last_ep_dataset = pick_last_ep(dataset_eval_run)
+    dataset_eval_visual += last_ep_dataset
+    dataset_eval += dataset_eval_run
+    print('J at start : ' + str(np.mean(J)))
 
 
     for n in range(n_runs):
         print('ITERATION', n)
         core.learn(n_episodes=ep_per_run*n_iterations, skip=True)
-        dataset_eval = core.evaluate(n_episodes=ep_per_run)
-
-        last_ep_dataset = pick_last_ep(dataset_eval)
+        dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
+        J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
+        print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
+        dataset_eval += dataset_eval_run
+        last_ep_dataset = pick_last_ep(dataset_eval_run)
         dataset_eval_visual += last_ep_dataset
         low_level_dataset_eval += control_block2.dataset.get()
 

@@ -35,17 +35,17 @@ def experiment(alg, params, experiment_params ,subdir, i):
     # MDP
     mdp = ShipSteering(small=True, hard=True, n_steps_action=3)
 
-    high = [15, 15, np.pi, np.pi/12]
-    low = [0, 0, -np.pi, -np.pi/12]
-    n_tiles = [5, 5, 6, 1]
+    high = [15, 15, np.pi]
+    low = [0, 0, -np.pi]
+    n_tiles = [5, 5, 6]
     low = np.array(low, dtype=np.float)
     high = np.array(high, dtype=np.float)
-    n_tilings = 9
+    n_tilings = 1
 
-    tilings = Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low, high=high)
+    tilings = Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low,
+                             high=high)
+
     phi = Features(tilings=tilings)
-
-
     input_shape = (phi.size,)
 
     approximator_params = dict(input_dim=phi.size)
@@ -53,7 +53,9 @@ def experiment(alg, params, experiment_params ,subdir, i):
                              output_shape=mdp.info.action_space.shape,
                              params=approximator_params)
 
-    sigma = np.array([[.05]])
+    sigma = np.array([[1e-4]])
+    #std = 1e-4*np.ones(shape=(,))
+    #policy = MultivariateDiagonalGaussianPolicy(mu=approximator, std=std)
     policy = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
 
     # Agent
@@ -66,13 +68,22 @@ def experiment(alg, params, experiment_params ,subdir, i):
 
     dataset_eval_visual = list()
     dataset_eval = list()
-    print(how_many, n_runs, n_iterations, ep_per_run)
+
+    dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
+    # print('distribution parameters: ', distribution.get_parameters())
+    J = compute_J(dataset_eval, gamma=mdp.info.gamma)
+    last_ep_dataset = pick_last_ep(dataset_eval_run)
+    dataset_eval_visual += last_ep_dataset
+    dataset_eval += dataset_eval_run
+    print('J at start : ' + str(np.mean(J)))
 
     for n in range(n_runs):
         print('ITERATION    :', n)
         core.learn(n_episodes=n_iterations * ep_per_run,
                    n_episodes_per_fit=ep_per_run)
         dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
+        J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
+        print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
         last_ep_dataset = pick_last_ep(dataset_eval_run)
         dataset_eval_visual += last_ep_dataset
         dataset_eval += dataset_eval_run
@@ -88,11 +99,11 @@ if __name__ == '__main__':
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_flat/'
     alg = GPOMDP
-    learning_rate = AdaptiveParameter(value=1)
+    learning_rate = AdaptiveParameter(value=.001)
     how_many = 1
     n_runs = 10
     n_iterations = 10
-    ep_per_run = 2
+    ep_per_run = 10
     mk_dir_recursive('./' + subdir)
     params = {'learning_rate': learning_rate}
     np.save(subdir + '/algorithm_params_dictionary', params)

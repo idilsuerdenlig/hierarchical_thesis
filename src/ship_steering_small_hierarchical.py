@@ -21,7 +21,7 @@ from library.environments.idilshipsteering import ShipSteering
 from mushroom.environments import MDPInfo
 import datetime
 from joblib import Parallel, delayed
-
+from mushroom.utils.dataset import compute_J
 import argparse
 from mushroom.utils.folder import *
 from library.blocks.functions.lqr_cost import lqr_cost
@@ -126,11 +126,23 @@ def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir
     low_level_dataset_eval = list()
     dataset_eval = list()
 
+    dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
+    # print('distribution parameters: ', distribution.get_parameters())
+    J = compute_J(dataset_eval, gamma=mdp.info.gamma)
+    print('J at start : ' + str(np.mean(J)))
+    last_ep_dataset = pick_last_ep(dataset_eval_run)
+    dataset_eval_visual += last_ep_dataset
+    dataset_eval += dataset_eval_run
+
     for n in range(n_runs):
         print('ITERATION', n)
         core.learn(n_episodes=n_iterations*ep_per_run, skip=True)
         dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
         dataset_eval += dataset_eval_run
+        J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
+        print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
+        last_ep_dataset = pick_last_ep(dataset_eval_run)
+        dataset_eval_visual += last_ep_dataset
         low_level_dataset_eval += control_block2.dataset.get()
 
     # Save
@@ -157,8 +169,8 @@ def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir
 if __name__ == '__main__':
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_hierarchical/'
-    alg_high = GPOMDP
-    alg_low = GPOMDP
+    alg_high = PGPE
+    alg_low = PGPE
     learning_rate_high = AdaptiveParameter(value=15)
     learning_rate_low = AdaptiveParameter(value=1e-3)
     how_many = 1

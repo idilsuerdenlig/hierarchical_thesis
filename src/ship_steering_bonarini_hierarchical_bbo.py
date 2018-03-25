@@ -121,10 +121,14 @@ def experiment_bonarini_hierarchical(alg_high, alg_low, params, experiment_param
     # Train
     dataset_eval_visual = list()
     low_level_dataset_eval = list()
+    dataset_eval = 0
 
-    dataset_eval = core.evaluate(n_episodes=ep_per_run)
+    dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
     J = compute_J(dataset_eval, gamma=mdp.info.gamma)
     print('J at start : ' + str(np.mean(J)))
+    last_ep_dataset = pick_last_ep(dataset_eval_run)
+    dataset_eval_visual += last_ep_dataset
+    dataset_eval += dataset_eval_run
 
 
     for n in range(n_runs):
@@ -134,6 +138,8 @@ def experiment_bonarini_hierarchical(alg_high, alg_low, params, experiment_param
         J =  compute_J(dataset_eval_run, mdp.info.gamma)
         print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
         dataset_eval += dataset_eval_run
+        last_ep_dataset = pick_last_ep(dataset_eval_run)
+        dataset_eval_visual += last_ep_dataset
         low_level_dataset_eval += control_block2.dataset.get()
 
     # Save
