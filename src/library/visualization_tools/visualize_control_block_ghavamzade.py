@@ -7,7 +7,7 @@ def visualize_control_block_ghavamzade(datalist_control, J = None, ep_count = No
 
     plt.figure()
 
-    ax1 = plt.subplot2grid((4,2), (0,0), rowspan=2, projection='3d')
+    ax1 = plt.subplot2grid((4,2), (0,0), rowspan=2)
     #ax2 = plt.subplot2grid((4,2), (1,0))
     ax3 = plt.subplot2grid((4,2), (2,0))
     ax4 = plt.subplot2grid((4,2), (0,1))
@@ -105,7 +105,7 @@ def visualize_control_block_ghavamzade(datalist_control, J = None, ep_count = No
         x_ep = state_ep[:, 0]
         y_ep = state_ep[:, 1]
         time =np.arange(len(x_ep))
-        ax1.plot(x_ep, y_ep, time)
+        ax1.plot(x_ep, y_ep)
 
     for episode in range_eps:
         state_ep = np.array(state_list[episode])
