@@ -164,7 +164,7 @@ if __name__ == '__main__':
     #0.026179938779
     learning_rate_high = AdaptiveParameter(value=0.001)
     learning_rate_low = AdaptiveParameter(value=1e-3)
-    how_many = 1
+    how_many = 100
     n_runs = 25
     n_iterations = 10
     ep_per_run = 20
@@ -176,6 +176,6 @@ if __name__ == '__main__':
                          'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
 
-    Js = Parallel(n_jobs=1)(delayed(server_experiment_small)(alg_high, alg_low, params,
+    Js = Parallel(n_jobs=-1)(delayed(server_experiment_small)(alg_high, alg_low, params,
                                                               experiment_params,
                                                               subdir, i) for i in range(how_many))
