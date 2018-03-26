@@ -73,8 +73,6 @@ class ShipSteering(Environment):
         new_state[3] = self._state[3] + (r - self._state[3]) * self._dt / \
                        self._T
 
-
-
         if new_state[0] > self.field_size or new_state[1] > self.field_size\
            or new_state[0] < 0 or new_state[1] < 0:
             reward = self._out_reward
@@ -84,10 +82,7 @@ class ShipSteering(Environment):
             reward = self._success_reward
             absorbing = True
         else:
-            if self.hard:
-                reward = -1
-            else:
-                reward = (-0.001)*np.linalg.norm(new_state[:2] - np.array([910, 910]))
+            reward = -1
             absorbing = False
 
         self._state = new_state
