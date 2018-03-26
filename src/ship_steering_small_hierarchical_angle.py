@@ -58,10 +58,11 @@ def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir
 
     # Policy 1
     std1 = np.array([np.pi/4])
+    sigma1 = Parameter(value=144e-4)
     approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(1,))
     approximator1.set_weights(np.array([0]))
 
-    pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,std=std1)
+    pi1 = GaussianPolicy(mu=approximator1,sigma=sigma1)
 
 
     # Policy 2
@@ -160,12 +161,13 @@ if __name__ == '__main__':
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_hierarchical_angle/'
     alg_high = GPOMDP
     alg_low = GPOMDP
-    learning_rate_high = AdaptiveParameter(value=15)
+    #0.026179938779
+    learning_rate_high = AdaptiveParameter(value=1e-4)
     learning_rate_low = AdaptiveParameter(value=1e-3)
     how_many = 1
     n_runs = 25
-    n_iterations = 10
-    ep_per_run = 10
+    n_iterations = 100
+    ep_per_run = 20
     mk_dir_recursive('./' + subdir)
 
     params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low}

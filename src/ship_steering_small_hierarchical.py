@@ -9,7 +9,7 @@ from mushroom.features.features import *
 from mushroom.policy.gaussian_policy import *
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
-from mushroom.algorithms.policy_search import *pos_ref_angle_difference
+from mushroom.algorithms.policy_search import *
 from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
 from library.blocks.functions.feature_angle_diff_ship_steering import pos_ref_angle_difference
 from library.blocks.basic_operation_block import *
