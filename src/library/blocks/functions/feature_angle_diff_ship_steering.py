@@ -16,7 +16,6 @@ def pos_ref_angle_difference(ins):
     return np.array([del_theta])
 
 def angle_ref_angle_difference(ins):
-    print(ins)
     theta_ref = normalize_angle(ins[0])
     theta = ins[1][2]
     theta = normalize_angle(np.pi / 2 - theta)
