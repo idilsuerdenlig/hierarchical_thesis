@@ -12,7 +12,7 @@ from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.algorithms.policy_search import *
 from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
-from library.blocks.functions.feature_angle_diff_ship_steering import phi
+from library.blocks.functions.feature_angle_diff_ship_steering import pos_ref_angle_difference
 from library.blocks.basic_operation_block import *
 from library.blocks.model_placeholder import PlaceHolder
 from library.utils.pick_last_ep_dataset import pick_last_ep
@@ -45,7 +45,7 @@ def experiment_bonarini_hierarchical(alg_high, alg_low, params, subdir, i):
     lastaction_ph = PlaceHolder(name='lastaction_ph')
 
     # Function Block 1
-    function_block1 = fBlock(name='f1 (angle difference)',phi=phi)
+    function_block1 = fBlock(name='f1 (angle difference)',phi=pos_ref_angle_difference)
 
     # Function Block 2
     function_block2 = fBlock(name='f2 (lqr cost)', phi=lqr_cost)
