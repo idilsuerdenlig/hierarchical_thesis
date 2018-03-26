@@ -10,7 +10,7 @@ from mushroom.utils.dataset import compute_J
 import numpy as np
 from tqdm import tqdm
 
-def visualize_bonarini_hierarchical(gamma=1, ep_count=2):
+def visualize_bonarini_hierarchical(gamma=1, ep_count=10):
 
     experiment_params = np.load('latest/experiment_params_dictionary.npy')
     how_many = experiment_params.item().get('how_many')
@@ -23,7 +23,6 @@ def visualize_bonarini_hierarchical(gamma=1, ep_count=2):
         max_q_val_tiled = np.load('latest/'+str(i)+'/max_q_val_tiled_file.npy')
         low_level_dataset1 = np.load('latest/'+str(i)+'/low_level_dataset1_file.npy')
         low_level_dataset2 = np.load('latest/'+str(i)+'/low_level_dataset2_file.npy')
-        dataset_eval = np.load('latest/'+str(i)+'/dataset_eval_file.npy')
         plot_arrows(act_max_q_val_tiled)
         fig, axis = plt.subplots()
         heatmap = axis.pcolor(max_q_val_tiled, cmap=plt.cm.Blues)
@@ -32,18 +31,19 @@ def visualize_bonarini_hierarchical(gamma=1, ep_count=2):
         plt.suptitle('ctrl+')
         visualize_control_block_ghavamzade(low_level_dataset2, ep_count=ep_count)
         plt.suptitle('ctrlx')
-        dataset_eval_eps = list()
-        dataset_vis = list()
-        dataset_eval_vis = list()
-        for run in range(n_runs):
-            dataset_eval_run = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
-            last_ep_of_run = pick_last_ep(dataset_eval_run)
-            for step in last_ep_of_run:
-                dataset_eval_vis.append(step)
-        visualize_ship_steering(dataset_vis, name='evaluate', small=False, n_runs=n_runs, ep_per_run=ep_per_run)
+
+    dataset_eval = np.load('latest/' + str(how_many-1) + '/dataset_eval_file.npy')
+    dataset_vis = list()
+    dataset_eval_vis = list()
+    for run in range(n_runs):
+        dataset_eval_run = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
+        last_ep_of_run = pick_last_ep(dataset_eval_run)
+        for step in last_ep_of_run:
+            dataset_eval_vis.append(step)
+    visualize_ship_steering(dataset_vis, name='evaluate', small=False, n_runs=n_runs, ep_per_run=ep_per_run)
 
     plt.show()
 
 if __name__ == '__main__':
     # range_vis must be a range()
-    visualize_bonarini_hierarchical(gamma=0.99, ep_count=2)
+    visualize_bonarini_hierarchical(gamma=0.99, ep_count=10)

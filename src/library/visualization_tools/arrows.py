@@ -6,10 +6,12 @@ def plot_arrows(act_max_q_val_tiled):
 
     plt.figure()
     ax = plt.axes()
-    ax.set_xlim([0, 50])
-    ax.set_ylim([0, 50])
-    for i in range(5):
-        for j in range(5):
+    n_tiles = [act_max_q_val_tiled.shape[0], act_max_q_val_tiled.shape[1]]
+    ax.set_xlim([0, n_tiles[0]*7.5])
+    ax.set_ylim([0, n_tiles[1]*7.5])
+
+    for i in range(n_tiles[0]):
+        for j in range(n_tiles[1]):
             xs = 3.25 + i*7.5
             ys = 3.25 + j*7.5
             act_no = act_max_q_val_tiled[i, j]

@@ -35,7 +35,7 @@ def experiment(alg, params, experiment_params ,subdir, i):
     # MDP
     mdp = ShipSteering(small=True, hard=True, n_steps_action=3)
 
-    high = [15, 15, np.pi]
+    high = [150, 150, np.pi]
     low = [0, 0, -np.pi]
     n_tiles = [5, 5, 6]
     low = np.array(low, dtype=np.float)
@@ -105,6 +105,6 @@ if __name__ == '__main__':
                          'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
 
-    Js = Parallel(n_jobs=-1)(delayed(experiment)(alg=alg, params=params,
+    Js = Parallel(n_jobs=8)(delayed(experiment)(alg=alg, params=params,
                                                 experiment_params=experiment_params,
                                                 subdir=subdir, i=i) for i in range(how_many))
