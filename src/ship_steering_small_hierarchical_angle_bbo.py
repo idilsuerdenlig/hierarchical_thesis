@@ -3,31 +3,30 @@ from library.blocks.computational_graph import ComputationalGraph
 from library.blocks.control_block import ControlBlock
 from mushroom.utils import spaces
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
-from mushroom.utils.callbacks import CollectDataset
 from mushroom.features.basis import *
 from mushroom.features.features import *
 from mushroom.policy.gaussian_policy import *
 from mushroom.approximators.parametric import LinearApproximator
+from mushroom.distributions import GaussianDiagonalDistribution
+from mushroom.distributions.determ
 from mushroom.approximators.regressor import Regressor
 from mushroom.algorithms.policy_search import *
 from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
 from library.blocks.functions.feature_angle_diff_ship_steering import angle_ref_angle_difference
 from library.blocks.basic_operation_block import *
 from library.blocks.model_placeholder import PlaceHolder
-from library.utils.pick_last_ep_dataset import pick_last_ep
 from library.blocks.reward_accumulator import reward_accumulator_block
-from library.blocks.error_accumulator import ErrorAccumulatorBlock
 from library.environments.idilshipsteering import ShipSteering
 from mushroom.environments import MDPInfo
+from mushroom.algorithms.policy_search import RWR, PGPE, REPS
 import datetime
 from joblib import Parallel, delayed
 from mushroom.utils.dataset import compute_J
-import argparse
 from mushroom.utils.folder import *
 from library.blocks.functions.lqr_cost import lqr_cost
 
 
-def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir, i):
+def experiment(alg, params,subdir, i):
 
     np.random.seed()
 
@@ -62,13 +61,16 @@ def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir
     approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(1,))
     approximator1.set_weights(np.array([0]))
 
-    pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1, std=std1)
+    pi1 = GaussianPolicy(mu=approximator1,sigma=sigma1)
 
 
     # Policy 2
     sigma2 = Parameter(value=1e-4)
     approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
-    pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
+    policy2 = DeterministicPolicy(mu=approximator2)
+    mu2 = np.zeros(policy2.weights_size)
+    sigma2 = 2e-3 * np.ones(policy2.weights_size)
+    distribution2 = GaussianDiagonalDistribution(mu2, sigma2)
 
     # Agent 1
     learning_rate1 = params.get('learning_rate_high')
@@ -158,24 +160,33 @@ def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir
 
 if __name__ == '__main__':
 
-    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_hierarchical_angle/'
-    alg_high = GPOMDP
-    alg_low = GPOMDP
-    #0.026179938779
-    learning_rate_high = AdaptiveParameter(value=0.001)
-    learning_rate_low = AdaptiveParameter(value=1e-3)
     how_many = 1
+    n_jobs = 1
     n_runs = 25
     n_iterations = 10
     ep_per_run = 20
-    mk_dir_recursive('./' + subdir)
 
-    params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low}
+    algs_and_params = [
+        (REPS, {'eps': 1.0}),
+        (RWR, {'beta': 0.7}),
+        (PGPE, {'learning_rate_high': AdaptiveParameter(value=6),
+                'learning_rate_low': AdaptiveParameter(value=1.5)}),
+    ]
+
+    base_dir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_hierarchical_angle_/'
+    mk_dir_recursive('./' + base_dir)
+    force_symlink(base_dir, './latest')
+
+    for alg, params in algs_and_params:
+        subdir = base_dir + alg.__name__ + '/'
+        mk_dir_recursive('./' + subdir)
+
     np.save(subdir + '/algorithm_params_dictionary', params)
     experiment_params = {'how_many': how_many, 'n_runs': n_runs,
-                         'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
+                         'n_iterations': n_iterations,
+                         'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
-
-    Js = Parallel(n_jobs=1)(delayed(server_experiment_small)(alg_high, alg_low, params,
-                                                              experiment_params,
-                                                              subdir, i) for i in range(how_many))
+    print('---------------------------------------------------------------')
+    print(alg.__name__)
+    Parallel(n_jobs=n_jobs)(delayed(experiment)(alg, params, subdir, i)
+                            for i in range(how_many))
