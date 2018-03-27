@@ -33,14 +33,13 @@ def visualize_bonarini_hierarchical(gamma=1, ep_count=10):
         plt.suptitle('ctrlx')
 
     dataset_eval = np.load('latest/' + str(how_many-1) + '/dataset_eval_file.npy')
-    dataset_vis = list()
     dataset_eval_vis = list()
     for run in range(n_runs):
         dataset_eval_run = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
         last_ep_of_run = pick_last_ep(dataset_eval_run)
         for step in last_ep_of_run:
             dataset_eval_vis.append(step)
-    visualize_ship_steering(dataset_vis, name='evaluate', small=False, n_runs=n_runs, ep_per_run=ep_per_run)
+    visualize_ship_steering(dataset_eval_vis, name='evaluate', small=False, n_runs=n_runs, ep_per_run=ep_per_run)
 
     plt.show()
 
