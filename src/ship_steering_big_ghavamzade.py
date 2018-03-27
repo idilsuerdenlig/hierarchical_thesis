@@ -98,7 +98,7 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     #FeaturesL
     high = [150, 150, np.pi]
     low = [0, 0, -np.pi]
-    n_tiles = [5, 5, 6]
+    n_tiles = [5, 5, 36]
     low = np.array(low, dtype=np.float)
     high = np.array(high, dtype=np.float)
     n_tilings = 1
@@ -274,6 +274,7 @@ if __name__ == '__main__':
     alg_low = GPOMDP
     learning_rate_high = ExponentialDecayParameter(value=1.0, decay_exp=0.8)
     learning_rate_low = AdaptiveParameter(value=1e-3)
+    n_jobs=1
     how_many = 1
     n_runs = 25
     n_iterations = 10
@@ -285,5 +286,5 @@ if __name__ == '__main__':
     experiment_params = {'how_many': how_many, 'n_runs': n_runs,
                          'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
-    Js = Parallel(n_jobs=1)(delayed(experiment_ghavamzade)(alg_high, alg_low, params,
+    Js = Parallel(n_jobs=n_jobs)(delayed(experiment_ghavamzade)(alg_high, alg_low, params,
                                                            subdir, i) for i in range(how_many))
