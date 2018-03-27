@@ -1,14 +1,15 @@
 from library.core.hierarchical_core import HierarchicalCore
 from library.blocks.computational_graph import ComputationalGraph
 from library.blocks.control_block import ControlBlock
+from mushroom.features.tiles import Tiles
 from mushroom.utils import spaces
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
-from mushroom.features.basis import *
+from library.agents.dummy_agent import SimpleAgent
 from mushroom.features.features import *
 from mushroom.policy.gaussian_policy import *
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.distributions import GaussianDiagonalDistribution
-from mushroom.distributions.determ
+from mushroom.policy import DeterministicPolicy
 from mushroom.approximators.regressor import Regressor
 from mushroom.algorithms.policy_search import *
 from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
@@ -20,13 +21,14 @@ from library.environments.idilshipsteering import ShipSteering
 from mushroom.environments import MDPInfo
 from mushroom.algorithms.policy_search import RWR, PGPE, REPS
 import datetime
+from mushroom.features.basis import *
 from joblib import Parallel, delayed
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.folder import *
 from library.blocks.functions.lqr_cost import lqr_cost
 
 
-def experiment(alg, params,subdir, i):
+def experiment(alg_high, alg_low, params,subdir, i):
 
     np.random.seed()
 
@@ -53,23 +55,33 @@ def experiment(alg, params,subdir, i):
 
 
     #Features
+    '''high = [150, 150]
+    low = [0, 0]
+    n_tiles = [5, 5]
+    low = np.array(low, dtype=np.float)
+    high = np.array(high, dtype=np.float)
+    n_tilings = 1
+
+    tilings = Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low,
+                             high=high)
+    features = Features(tilings=tilings)
+
+    input_shape = (features.size,)'''
+
     features = Features(basis_list=[PolynomialBasis()])
 
     # Policy 1
-    std1 = np.array([np.pi/4])
-    sigma1 = Parameter(value=144e-4)
+    std1 = np.array([1.0])
     approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(1,))
-    approximator1.set_weights(np.array([0]))
-
-    pi1 = GaussianPolicy(mu=approximator1,sigma=sigma1)
+    #approximator1.set_weights(np.array([np.pi/4-0.00349066]))
+    policy1 = MultivariateDiagonalGaussianPolicy(mu=approximator1, std=std1)
 
 
     # Policy 2
-    sigma2 = Parameter(value=1e-4)
     approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
     policy2 = DeterministicPolicy(mu=approximator2)
     mu2 = np.zeros(policy2.weights_size)
-    sigma2 = 2e-3 * np.ones(policy2.weights_size)
+    sigma2 = 1e-3 * np.ones(policy2.weights_size)
     distribution2 = GaussianDiagonalDistribution(mu2, sigma2)
 
     # Agent 1
@@ -78,23 +90,23 @@ def experiment(alg, params,subdir, i):
     low = [0, 0, -np.pi, -np.pi/12]
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(low[2], high[2], (1,)), gamma=mdp.info.gamma, horizon=100)
-    agent1 = alg_high(policy=pi1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=features)
-
+    agent1 = alg_high(policy=policy1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=features)
+    #agent1 = SimpleAgent(name='DUMMYDUMMYDUMMY', mdp_info=mdp_info_agent1, params=None, features=None, policy=None)
     # Agent 2
     learning_rate2 = params.get('learning_rate_low')
+    eps = params.get('eps')
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low[2], high[2], (1,)),
                               action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
-    agent2 = alg_low(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
+    agent2 = alg_low(policy=policy2, distribution=distribution2,
+                     mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
 
     # Control Block 1
-    parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=10,
+    parameter_callback1 = CollectPolicyParameter(policy1)
+    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=ep_per_run,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
-    parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=100,
-                                  callbacks=[parameter_callback2])
+    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=10)
 
 
     #Reward Accumulator
@@ -117,7 +129,6 @@ def experiment(alg, params,subdir, i):
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
     function_block2.add_input(lastaction_ph)
-    function_block3.add_input(function_block1)
     function_block3.add_input(function_block2)
     function_block3.add_input(reward_ph)
     control_block2.add_input(function_block1)
@@ -141,17 +152,16 @@ def experiment(alg, params,subdir, i):
         dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
         dataset_eval += dataset_eval_run
         J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
+        #print(parameter_callback1.get_values())
         print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
         low_level_dataset_eval += control_block2.dataset.get()
 
     # Save
     parameter_dataset1 = parameter_callback1.get_values()
-    parameter_dataset2 = parameter_callback2.get_values()
     mk_dir_recursive('./' + subdir + str(i))
 
     np.save(subdir+str(i)+'/low_level_dataset_file', low_level_dataset_eval)
     np.save(subdir+str(i)+'/parameter_dataset1_file', parameter_dataset1)
-    np.save(subdir+str(i)+'/parameter_dataset2_file', parameter_dataset2)
     np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval)
 
 
@@ -161,32 +171,28 @@ def experiment(alg, params,subdir, i):
 if __name__ == '__main__':
 
     how_many = 1
-    n_jobs = 1
     n_runs = 25
     n_iterations = 10
     ep_per_run = 20
+    alg_high = GPOMDP
+    alg_low = PGPE
 
-    algs_and_params = [
-        (REPS, {'eps': 1.0}),
-        (RWR, {'beta': 0.7}),
-        (PGPE, {'learning_rate_high': AdaptiveParameter(value=6),
-                'learning_rate_low': AdaptiveParameter(value=1.5)}),
-    ]
+    learning_rate_high = AdaptiveParameter(value=1e-3)
+    learning_rate_low = AdaptiveParameter(value=1e-5)
 
-    base_dir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_hierarchical_angle_/'
-    mk_dir_recursive('./' + base_dir)
-    force_symlink(base_dir, './latest')
+    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_hierarchical_angle_bbo/'
 
-    for alg, params in algs_and_params:
-        subdir = base_dir + alg.__name__ + '/'
-        mk_dir_recursive('./' + subdir)
+    mk_dir_recursive('./' + subdir)
+    force_symlink('./' + subdir, 'latest')
 
+    params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low, 'eps': 1.0}
     np.save(subdir + '/algorithm_params_dictionary', params)
     experiment_params = {'how_many': how_many, 'n_runs': n_runs,
-                         'n_iterations': n_iterations,
-                         'ep_per_run': ep_per_run}
+                         'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
     print('---------------------------------------------------------------')
-    print(alg.__name__)
-    Parallel(n_jobs=n_jobs)(delayed(experiment)(alg, params, subdir, i)
-                            for i in range(how_many))
+    print(alg_low.__name__)
+    Js = Parallel(n_jobs=1)(delayed(experiment)(alg_high, alg_low, params,
+                                                              subdir, i) for i in range(how_many))
+
+
