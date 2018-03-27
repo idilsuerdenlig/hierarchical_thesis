@@ -1,16 +1,12 @@
 from library.visualization_tools.visualize_ship_steering import visualize_ship_steering
 import matplotlib.pyplot as plt
-from library.visualization_tools.visualize_control_block import visualize_control_block
 from library.visualization_tools.visualize_control_block_ghavamzade import visualize_control_block_ghavamzade
-from library.visualization_tools.visualize_policy_parameters import visualize_policy_params
 from library.visualization_tools.arrows import plot_arrows
 from library.utils.pick_last_ep_dataset import pick_last_ep
 from library.utils.pick_eps import pick_eps
-from mushroom.utils.dataset import compute_J
 import numpy as np
-from tqdm import tqdm
 
-def visualize_bonarini_hierarchical(gamma=1, ep_count=10):
+def visualize_bonarini_hierarchical(ep_count=10):
 
     experiment_params = np.load('latest/experiment_params_dictionary.npy')
     how_many = experiment_params.item().get('how_many')
@@ -45,4 +41,4 @@ def visualize_bonarini_hierarchical(gamma=1, ep_count=10):
 
 if __name__ == '__main__':
     # range_vis must be a range()
-    visualize_bonarini_hierarchical(gamma=0.99, ep_count=10)
+    visualize_bonarini_hierarchical(ep_count=10)

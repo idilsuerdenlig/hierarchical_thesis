@@ -275,9 +275,9 @@ if __name__ == '__main__':
     learning_rate_high = ExponentialDecayParameter(value=1.0, decay_exp=0.8)
     learning_rate_low = AdaptiveParameter(value=1e-3)
     how_many = 1
-    n_runs = 5
-    n_iterations = 50
-    ep_per_run = 10
+    n_runs = 25
+    n_iterations = 10
+    ep_per_run = 20
     mk_dir_recursive('./' + subdir)
     force_symlink('./' + subdir, './latest')
 
