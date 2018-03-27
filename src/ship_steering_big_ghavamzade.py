@@ -14,7 +14,7 @@ from mushroom.utils.dataset import compute_J
 from mushroom.utils.folder import *
 
 from library.core.hierarchical_core import HierarchicalCore
-from library.environments.bonarinishipsteering import BonariniShipSteering
+from library.environments.idilshipsteering import ShipSteering
 from library.blocks.computational_graph import ComputationalGraph
 from library.blocks.control_block import ControlBlock
 from library.blocks.functions.pick_state import pick_state
@@ -45,14 +45,17 @@ class TerminationCondition(object):
         else:
             return False
 
+def selector_function(inputs):
+    return 0 if np.asscalar(inputs[0]) < 4 else 1
 
-def experiment_bonarini_ghavamzade(alg_high, alg_low, params, subdir, i):
+
+def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
 
     np.random.seed()
 
     # Model Block
     small=False
-    mdp = BonariniShipSteering(small=False, hard=False, n_steps_action=3)
+    mdp = ShipSteering(small=False, hard=False, n_steps_action=3)
 
     #State Placeholder
     state_ph = PlaceHolder(name='state_ph')
@@ -171,6 +174,10 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, subdir, i):
     #Reward Accumulator H:
     reward_acc_H = reward_accumulator_block(gamma=mdp_info_agentH.gamma, name='reward_acc_H')
 
+
+    # Selector Block
+    function_block8 = fBlock(phi=selector_function, name='f7 G_lo')
+
     #Mux_Block
     mux_block = MuxBlock(name='mux')
     mux_block.add_block_list([control_block1])
@@ -180,7 +187,8 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, subdir, i):
     blocks = [state_ph, reward_ph, lastaction_ph, control_blockH, mux_block,
               function_block1, function_block2, function_block3,
               function_block4, function_block5,
-              function_block6, function_block7, reward_acc_H]
+              function_block6, function_block7, function_block8,
+              reward_acc_H]
 
     #state_ph.add_input(mux_block)
     #reward_ph.add_input(mux_block)
@@ -192,7 +200,7 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, subdir, i):
     control_blockH.add_reward(function_block4)
     control_blockH.add_alarm_connection(control_block1)
     control_blockH.add_alarm_connection(control_block2)
-    mux_block.add_input(control_blockH)
+    mux_block.add_input(function_block8)
     mux_block.add_input(function_block2)
     control_block1.add_reward(function_block5)
     control_block2.add_reward(function_block5)
@@ -210,6 +218,7 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, subdir, i):
     function_block6.add_input(reward_ph)
     function_block7.add_input(control_blockH)
     function_block7.add_input(function_block2)
+    function_block8.add_input(control_blockH)
 
 
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
@@ -236,8 +245,6 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, subdir, i):
         low_level_dataset_eval1 += control_block1.dataset.get()
         low_level_dataset_eval2 += control_block2.dataset.get()
 
-
-
     # Tile data
     hi_lev_params = agentH.Q.get_weights()
     hi_lev_params = np.reshape(hi_lev_params, (8, n_tiles_high[0]**2))
@@ -250,7 +257,6 @@ def experiment_bonarini_ghavamzade(alg_high, alg_low, params, subdir, i):
     act_max_q_val_tiled = np.reshape(act_max_q_val, (n_tiles_high[0], n_tiles_high[1]))
 
     mk_dir_recursive('./' + subdir + str(i))
-
 
     np.save(subdir+str(i)+'/low_level_dataset1_file', low_level_dataset_eval1)
     np.save(subdir+str(i)+'/low_level_dataset2_file', low_level_dataset_eval2)
@@ -279,5 +285,5 @@ if __name__ == '__main__':
     experiment_params = {'how_many': how_many, 'n_runs': n_runs,
                          'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
-    Js = Parallel(n_jobs=1)(delayed(experiment_bonarini_ghavamzade)(alg_high, alg_low, params,
-                                                                    subdir, i) for i in range(how_many))
+    Js = Parallel(n_jobs=1)(delayed(experiment_ghavamzade)(alg_high, alg_low, params,
+                                                           subdir, i) for i in range(how_many))
