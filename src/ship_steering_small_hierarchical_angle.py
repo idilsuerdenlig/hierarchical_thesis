@@ -16,11 +16,13 @@ from library.blocks.model_placeholder import PlaceHolder
 from library.blocks.reward_accumulator import reward_accumulator_block
 from library.environments.idilshipsteering import ShipSteering
 from mushroom.environments import MDPInfo
+from library.agents.dummy_agent import SimpleAgent
 import datetime
 from joblib import Parallel, delayed
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.folder import *
 from library.blocks.functions.lqr_cost import lqr_cost
+from library.blocks.functions.cost_cosine import cost_cosine
 
 
 def server_experiment_small(alg_high, alg_low, params, subdir, i):
@@ -43,7 +45,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     function_block1 = fBlock(name='f1 (angle difference)',phi=angle_ref_angle_difference)
 
     # Function Block 2
-    function_block2 = fBlock(name='f2 (lqr cost)', phi=lqr_cost)
+    function_block2 = fBlock(name='f2 (lqr cost)', phi=cost_cosine)
 
     # Function Block 3
     function_block3 = addBlock(name='f3 (summation)')
@@ -75,8 +77,9 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     # Agent 2
     learning_rate2 = params.get('learning_rate_low')
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low[2], high[2], (1,)),
-                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
+                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=50)
     agent2 = alg_low(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
+    #agent2 = SimpleAgent(name='DUMMYDUMMYDUMMY', mdp_info=mdp_info_agent2, params=None, features=None, policy=None)
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
@@ -85,7 +88,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
     # Control Block 2
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=100,
+    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=10,
                                   callbacks=[parameter_callback2])
 
 
@@ -110,7 +113,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     function_block2.add_input(function_block1)
     function_block2.add_input(lastaction_ph)
     function_block3.add_input(function_block2)
-    function_block3.add_input(reward_ph)
+    #function_block3.add_input(reward_ph)
     control_block2.add_input(function_block1)
     control_block2.add_reward(function_block3)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
@@ -168,5 +171,5 @@ if __name__ == '__main__':
                          'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
 
-    Js = Parallel(n_jobs=-1)(delayed(server_experiment_small)(alg_high, alg_low, params,
+    Js = Parallel(n_jobs=1)(delayed(server_experiment_small)(alg_high, alg_low, params,
                                                               subdir, i) for i in range(how_many))

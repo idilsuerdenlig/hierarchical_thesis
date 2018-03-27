@@ -62,11 +62,10 @@ class SimpleAgent(object):
             The action to be executed.
 
         """
-        if self.name == 'HIGH':
-            action = np.array([110,110])
-        elif self.policy is None:
-            action = np.random.choice(self.action_space.n)
-            action = np.array([4])
+
+
+        if self.policy is None:
+            action = -0.2*state
         else:
             action = self.policy.draw_action(state)
         self.counter += 1
@@ -104,4 +103,10 @@ class SimpleAgent(object):
         if self.phi is not None:
             state = self.phi(state)
 
+
+
         return state, action, reward, next_state, absorbing, last
+
+    def stop(self):
+
+        """do nothing"""

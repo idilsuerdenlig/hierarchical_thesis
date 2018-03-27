@@ -2,8 +2,8 @@ import numpy as np
 
 
 def lqr_cost(ins):
-    q_square = 8
-    r_square = 1
+    q_square = 0.8
+    r_square = 0.1
 
     error_cost = np.zeros(1)
     action_cost = np.zeros(1)

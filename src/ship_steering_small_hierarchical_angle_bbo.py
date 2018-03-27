@@ -91,12 +91,11 @@ def experiment(alg_high, alg_low, params,subdir, i):
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(low[2], high[2], (1,)), gamma=mdp.info.gamma, horizon=100)
     agent1 = alg_high(policy=policy1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=features)
-    #agent1 = SimpleAgent(name='DUMMYDUMMYDUMMY', mdp_info=mdp_info_agent1, params=None, features=None, policy=None)
     # Agent 2
     learning_rate2 = params.get('learning_rate_low')
     eps = params.get('eps')
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low[2], high[2], (1,)),
-                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
+                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=30)
     agent2 = alg_low(policy=policy2, distribution=distribution2,
                      mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
 
@@ -140,7 +139,7 @@ def experiment(alg_high, alg_low, params,subdir, i):
     low_level_dataset_eval = list()
     dataset_eval = list()
 
-    dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
+    dataset_eval_run = core.evaluate(n_episodes=ep_per_run, quiet=True)
     # print('distribution parameters: ', distribution.get_parameters())
     J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
     print('J at start : ' + str(np.mean(J)))
@@ -148,8 +147,8 @@ def experiment(alg_high, alg_low, params,subdir, i):
 
     for n in range(n_runs):
         print('ITERATION', n)
-        core.learn(n_episodes=n_iterations*ep_per_run, skip=True)
-        dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
+        core.learn(n_episodes=n_iterations*ep_per_run, skip=True, quiet=True)
+        dataset_eval_run = core.evaluate(n_episodes=ep_per_run, quiet=True)
         dataset_eval += dataset_eval_run
         J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
         #print(parameter_callback1.get_values())

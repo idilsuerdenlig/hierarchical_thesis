@@ -1,29 +1,52 @@
 from .block import Block
 import numpy as np
-from library.utils.dataset_manager import DatasetManager
-from library.agents.ghavamzade_agent import GhavamzadeAgent
+from mushroom.utils.dataset import compute_J
+
+
+
+class ControlDataset():
+    def __init__(self):
+        self.dataset = list()
+        self.s = None
+        self.a = None
+
+    def add_first(self, state, action):
+        self.s = state
+        self.a = action
+
+    def add_next(self, next_state, reward, absorbing, last):
+        sample = self.s, self.a, reward, next_state, absorbing, last
+        self.dataset.append(sample)
+        self.s = next_state
+
+    def add_action(self, action):
+        self.a = action
+
+    def empty(self):
+        del self.dataset[:]
+
+    def get(self):
+        return self.dataset
+
+    def __len__(self):
+        return len(self.dataset)
+
 
 class ControlBlock(Block):
-    """
-    This class implements the functions to initialize and move the agent drawing
-    actions from its policy.
 
-    """
-    def __init__(self, name, agent, termination_condition=None, n_eps_per_fit=None, n_steps_per_fit=None, callbacks=list()):
-
+    def __init__(self, name, agent, termination_condition=None, n_eps_per_fit=None,
+                 n_steps_per_fit=None, callbacks=list()):
         self.agent = agent
-        self.ep_step_counter = 0
-        self.curr_episode_counter = 0
         self.n_eps_per_fit = n_eps_per_fit
         self.n_steps_per_fit = n_steps_per_fit
-        self.dataset = DatasetManager()
+        self.dataset = ControlDataset()
         self.horizon = self.agent.mdp_info.horizon
         self.gamma = self.agent.mdp_info.gamma
-        self.last_input = None
-        self.last_output = None
-        self.last = False
         self.callbacks = callbacks
-        self.terminated = False
+        self.curr_episode_counter = 0
+        self.ep_step_counter = 0
+        self.need_reset = False
+
         if termination_condition is None:
             self.termination_condition = lambda x : False
         else:
@@ -32,120 +55,62 @@ class ControlBlock(Block):
         super(ControlBlock, self).__init__(name=name)
 
     def _call(self, inputs, reward, absorbing, last, learn_flag):
-
         state = np.concatenate(inputs, axis=0)
-        #if last and not absorbing:
-            #print(self.name, 'horizon reached')
+        self.ep_step_counter += 1
 
-        if self.last or last:
-            self.curr_episode_counter += 1
-
-        if self.last:
-            if not self.terminated:
-                self.last_call(inputs, reward, absorbing, learn_flag)
-            self.reset(inputs)
+        if self.need_reset:
+            if not last:
+                self.reset(inputs)
         else:
-            self.draw_action(state, last)
-            sample = state, self.last_output, reward, absorbing, last or self.last
-            #if self.name == 'control block 1':
-            #    print self.name, 'STEP-----------------------------------------------------'
-            #    print sample
-            self.dataset.add_sample(sample, False)
+            local_absorbing = self.termination_condition(state)
+            local_last = local_absorbing or self.ep_step_counter >= self.horizon
 
-            self.last = self.ep_step_counter >= self.horizon or self.termination_condition(state)
+            self.dataset.add_next(next_state=state, reward=reward,
+                                absorbing=absorbing or local_absorbing,
+                                last=last or local_last)
+            self.need_reset = local_last
+
+            if local_last or last:
+                self.curr_episode_counter += 1
 
 
-        if learn_flag and \
-            (len(self.dataset) == self.n_steps_per_fit or self.curr_episode_counter == self.n_eps_per_fit):
-            self.fit(self.dataset.get())
-            self.dataset.empty()
+            if learn_flag and \
+                (len(self.dataset) == self.n_steps_per_fit
+                 or self.curr_episode_counter == self.n_eps_per_fit):
+                dataset = self.dataset.get()
 
-        #print self.name
-        if self.name != 'control block H':
-            if np.any(np.isnan(self.agent.policy.get_weights())):
-                print('PARAMETER IS NaN!')
-                print(self.name)
+                self.agent.fit(dataset)
+                self.dataset.empty()
+                self.curr_episode_counter = 0
 
-        self.alarm_output = self.last
 
-    def last_call(self, inputs, reward, absorbing, learn_flag):
-        '''if np.any(np.isnan(inputs)):
-            print inputs
-            print self.name
-            exit()'''
+                for c in self.callbacks:
+                    callback_pars = dict(dataset=dataset)
+                    c(**callback_pars)
+            if not last:
+                next_action = self.agent.draw_action(state)
+                self.dataset.add_action(next_action)
+                self.last_output = next_action
 
-        state = np.concatenate(inputs, axis=0)
-        sample = state, None, reward, absorbing, True
-        self.dataset.add_sample(sample, False)
-        #if self.name == 'control block 1':
-        #    print self.name, 'LAST STEP-----------------------------------------------------'
-        #    print sample
-        self.terminated = True
-        self.last = True
-        if learn_flag and \
-            (len(self.dataset) == self.n_steps_per_fit or self.curr_episode_counter == self.n_eps_per_fit):
-            self.fit(self.dataset.get())
-            self.dataset.empty()
-
-    def draw_action(self, state, last):
-
-        if not last:
-            self.last_input = state
-            self.last_output = self.agent.draw_action(state)
-            self.ep_step_counter += 1
-
-    def check_no_of_eps(self, dataset):
-        i = 0
-        size_eps = list()
-        for dataset_step in dataset:
-            if dataset_step[-1]:
-                i += 1
-            else:
-                i += 1
-                size_eps.append(i)
-                i = 0
-        return size_eps
-
-    def fit(self, dataset):
-        '''if isinstance(self.agent, GhavamzadeAgent):
-            print(self.name)
-            print(dataset)'''
-
-        for dataset_step in dataset:
-            if np.any(dataset_step[1]) is None:
-                print('action none')
-                print(self.name)
-                np.save('dataset_action_none.npy',dataset)
-                exit()
-        #if self.name == 'control block 1':
-        #print self.name, 'FIT-----------------------------------------------------'
-        self.agent.fit(dataset)
-        self.curr_episode_counter = 0
-        for c in self.callbacks:
-            callback_pars = dict(dataset=dataset)
-            c(**callback_pars)
+            self.alarm_output = local_last
 
     def reset(self, inputs):
-
         state = np.concatenate(inputs, axis=0)
-        #if self.last_input is not None and self.name != 'control block H':
-        #    self.build_sample(state, 0, True, True)
         self.agent.episode_start()
+        action = self.agent.draw_action(state)
+        self.dataset.add_first(state, action)
         self.ep_step_counter = 0
-        self.draw_action(state, False)
-        sample = state, self.last_output
-        self.dataset.add_first_sample(sample, False)
         self.alarm_output = False
-        self.last = False
-        self.terminated = False
+        self.need_reset = False
+        self.last_output = action
 
     def init(self):
         self.dataset.empty()
         self.ep_step_counter = 0
         self.curr_episode_counter = 0
         self.last_output = None
-        self.last = False
-        self.terminated = False
+        self.need_reset = False
+        self.alarm_output = False
 
     def stop(self):
         self.agent.stop()
