@@ -20,6 +20,7 @@ def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
     n_runs = experiment_params.item().get('n_runs')
     ep_per_run = experiment_params.item().get('ep_per_run')
     parameter_dataset1 = list()
+    parameter_dataset2 = list()
     size_eps = list()
     size_exp_list = list()
     J_avg = np.zeros((n_runs,))
@@ -30,6 +31,8 @@ def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
     for exp_no in range(how_many):
 
         parameter_dataset1 += [np.load('latest/' + str(exp_no) + '/parameter_dataset1_file.npy')]
+        parameter_dataset2 += [np.load('latest/' + str(exp_no) + '/parameter_dataset2_file.npy')]
+
         dataset_eval = np.load('latest/' + str(exp_no) + '/dataset_eval_file.npy')
 
         J_runs_eps = compute_J(dataset_eval, gamma)
@@ -85,6 +88,8 @@ def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
     for i in range(how_many):
         params1_one_experiment = parameter_dataset1[i]
         max_len1 = max(len(params1_one_experiment), max_len1)
+        params2_one_experiment = parameter_dataset2[i]
+        max_len2 = max(len(params2_one_experiment), max_len2)
 
     a = list()
     for _ in range(how_many):
@@ -100,6 +105,21 @@ def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
     param1_avg = np.nanmean(a, axis=0)
     ax1.plot(param1_avg)
     ax1.set_title('pi1 parameters averaged')
+
+    a = list()
+    for _ in range(how_many):
+        a.append(list())
+
+    for i in range(how_many):
+        diff_len = max_len2 - len(parameter_dataset2[i])
+        for each in parameter_dataset2[i]:
+            a[i].append(each)
+        if diff_len is not 0:
+            for m in range(diff_len):
+                a[i].append(np.array(np.NaN))
+    param2_avg = np.nanmean(a, axis=0)
+    ax2.plot(param2_avg)
+    ax2.set_title('pi2 parameters averaged')
 
 
     #visualize_policy_params(parameter_dataset1, parameter_dataset2, small=small, how_many=how_many)
