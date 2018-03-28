@@ -21,6 +21,9 @@ from joblib import Parallel, delayed
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.folder import *
 from library.blocks.functions.cost_cosine import cost_cosine
+from mushroom.distributions import GaussianDiagonalDistribution
+from library.policy.deterministic_control_policy import DeterministicControlPolicy
+from library.utils.callbacks.collect_distribution_parameter import CollectDistributionParameter
 
 
 
@@ -62,9 +65,10 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
 
     # Policy 2
-    sigma2 = np.array([5e-3])
-    approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
-    pi2 = MultivariateDiagonalGaussianPolicy(mu=approximator2, std=sigma2)
+    pi2 = DeterministicControlPolicy(weights=np.array([0]))
+    mu2 = np.zeros(pi2.weights_size)
+    sigma2 = 1e-3 * np.ones(pi2.weights_size)
+    distribution2 = GaussianDiagonalDistribution(mu2, sigma2)
 
     # Agent 1
     learning_rate1 = params.get('learning_rate_high')
@@ -77,7 +81,8 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     learning_rate2 = params.get('learning_rate_low')
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
                               action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
-    agent2 = alg_low(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
+    agent2 = alg_low(distribution=distribution2, policy=pi2,
+                     mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
@@ -85,7 +90,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
-    parameter_callback2 = CollectPolicyParameter(pi2)
+    parameter_callback2 = CollectDistributionParameter(distribution2)
     control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=10,
                                   callbacks=[parameter_callback2])
 
@@ -153,9 +158,9 @@ if __name__ == '__main__':
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_hierarchical/'
     alg_high = GPOMDP
-    alg_low = GPOMDP
-    learning_rate_high = Parameter(value=1)
-    learning_rate_low = AdaptiveParameter(value=1e-3)
+    alg_low = PGPE
+    learning_rate_high = AdaptiveParameter(value=10)
+    learning_rate_low = AdaptiveParameter(value=5e-4)
     how_many = 100
     n_runs = 25
     n_iterations = 10

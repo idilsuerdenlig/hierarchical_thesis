@@ -34,6 +34,7 @@ def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
         parameter_dataset2 += [np.load('latest/' + str(exp_no) + '/parameter_dataset2_file.npy')]
         dataset_eval = np.load('latest/' + str(exp_no) + '/dataset_eval_file.npy')
 
+
         J_runs_eps = compute_J(dataset_eval, gamma)
         for i in range(n_runs):
             J_avg[i] = np.mean(J_runs_eps[ep_per_run * i:ep_per_run * i + ep_per_run], axis=0)
@@ -74,6 +75,36 @@ def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
         last_ep_of_run = pick_last_ep(dataset_eval_run)
         for step in last_ep_of_run:
             dataset_eval_vis.append(step)
+
+        # parameter print
+    unstable_count = 0
+    max_len2 = 0
+    fig = plt.figure()
+    ax2 = fig.add_subplot(122)
+
+    for i in range(how_many):
+        params2_one_experiment = parameter_dataset2[i]
+        last_val = params2_one_experiment[-1]
+        if last_val[0] > 0:
+            unstable_count += 1
+        max_len2 = max(len(params2_one_experiment), max_len2)
+    print('UNSTABLE COUNT:  ', unstable_count)
+
+    a = list()
+    for _ in range(how_many):
+        a.append(list())
+
+    for i in range(how_many):
+        diff_len = max_len2 - len(parameter_dataset2[i])
+        for each in parameter_dataset2[i]:
+            a[i].append(each)
+        if diff_len is not 0:
+            for m in range(diff_len):
+                a[i].append(np.array(np.NaN))
+    param2_avg = np.nanmean(a, axis=0)
+
+    ax2.plot(param2_avg)
+    ax2.set_title('pi2 parameters averaged')
 
     visualize_policy_params(parameter_dataset1, parameter_dataset2, small=small, how_many=how_many)
     visualize_ship_steering(dataset_eval_vis, 'evaluate', small=small, range_eps=range_vis, n_gates=1,

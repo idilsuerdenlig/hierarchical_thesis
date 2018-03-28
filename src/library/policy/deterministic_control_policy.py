@@ -8,12 +8,12 @@ class DeterministicControlPolicy:
         self._weights = weights
 
     def __call__(self, state, action):
-        policy_action = np.atleast_1d(-(self._weights**2).dot(state))
+        policy_action = np.atleast_1d(-np.abs(self._weights).dot(state))
 
         return 1. if np.array_equal(action, policy_action) else 0.
 
     def draw_action(self, state):
-        return np.atleast_1d(-(self._weights**2).dot(state))
+        return np.atleast_1d(-np.abs(self._weights).dot(state))
 
     def diff(self, state, action):
         raise RuntimeError('Deterministic policy is not differentiable')
