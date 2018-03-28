@@ -3,7 +3,6 @@ from library.blocks.computational_graph import ComputationalGraph
 from library.blocks.control_block import ControlBlock
 from mushroom.utils import spaces
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
-from mushroom.utils.callbacks import CollectDataset
 from mushroom.features.basis import *
 from mushroom.features.features import *
 from mushroom.policy.gaussian_policy import *
@@ -14,21 +13,15 @@ from library.utils.callbacks.collect_policy_parameter import CollectPolicyParame
 from library.blocks.functions.feature_angle_diff_ship_steering import *
 from library.blocks.basic_operation_block import *
 from library.blocks.model_placeholder import PlaceHolder
-from library.utils.pick_last_ep_dataset import pick_last_ep
-from library.blocks.functions.pick_state import pick_state
 from library.blocks.reward_accumulator import reward_accumulator_block
-from library.blocks.error_accumulator import ErrorAccumulatorBlock
 from library.environments.idilshipsteering import ShipSteering
-from mushroom.features.tiles import Tiles
 from mushroom.environments import MDPInfo
 import datetime
 from joblib import Parallel, delayed
 from mushroom.utils.dataset import compute_J
-import argparse
 from mushroom.utils.folder import *
-from library.blocks.functions.lqr_cost import lqr_cost
 from library.blocks.functions.cost_cosine import cost_cosine
-from library.blocks.functions.map_avoid_corner import map
+
 
 
 def server_experiment_small(alg_high, alg_low, params, subdir, i):
@@ -56,11 +49,6 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     # Function Block 3
     function_block3 = addBlock(name='f3 (summation)')
 
-    #Function Block 4
-    #function_block4 = fBlock(name='f4 (pick state)', phi=pick_state)
-
-    #Function Block 5
-    #function_block5 = fBlock(name='f5 (map)', phi=map)
 
     #Features
     features = Features(basis_list=[PolynomialBasis()])
@@ -71,18 +59,6 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     approximator1.set_weights(np.array([75, 75]))
 
     pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,std=sigma1)
-
-    #FeaturesL
-    '''high = [150, 150, np.pi]
-    low = [0, 0, -np.pi]
-    n_tiles = [3, 3, 10]
-    low = np.array(low, dtype=np.float)
-    high = np.array(high, dtype=np.float)
-    n_tilings = 1
-
-    tilings = Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low,
-                             high=high)
-    featuresL = Features(tilings=tilings)'''
 
 
     # Policy 2
@@ -134,9 +110,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
     function_block3.add_input(function_block2)
-    #function_block3.add_input(reward_ph)
-    #function_block5.add_input(state_ph)
-    #control_block2.add_input(function_block5)
+
     control_block2.add_input(function_block1)
     control_block2.add_reward(function_block3)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
