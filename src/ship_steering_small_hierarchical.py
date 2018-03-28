@@ -28,7 +28,7 @@ import argparse
 from mushroom.utils.folder import *
 from library.blocks.functions.lqr_cost import lqr_cost
 from library.blocks.functions.cost_cosine import cost_cosine
-
+from library.blocks.functions.map_avoid_corner import map
 
 
 def server_experiment_small(alg_high, alg_low, params, subdir, i):
@@ -57,20 +57,23 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     function_block3 = addBlock(name='f3 (summation)')
 
     #Function Block 4
-    function_block4 = fBlock(name='f4 (pick state)', phi=pick_state)
+    #function_block4 = fBlock(name='f4 (pick state)', phi=pick_state)
+
+    #Function Block 5
+    #function_block5 = fBlock(name='f5 (map)', phi=map)
 
     #Features
     features = Features(basis_list=[PolynomialBasis()])
 
     # Policy 1
-    sigma1 = np.array([38, 38])
+    sigma1 = np.array([40, 40])
     approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
     approximator1.set_weights(np.array([75, 75]))
 
     pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,std=sigma1)
 
     #FeaturesL
-    high = [150, 150, np.pi]
+    '''high = [150, 150, np.pi]
     low = [0, 0, -np.pi]
     n_tiles = [3, 3, 10]
     low = np.array(low, dtype=np.float)
@@ -79,12 +82,13 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
     tilings = Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low,
                              high=high)
-    featuresL = Features(tilings=tilings)
+    featuresL = Features(tilings=tilings)'''
+
 
     # Policy 2
-    sigma2 = Parameter(value=1e-4)
-    approximator2 = Regressor(LinearApproximator, input_shape=(featuresL.size,), output_shape=mdp.info.action_space.shape)
-    pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
+    sigma2 = np.array([5e-3])
+    approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
+    pi2 = MultivariateDiagonalGaussianPolicy(mu=approximator2, std=sigma2)
 
     # Agent 1
     learning_rate1 = params.get('learning_rate_high')
@@ -97,7 +101,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     learning_rate2 = params.get('learning_rate_low')
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
                               action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
-    agent2 = alg_low(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2, features=featuresL)
+    agent2 = alg_low(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
@@ -106,7 +110,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
     # Control Block 2
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=ep_per_run,
+    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=10,
                                   callbacks=[parameter_callback2])
 
 
@@ -129,12 +133,10 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     function_block1.add_input(control_block1)
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
-    function_block2.add_input(state_ph)
-    function_block2.add_input(control_block1)
     function_block3.add_input(function_block2)
     #function_block3.add_input(reward_ph)
-    function_block4.add_input(state_ph)
-    control_block2.add_input(function_block4)
+    #function_block5.add_input(state_ph)
+    #control_block2.add_input(function_block5)
     control_block2.add_input(function_block1)
     control_block2.add_reward(function_block3)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
@@ -180,7 +182,7 @@ if __name__ == '__main__':
     alg_low = GPOMDP
     learning_rate_high = Parameter(value=1)
     learning_rate_low = AdaptiveParameter(value=1e-3)
-    how_many = 1
+    how_many = 100
     n_runs = 25
     n_iterations = 10
     ep_per_run = 20
@@ -193,5 +195,5 @@ if __name__ == '__main__':
     experiment_params = {'how_many': how_many, 'n_runs': n_runs,
                          'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
-    Js = Parallel(n_jobs=1)(delayed(server_experiment_small)(alg_high, alg_low, params,
+    Js = Parallel(n_jobs=-1)(delayed(server_experiment_small)(alg_high, alg_low, params,
                                                 subdir, i) for i in range(how_many))

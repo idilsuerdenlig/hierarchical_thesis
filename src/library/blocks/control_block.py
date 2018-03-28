@@ -77,6 +77,7 @@ class ControlBlock(Block):
             if learn_flag and \
                 (len(self.dataset) == self.n_steps_per_fit
                  or self.curr_episode_counter == self.n_eps_per_fit):
+
                 dataset = self.dataset.get()
 
                 self.agent.fit(dataset)
