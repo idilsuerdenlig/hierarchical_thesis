@@ -100,8 +100,9 @@ def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
             a[i].append(each)
         if diff_len is not 0:
             for m in range(diff_len):
-                a[i].append(np.array(np.NaN))
+                a[i].append(np.array([np.NaN, np.NaN]))
     param2_avg = np.nanmean(a, axis=0)
+    print(param2_avg.shape)
 
     ax2.plot(param2_avg)
     ax2.set_title('pi2 parameters averaged')
