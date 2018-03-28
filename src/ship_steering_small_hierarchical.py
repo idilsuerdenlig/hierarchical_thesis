@@ -154,9 +154,9 @@ if __name__ == '__main__':
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_hierarchical/'
     alg_high = GPOMDP
     alg_low = GPOMDP
-    learning_rate_high = Parameter(value=1)
+    learning_rate_high = AdaptiveParameter(value=10)
     learning_rate_low = AdaptiveParameter(value=1e-3)
-    how_many = 100
+    how_many = 1
     n_runs = 25
     n_iterations = 10
     ep_per_run = 20
@@ -169,5 +169,5 @@ if __name__ == '__main__':
     experiment_params = {'how_many': how_many, 'n_runs': n_runs,
                          'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
-    Js = Parallel(n_jobs=-1)(delayed(server_experiment_small)(alg_high, alg_low, params,
+    Js = Parallel(n_jobs=1)(delayed(server_experiment_small)(alg_high, alg_low, params,
                                                 subdir, i) for i in range(how_many))
