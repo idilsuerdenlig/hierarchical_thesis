@@ -1,28 +1,30 @@
-from library.core.hierarchical_core import HierarchicalCore
-from library.blocks.computational_graph import ComputationalGraph
-from library.blocks.control_block import ControlBlock
+import datetime
+
+from mushroom.environments import MDPInfo
 from mushroom.utils import spaces
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 from mushroom.features.basis import *
 from mushroom.features.features import *
 from mushroom.policy.gaussian_policy import *
+from mushroom.distribution import *
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.algorithms.policy_search import *
+from mushroom.utils.dataset import compute_J
+from mushroom.utils.folder import *
+
+from library.core.hierarchical_core import HierarchicalCore
+from library.blocks.computational_graph import ComputationalGraph
+from library.blocks.control_block import ControlBlock
 from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
 from library.blocks.functions.feature_angle_diff_ship_steering import angle_ref_angle_difference
 from library.blocks.basic_operation_block import *
 from library.blocks.model_placeholder import PlaceHolder
 from library.blocks.reward_accumulator import reward_accumulator_block
 from library.environments.idilshipsteering import ShipSteering
-from mushroom.environments import MDPInfo
-from library.agents.dummy_agent import SimpleAgent
-import datetime
-from joblib import Parallel, delayed
-from mushroom.utils.dataset import compute_J
-from mushroom.utils.folder import *
-from library.blocks.functions.lqr_cost import lqr_cost
 from library.blocks.functions.cost_cosine import cost_cosine
+
+from joblib import Parallel, delayed
 
 
 def server_experiment_small(alg_high, alg_low, params, subdir, i):
@@ -55,13 +57,14 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     features = Features(basis_list=[PolynomialBasis()])
 
     # Policy 1
-    std1 = np.array([1.0])
+    std1 = np.array([0.8])
     approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(1,))
 
     pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1, std=std1)
 
     # Policy 2
-    sigma2 = Parameter(value=1e-4)
+    dist = GaussianDiagonalDistribution()
+    sigma2 = Parameter(value=1e-3)
     approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
@@ -74,17 +77,19 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
                               horizon=mdp.info.horizon)
     agent1 = alg_high(policy=pi1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=features)
 
-    # Agent 2
-    learning_rate2 = params.get('learning_rate_low')
-    mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low[2], high[2], (1,)),
-                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=10)
-    agent2 = alg_low(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
-    #agent2 = SimpleAgent(name='DUMMYDUMMYDUMMY', mdp_info=mdp_info_agent2, params=None, features=None, policy=None)
-
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
     control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=ep_per_run,
                                   callbacks=[parameter_callback1])
+
+    # Agent 2
+    learning_rate2 = params.get('learning_rate_low')
+    mdp_info_agent2 = MDPInfo(
+        observation_space=spaces.Box(low[2], high[2], (1,)),
+        action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
+    agent2 = alg_low(policy=pi2, mdp_info=mdp_info_agent2,
+                     learning_rate=learning_rate2)
+
 
     # Control Block 2
     parameter_callback2 = CollectPolicyParameter(pi2)
@@ -98,7 +103,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
     # Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_block1, control_block2,
-              function_block1, function_block2, function_block3, reward_acc]
+              function_block1, function_block2, reward_acc]
 
     state_ph.add_input(control_block2)
     reward_ph.add_input(control_block2)
@@ -112,10 +117,10 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
     function_block2.add_input(lastaction_ph)
-    function_block3.add_input(function_block2)
+    #function_block3.add_input(function_block2)
     #function_block3.add_input(reward_ph)
     control_block2.add_input(function_block1)
-    control_block2.add_reward(function_block3)
+    control_block2.add_reward(function_block2)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
     core = HierarchicalCore(computational_graph)
 
@@ -156,8 +161,8 @@ if __name__ == '__main__':
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_hierarchical_angle/'
     alg_high = GPOMDP
     alg_low = GPOMDP
-    learning_rate_high = AdaptiveParameter(value=1e-2)
-    learning_rate_low = AdaptiveParameter(value=1e-4)
+    learning_rate_high = Parameter(value=1e-3)
+    learning_rate_low = Parameter(value=1e-6)
     how_many = 1
     n_runs = 25
     n_iterations = 10

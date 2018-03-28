@@ -1,15 +1,15 @@
 import numpy as np
 
 
-class CollectPolicyParameter:
+class CollectDistributionParameter:
     """
     This callback can be used to collect the values of a parameter
     (e.g. learning rate) during a run of the agent.
 
     """
-    def __init__(self, policy):
+    def __init__(self, distribution):
 
-        self._policy = policy
+        self._distribution = distribution
         self._p = list()
 
     def __call__(self, **kwargs):
@@ -21,7 +21,7 @@ class CollectPolicyParameter:
 
         """
 
-        value = self._policy.get_weights()
+        value = self._distribution.get_parameters()
         if isinstance(value, np.ndarray):
             value = np.array(value)
         self._p.append(value)

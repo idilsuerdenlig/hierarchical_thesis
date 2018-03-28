@@ -12,7 +12,7 @@ from mushroom.distributions import GaussianDiagonalDistribution
 from mushroom.policy import DeterministicPolicy
 from mushroom.approximators.regressor import Regressor
 from mushroom.algorithms.policy_search import *
-from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
+from library.utils.callbacks.collect_distribution_parameter import CollectDistributionParameter
 from library.blocks.functions.feature_angle_diff_ship_steering import angle_ref_angle_difference
 from library.blocks.basic_operation_block import *
 from library.blocks.model_placeholder import PlaceHolder
@@ -30,7 +30,7 @@ from library.blocks.functions.cost_cosine import cost_cosine
 
 
 
-def experiment(alg_high, alg_low, params,subdir, i):
+def experiment(alg_high, alg_low, params_high, params_low, subdir, i):
 
     np.random.seed()
 
@@ -47,79 +47,72 @@ def experiment(alg_high, alg_low, params,subdir, i):
     lastaction_ph = PlaceHolder(name='lastaction_ph')
 
     # Function Block 1
-    function_block1 = fBlock(name='f1 (angle difference)',phi=angle_ref_angle_difference)
+    function_block1 = fBlock(name='f1 (angle difference)',
+                             phi=angle_ref_angle_difference)
 
     # Function Block 2
     function_block2 = fBlock(name='f2 (lqr cost)', phi=cost_cosine)
 
-    # Function Block 3
-    function_block3 = addBlock(name='f3 (summation)')
-
-
     #Features
-    '''high = [150, 150]
-    low = [0, 0]
-    n_tiles = [5, 5]
-    low = np.array(low, dtype=np.float)
-    high = np.array(high, dtype=np.float)
-    n_tilings = 1
-
-    tilings = Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low,
-                             high=high)
-    features = Features(tilings=tilings)
-
-    input_shape = (features.size,)'''
-
     features = Features(basis_list=[PolynomialBasis()])
 
     # Policy 1
-    std1 = np.array([1.0])
-    approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(1,))
-    #approximator1.set_weights(np.array([np.pi/4-0.00349066]))
-    policy1 = MultivariateDiagonalGaussianPolicy(mu=approximator1, std=std1)
+    approximator1 = Regressor(LinearApproximator, input_shape=(features.size,),
+                              output_shape=(1,))
+    policy1 = DeterministicPolicy(mu=approximator1)
+    sigma1 = 1e-3 * np.ones(policy1.weights_size)
+    mu1 = np.zeros(policy1.weights_size)
+    distribution1 = GaussianDiagonalDistribution(mu1, sigma1)
+
+    # Agent 1
+    high = [150, 150, np.pi, np.pi/12]
+    low = [0, 0, -np.pi, -np.pi/12]
+    mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
+                              action_space=spaces.Box(low[2], high[2], (1,)),
+                              gamma=mdp.info.gamma, horizon=100)
+    agent1 = alg_high(distribution=distribution1,
+                      policy=policy1,
+                      mdp_info=mdp_info_agent1,
+                      features=features, **params_high)
 
 
     # Policy 2
-    approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
+    approximator2 = Regressor(LinearApproximator, input_shape=(1,),
+                              output_shape=mdp.info.action_space.shape)
     policy2 = DeterministicPolicy(mu=approximator2)
     mu2 = np.zeros(policy2.weights_size)
     sigma2 = 1e-3 * np.ones(policy2.weights_size)
     distribution2 = GaussianDiagonalDistribution(mu2, sigma2)
 
-    # Agent 1
-    learning_rate1 = params.get('learning_rate_high')
-    high = [150, 150, np.pi, np.pi/12]
-    low = [0, 0, -np.pi, -np.pi/12]
-    mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
-                              action_space=spaces.Box(low[2], high[2], (1,)), gamma=mdp.info.gamma, horizon=100)
-    agent1 = alg_high(policy=policy1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=features)
     # Agent 2
-    learning_rate2 = params.get('learning_rate_low')
-    eps = params.get('eps')
-    beta = params.get('beta')
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low[2], high[2], (1,)),
-                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=30)
-    agent2 = alg_low(policy=policy2, distribution=distribution2,
-                     mdp_info=mdp_info_agent2, eps=eps)
+                              action_space=mdp.info.action_space,
+                              gamma=mdp.info.gamma, horizon=100)
+    agent2 = alg_low(distribution=distribution2,
+                     policy=policy2,
+                     mdp_info=mdp_info_agent2, **params_low)
 
     # Control Block 1
-    parameter_callback1 = CollectPolicyParameter(policy1)
-    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=ep_per_run,
+    parameter_callback1 = CollectDistributionParameter(distribution1)
+    control_block1 = ControlBlock(name='Control Block 1', agent=agent1,
+                                  n_eps_per_fit=ep_per_run,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
-    parameter_callback2 = CollectPolicyParameter(policy1)
-    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=10,
+    parameter_callback2 = CollectDistributionParameter(distribution2)
+    control_block2 = ControlBlock(name='Control Block 2', agent=agent2,
+                                  n_eps_per_fit=10,
                                   callbacks=[parameter_callback2])
 
 
     #Reward Accumulator
-    reward_acc = reward_accumulator_block(gamma=mdp_info_agent1.gamma, name='reward_acc')
+    reward_acc = reward_accumulator_block(gamma=mdp_info_agent1.gamma,
+                                          name='reward_acc')
 
 
     # Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_block1, control_block2,
-              function_block1, function_block2, function_block3, reward_acc]
+              function_block1, function_block2, reward_acc]
 
     state_ph.add_input(control_block2)
     reward_ph.add_input(control_block2)
@@ -133,10 +126,8 @@ def experiment(alg_high, alg_low, params,subdir, i):
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
     function_block2.add_input(lastaction_ph)
-    function_block3.add_input(function_block2)
-    function_block3.add_input(reward_ph)
     control_block2.add_input(function_block1)
-    control_block2.add_reward(function_block3)
+    control_block2.add_reward(function_block2)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
     core = HierarchicalCore(computational_graph)
 
@@ -182,8 +173,8 @@ if __name__ == '__main__':
     n_runs = 25
     n_iterations = 10
     ep_per_run = 20
-    alg_high = GPOMDP
-    alg_low = REPS
+    alg_high = PGPE
+    alg_low = PGPE
 
     learning_rate_high = AdaptiveParameter(value=1e-3)
     learning_rate_low = AdaptiveParameter(value=1e-5)
@@ -193,15 +184,17 @@ if __name__ == '__main__':
     mk_dir_recursive('./' + subdir)
     force_symlink('./' + subdir, 'latest')
 
-    params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low,
-              'eps': 1.0, 'beta': 0.6}
-    np.save(subdir + '/algorithm_params_dictionary', params)
+    params_high = {'learning_rate': learning_rate_high}
+    params_low = {'learning_rate': learning_rate_low}
+    np.save(subdir + '/algorithm_params_high_dictionary', params_high)
+    np.save(subdir + '/algorithm_params_low_dictionary', params_low)
     experiment_params = {'how_many': how_many, 'n_runs': n_runs,
                          'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
     print('---------------------------------------------------------------')
     print(alg_low.__name__)
-    Js = Parallel(n_jobs=1)(delayed(experiment)(alg_high, alg_low, params,
-                                                              subdir, i) for i in range(how_many))
+    Js = Parallel(n_jobs=1)(delayed(experiment)(alg_high, alg_low, params_high,
+                                                params_low, subdir, i)
+                            for i in range(how_many))
 
 

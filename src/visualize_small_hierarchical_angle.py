@@ -88,7 +88,7 @@ def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
         params2_one_experiment = parameter_dataset2[i]
         params1_one_experiment = parameter_dataset1[i]
         last_val = params2_one_experiment[-1]
-        if last_val > 0:
+        if last_val[0] > 0:
             unstable_count += 1
         max_len2 = max(len(params2_one_experiment), max_len2)
         max_len1 = max(len(params1_one_experiment), max_len1)
