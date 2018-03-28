@@ -154,7 +154,7 @@ if __name__ == '__main__':
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_hierarchical/'
     alg_high = GPOMDP
     alg_low = GPOMDP
-    learning_rate_high = AdaptiveParameter(value=10)
+    learning_rate_high = Parameter(value=1)
     learning_rate_low = AdaptiveParameter(value=1e-3)
     how_many = 100
     n_runs = 25
