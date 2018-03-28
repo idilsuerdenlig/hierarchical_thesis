@@ -3,7 +3,6 @@ from mushroom.utils.angles_utils import shortest_angular_distance, normalize_ang
 
 
 def pick_state(inputs):
-
     states = np.concatenate(inputs)
     indices = [0,1]
     states_needed = np.zeros(shape=(len(indices),))

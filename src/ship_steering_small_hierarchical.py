@@ -11,13 +11,15 @@ from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.algorithms.policy_search import *
 from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
-from library.blocks.functions.feature_angle_diff_ship_steering import phi
+from library.blocks.functions.feature_angle_diff_ship_steering import *
 from library.blocks.basic_operation_block import *
 from library.blocks.model_placeholder import PlaceHolder
 from library.utils.pick_last_ep_dataset import pick_last_ep
+from library.blocks.functions.pick_state import pick_state
 from library.blocks.reward_accumulator import reward_accumulator_block
 from library.blocks.error_accumulator import ErrorAccumulatorBlock
 from library.environments.idilshipsteering import ShipSteering
+from mushroom.features.tiles import Tiles
 from mushroom.environments import MDPInfo
 import datetime
 from joblib import Parallel, delayed
@@ -25,9 +27,11 @@ from mushroom.utils.dataset import compute_J
 import argparse
 from mushroom.utils.folder import *
 from library.blocks.functions.lqr_cost import lqr_cost
+from library.blocks.functions.cost_cosine import cost_cosine
 
 
-def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir, i):
+
+def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
     np.random.seed()
 
@@ -44,14 +48,16 @@ def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir
     lastaction_ph = PlaceHolder(name='lastaction_ph')
 
     # Function Block 1
-    function_block1 = fBlock(name='f1 (angle difference)',phi=phi)
+    function_block1 = fBlock(name='f1 (angle difference)',phi=pos_ref_angle_difference)
 
     # Function Block 2
-    function_block2 = fBlock(name='f2 (lqr cost)', phi=lqr_cost)
+    function_block2 = fBlock(name='f2 (cost cosine)', phi=cost_cosine)
 
     # Function Block 3
     function_block3 = addBlock(name='f3 (summation)')
 
+    #Function Block 4
+    function_block4 = fBlock(name='f4 (pick state)', phi=pick_state)
 
     #Features
     features = Features(basis_list=[PolynomialBasis()])
@@ -63,10 +69,21 @@ def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir
 
     pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,std=sigma1)
 
+    #FeaturesL
+    high = [150, 150, np.pi]
+    low = [0, 0, -np.pi]
+    n_tiles = [3, 3, 10]
+    low = np.array(low, dtype=np.float)
+    high = np.array(high, dtype=np.float)
+    n_tilings = 1
+
+    tilings = Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low,
+                             high=high)
+    featuresL = Features(tilings=tilings)
 
     # Policy 2
     sigma2 = Parameter(value=1e-4)
-    approximator2 = Regressor(LinearApproximator, input_shape=(1,), output_shape=mdp.info.action_space.shape)
+    approximator2 = Regressor(LinearApproximator, input_shape=(featuresL.size,), output_shape=mdp.info.action_space.shape)
     pi2 = GaussianPolicy(mu=approximator2, sigma=sigma2)
 
     # Agent 1
@@ -80,16 +97,16 @@ def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir
     learning_rate2 = params.get('learning_rate_low')
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
                               action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
-    agent2 = alg_low(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
+    agent2 = alg_low(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2, features=featuresL)
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
-    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=10,
+    control_block1 = ControlBlock(name='Control Block 1', agent=agent1, n_eps_per_fit=ep_per_run,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
     parameter_callback2 = CollectPolicyParameter(pi2)
-    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=100,
+    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=ep_per_run,
                                   callbacks=[parameter_callback2])
 
 
@@ -112,10 +129,12 @@ def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir
     function_block1.add_input(control_block1)
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
-    function_block2.add_input(lastaction_ph)
-    function_block3.add_input(function_block1)
+    function_block2.add_input(state_ph)
+    function_block2.add_input(control_block1)
     function_block3.add_input(function_block2)
-    function_block3.add_input(reward_ph)
+    #function_block3.add_input(reward_ph)
+    function_block4.add_input(state_ph)
+    control_block2.add_input(function_block4)
     control_block2.add_input(function_block1)
     control_block2.add_reward(function_block3)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
@@ -157,18 +176,22 @@ def server_experiment_small(alg_high, alg_low, params, experiment_params ,subdir
 if __name__ == '__main__':
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_hierarchical/'
-    alg_high = PGPE
-    alg_low = PGPE
-    learning_rate_high = AdaptiveParameter(value=15)
+    alg_high = GPOMDP
+    alg_low = GPOMDP
+    learning_rate_high = Parameter(value=1)
     learning_rate_low = AdaptiveParameter(value=1e-3)
     how_many = 1
-    n_runs = 50
-    n_iterations = 100
-    ep_per_run = 10
+    n_runs = 25
+    n_iterations = 10
+    ep_per_run = 20
     mk_dir_recursive('./' + subdir)
+    force_symlink('./' + subdir, 'latest')
+
 
     params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low}
     np.save(subdir + '/algorithm_params_dictionary', params)
     experiment_params = {'how_many': how_many, 'n_runs': n_runs,
                          'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
+    Js = Parallel(n_jobs=1)(delayed(server_experiment_small)(alg_high, alg_low, params,
+                                                subdir, i) for i in range(how_many))

@@ -77,7 +77,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     # Agent 2
     learning_rate2 = params.get('learning_rate_low')
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low[2], high[2], (1,)),
-                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=50)
+                              action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=10)
     agent2 = alg_low(policy=pi2, mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
     #agent2 = SimpleAgent(name='DUMMYDUMMYDUMMY', mdp_info=mdp_info_agent2, params=None, features=None, policy=None)
 
@@ -156,8 +156,8 @@ if __name__ == '__main__':
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_hierarchical_angle/'
     alg_high = GPOMDP
     alg_low = GPOMDP
-    learning_rate_high = AdaptiveParameter(value=1e-3)
-    learning_rate_low = AdaptiveParameter(value=1e-3)
+    learning_rate_high = AdaptiveParameter(value=1e-2)
+    learning_rate_low = AdaptiveParameter(value=1e-4)
     how_many = 1
     n_runs = 25
     n_iterations = 10

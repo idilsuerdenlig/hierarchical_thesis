@@ -1,4 +1,5 @@
 import numpy as np
+from mushroom.policy import DeterministicPolicy
 
 class CollectPolicyParameter:
     """
@@ -19,7 +20,10 @@ class CollectPolicyParameter:
             **kwargs (dict): empty dictionary.
 
         """
-        value = self._policy.get_weights()
+        if isinstance(self._policy, DeterministicPolicy):
+            value = self._policy.distribution.get_parameters()
+        else:
+            value = self._policy.get_weights()
         if isinstance(value, np.ndarray):
             value = np.array(value)
         self._p.append(value)

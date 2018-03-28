@@ -65,7 +65,6 @@ class ComputationalGraph(object):
         #print 'ENV RESET STATE, REW', self.state, self.reward
 
         for block in self.ordered:
-            #print('RESET___________')
             #print('NAME :', block.name)
             inputs = list()
             for input_block in block.input_connections:

@@ -25,6 +25,7 @@ def visualize_control_block(datalist_control, ep_count = None, how_many=1):
 
     i = 0
     n_eps = 0
+    ep_step_count = list()
 
 
     for dataset_step in datalist_control:
@@ -57,6 +58,7 @@ def visualize_control_block(datalist_control, ep_count = None, how_many=1):
             reward_list.append(reward_ep)
             action_list.append(action_ep)
             next_state_list.append(next_state_ep)
+            ep_step_count.append(i)
             state_ep = []
             reward_ep = []
             action_ep = []
@@ -87,6 +89,7 @@ def visualize_control_block(datalist_control, ep_count = None, how_many=1):
         time =np.arange(len(reward_ep))
         ax3.plot(time,reward_ep)
         ax3.set_ylabel('reward')
+
 
 
 

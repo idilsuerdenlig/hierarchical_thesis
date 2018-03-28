@@ -26,6 +26,8 @@ from joblib import Parallel, delayed
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.folder import *
 from library.blocks.functions.lqr_cost import lqr_cost
+from library.blocks.functions.cost_cosine import cost_cosine
+
 
 
 def experiment(alg_high, alg_low, params,subdir, i):
@@ -48,7 +50,7 @@ def experiment(alg_high, alg_low, params,subdir, i):
     function_block1 = fBlock(name='f1 (angle difference)',phi=angle_ref_angle_difference)
 
     # Function Block 2
-    function_block2 = fBlock(name='f2 (lqr cost)', phi=lqr_cost)
+    function_block2 = fBlock(name='f2 (lqr cost)', phi=cost_cosine)
 
     # Function Block 3
     function_block3 = addBlock(name='f3 (summation)')
@@ -94,10 +96,11 @@ def experiment(alg_high, alg_low, params,subdir, i):
     # Agent 2
     learning_rate2 = params.get('learning_rate_low')
     eps = params.get('eps')
+    beta = params.get('beta')
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low[2], high[2], (1,)),
                               action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=30)
     agent2 = alg_low(policy=policy2, distribution=distribution2,
-                     mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
+                     mdp_info=mdp_info_agent2, eps=eps)
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(policy1)
@@ -105,7 +108,9 @@ def experiment(alg_high, alg_low, params,subdir, i):
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
-    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=10)
+    parameter_callback2 = CollectPolicyParameter(policy1)
+    control_block2 = ControlBlock(name='Control Block 2', agent=agent2, n_eps_per_fit=10,
+                                  callbacks=[parameter_callback2])
 
 
     #Reward Accumulator
@@ -157,10 +162,14 @@ def experiment(alg_high, alg_low, params,subdir, i):
 
     # Save
     parameter_dataset1 = parameter_callback1.get_values()
+    parameter_dataset2 = parameter_callback2.get_values()
+
     mk_dir_recursive('./' + subdir + str(i))
 
     np.save(subdir+str(i)+'/low_level_dataset_file', low_level_dataset_eval)
     np.save(subdir+str(i)+'/parameter_dataset1_file', parameter_dataset1)
+    np.save(subdir+str(i)+'/parameter_dataset2_file', parameter_dataset2)
+
     np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval)
 
 
@@ -174,7 +183,7 @@ if __name__ == '__main__':
     n_iterations = 10
     ep_per_run = 20
     alg_high = GPOMDP
-    alg_low = PGPE
+    alg_low = REPS
 
     learning_rate_high = AdaptiveParameter(value=1e-3)
     learning_rate_low = AdaptiveParameter(value=1e-5)
@@ -184,7 +193,8 @@ if __name__ == '__main__':
     mk_dir_recursive('./' + subdir)
     force_symlink('./' + subdir, 'latest')
 
-    params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low, 'eps': 1.0}
+    params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low,
+              'eps': 1.0, 'beta': 0.6}
     np.save(subdir + '/algorithm_params_dictionary', params)
     experiment_params = {'how_many': how_many, 'n_runs': n_runs,
                          'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
