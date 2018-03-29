@@ -107,7 +107,7 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
 
     featuresL = Features(tilings=tilingsL)
 
-    mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]),
+    mdp_info_agentL = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]),
                                                            high=np.array([150, 150]), shape=(2,)),
                               action_space=mdp.info.action_space, gamma=0.99, horizon=10000)
 
@@ -131,11 +131,11 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
 
     # Agent1
     learning_rate1 = params.get('learning_rate_low')
-    agent1 = alg_low(pi1, mdp.info, learning_rate1, featuresL)
+    agent1 = alg_low(pi1, mdp_info_agentL, learning_rate1, featuresL)
 
     # Agent2
     learning_rate2 = params.get('learning_rate_low')
-    agent2 = alg_low(pi2, mdp.info, learning_rate2, featuresL)
+    agent2 = alg_low(pi2, mdp_info_agentL, learning_rate2, featuresL)
 
 
     #Termination Conds
@@ -239,8 +239,8 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
         J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
         print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
         dataset_eval += dataset_eval_run
-        low_level_dataset_eval1 += control_block1.dataset.get()
-        low_level_dataset_eval2 += control_block2.dataset.get()
+        low_level_dataset_eval1.append(control_block1.dataset.get())
+        low_level_dataset_eval2.append(control_block2.dataset.get())
 
     # Tile data
     hi_lev_params = agentH.Q.get_weights()
@@ -273,7 +273,7 @@ if __name__ == '__main__':
     learning_rate_low = AdaptiveParameter(value=1e-3)
     n_jobs=1
     how_many = 1
-    n_runs = 25
+    n_runs = 5
     n_iterations = 10
     ep_per_run = 20
     mk_dir_recursive('./' + subdir)

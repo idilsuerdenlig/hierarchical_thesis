@@ -70,10 +70,11 @@ def visualize_big_hierarchical(gamma=1, range_vis=None):
 
     dataset_eval_vis = list()
     for run in range(n_runs):
-        dataset_eval_run = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
-        last_ep_of_run = pick_last_ep(dataset_eval_run)
-        for step in last_ep_of_run:
-            dataset_eval_vis.append(step)
+        if run == 0 or run == n_runs-1 or run == 6 or run == 12 or run == 19:
+            dataset_eval_run = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
+            last_ep_of_run = pick_last_ep(dataset_eval_run)
+            for step in last_ep_of_run:
+                dataset_eval_vis.append(step)
 
     small = False
 

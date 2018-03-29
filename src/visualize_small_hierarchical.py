@@ -108,8 +108,7 @@ def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
     ax2.set_title('pi2 parameters averaged')
 
     visualize_policy_params(parameter_dataset1, parameter_dataset2, small=small, how_many=how_many)
-    visualize_ship_steering(dataset_eval_vis, 'evaluate', small=small, range_eps=range_vis, n_gates=1,
-                            how_many=how_many, n_runs=n_runs, ep_per_run=ep_per_run)
+    visualize_ship_steering(dataset_eval_vis, 'evaluate', small=small, range_eps=range_vis)
     visualize_control_block(datalist_control=low_level_dataset, ep_count=5, how_many=how_many)
 
     plt.show()
