@@ -24,7 +24,7 @@ class signBlock(fBlock):
                 res = input*-1
             return res
         self.phi = minus
-        super(minusBlock, self).__init__(phi=minus, name=name)
+        super(signBlock, self).__init__(phi=minus, name=name)
 
 class squarednormBlock(fBlock):
 

@@ -1,10 +1,12 @@
 from library.visualization_tools.visualize_ship_steering import visualize_ship_steering
 import matplotlib.pyplot as plt
 from library.visualization_tools.visualize_control_block import visualize_control_block
+from library.visualization_tools.visualize_policy_parameters import visualize_policy_params
 from library.utils.pick_last_ep_dataset import pick_last_ep
 from library.utils.pick_eps import pick_eps
 from mushroom.utils.dataset import compute_J
 import numpy as np
+from tqdm import tqdm
 
 
 def visualize_bonarini_hierarchical(gamma=1, range_vis=None):
@@ -28,6 +30,8 @@ def visualize_bonarini_hierarchical(gamma=1, range_vis=None):
 
     for exp_no in range(how_many):
 
+        parameter_dataset1 += [np.load('latest/' + str(exp_no) + '/parameter_dataset1_file.npy')]
+        parameter_dataset2 += [np.load('latest/' + str(exp_no) + '/parameter_dataset2_file.npy')]
         dataset_eval = np.load('latest/' + str(exp_no) + '/dataset_eval_file.npy')
 
         J_runs_eps = compute_J(dataset_eval, gamma)
@@ -62,15 +66,19 @@ def visualize_bonarini_hierarchical(gamma=1, range_vis=None):
 
     dataset_eval = np.load('latest/' + str(how_many - 1) + '/dataset_eval_file.npy')
     low_level_dataset = np.load('latest/' + str(exp_no) + '/low_level_dataset_file.npy')
-
-    small = False
     dataset_eval_vis = list()
     for run in range(n_runs):
         dataset_eval_run = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
+        visualize_ship_steering(dataset_eval_vis, 'evaluate', small=False, range_eps=range_vis, n_gates=1,
+                                how_many=how_many, n_runs=n_runs, ep_per_run=ep_per_run)
+
         last_ep_of_run = pick_last_ep(dataset_eval_run)
         for step in last_ep_of_run:
             dataset_eval_vis.append(step)
 
+    small = False
+
+    visualize_policy_params(parameter_dataset1, parameter_dataset2, small=small, how_many=how_many)
     visualize_ship_steering(dataset_eval_vis, 'evaluate', small=small, range_eps=range_vis, n_gates=1, how_many=how_many, n_runs=n_runs, ep_per_run=ep_per_run)
     visualize_control_block(datalist_control=low_level_dataset, ep_count=5, how_many=how_many)
 

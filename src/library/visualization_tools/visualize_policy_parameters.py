@@ -88,33 +88,7 @@ def visualize_policy_params(parameter_dataset1, parameter_dataset2, parameter_da
             ax2.set_ylim(-500, 1500)
         ax2.set_title('95% interval pi1 parameters averaged')
 
-        max_len2 = 0
-        unstable_count = 0
 
-        for i in range(how_many):
-            params2_one_experiment = parameter_dataset2[i]
-            last_val = params2_one_experiment[-1]
-            if last_val > 0:
-                unstable_count += 1
-            max_len2 = max(len(params2_one_experiment), max_len2)
-
-        print('UNSTABLE COUNT:  ', unstable_count)
-
-        a = list()
-        for _ in range(how_many):
-            a.append(list())
-
-        for i in range(how_many):
-            diff_len = max_len2-len(parameter_dataset2[i])
-            for each in parameter_dataset2[i]:
-                a[i].append(each)
-            if diff_len is not 0:
-                for m in range(diff_len):
-                    a[i].append(np.array(np.NaN))
-        param2_avg = np.nanmean(a, axis=0)
-        ax3 = fig.add_subplot(222)
-        ax3.plot(param2_avg)
-        ax3.set_title('pi2 parameters averaged')
 
         if parameter_dataset2_2 is not None:
             ax4 = fig.add_subplot(224)
