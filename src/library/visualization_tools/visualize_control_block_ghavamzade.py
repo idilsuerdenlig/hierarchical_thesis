@@ -20,15 +20,18 @@ def visualize_control_block_ghavamzade(datalist_control, ep_count = None, gamma=
     datalist_control_vis = list()
     J_avg = np.zeros((n_runs,))
     size_eps = list()
+    eps_step_avg = list()
+
 
     for run in range(n_runs):
         dataset_control_run = datalist_control[run]
+        total_steps = len(dataset_control_run)
         last_ep_of_run = pick_last_ep(dataset_control_run)
         datalist_control_vis.append(last_ep_of_run)
-
-    for i in range(n_runs):
-        J_runs_eps= compute_J(datalist_control[run], gamma)
-        J_avg[i] = np.mean(J_runs_eps, axis=0)
+        J_runs_eps= compute_J(dataset_control_run, gamma)
+        n_eps = len(J_runs_eps)
+        eps_step_avg.append(total_steps/n_eps)
+        J_avg[run] = np.mean(J_runs_eps, axis=0)
 
     fig = plt.figure()
     ax1n = fig.add_subplot(121)
@@ -70,7 +73,7 @@ def visualize_control_block_ghavamzade(datalist_control, ep_count = None, gamma=
         size_eps.append(len(state_ep))
 
 
-    ax2n.plot(size_eps)
+    ax2n.plot(eps_step_avg)
     ax2n.set_title('size_eps')
 
 
