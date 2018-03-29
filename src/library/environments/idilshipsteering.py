@@ -36,10 +36,10 @@ class ShipSteering(Environment):
         self._dt = .2
         self._gate_s = np.empty(2)
         self._gate_e = np.empty(2)
-        self._gate_s[0] = 100 if small else 900
-        self._gate_s[1] = 120 if small else 920
-        self._gate_e[0] = 120 if small else 920
-        self._gate_e[1] = 100 if small else 900
+        self._gate_s[0] = 100 if small else 350
+        self._gate_s[1] = 120 if small else 400
+        self._gate_e[0] = 120 if small else 450
+        self._gate_e[1] = 100 if small else 400
         self._out_reward = -100 if self.hard else -10000
         self._success_reward = 0 if self.hard else 100
 

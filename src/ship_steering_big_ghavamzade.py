@@ -55,7 +55,7 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
 
     # Model Block
     small=False
-    mdp = ShipSteering(small=False, hard=False, n_steps_action=3)
+    mdp = ShipSteering(small=False, hard=True, n_steps_action=3)
 
     #State Placeholder
     state_ph = PlaceHolder(name='state_ph')
@@ -190,9 +190,6 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
               function_block6, function_block7, function_block8,
               reward_acc_H]
 
-    #state_ph.add_input(mux_block)
-    #reward_ph.add_input(mux_block)
-    #lastaction_ph.add_input(mux_block)
     reward_acc_H.add_input(reward_ph)
     reward_acc_H.add_alarm_connection(control_block1)
     reward_acc_H.add_alarm_connection(control_block2)
