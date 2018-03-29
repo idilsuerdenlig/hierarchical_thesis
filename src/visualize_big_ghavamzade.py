@@ -27,10 +27,10 @@ def visualize_big_ghavamzade(ep_count=10, gamma=1):
     heatmap = axis.pcolor(max_q_val_tiled, cmap=plt.cm.Blues)
     plt.colorbar(heatmap)
     visualize_control_block_ghavamzade(low_level_dataset1, ep_count=ep_count, gamma=gamma,
-                                       n_runs=n_runs, ep_per_run=ep_per_run)
+                                       n_runs=n_runs, ep_per_run=ep_per_run, name='ctrl+')
     plt.suptitle('ctrl+')
     visualize_control_block_ghavamzade(low_level_dataset2, ep_count=ep_count, gamma=gamma,
-                                       n_runs=n_runs, ep_per_run=ep_per_run)
+                                       n_runs=n_runs, ep_per_run=ep_per_run, name='ctrlx')
     plt.suptitle('ctrlx')
 
     dataset_eval_vis = list()
