@@ -28,7 +28,7 @@ def visualize_control_block_ghavamzade(datalist_control, ep_count = None, gamma=
 
     for i in range(n_runs):
         J_runs_eps= compute_J(datalist_control[run], gamma)
-        J_avg[i] = np.mean(J_runs_eps[ep_per_run * i:ep_per_run * i + ep_per_run], axis=0)
+        J_avg[i] = np.mean(J_runs_eps, axis=0)
 
     fig = plt.figure()
     ax1n = fig.add_subplot(121)
