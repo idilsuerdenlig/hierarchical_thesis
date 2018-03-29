@@ -49,9 +49,6 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     # Function Block 2
     function_block2 = fBlock(name='f2 (cost cosine)', phi=cost_cosine)
 
-    # Function Block 3
-    function_block3 = addBlock(name='f3 (summation)')
-
 
     #Features
     features = Features(basis_list=[PolynomialBasis()])
@@ -101,7 +98,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
     # Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_block1, control_block2,
-              function_block1, function_block2, function_block3, reward_acc]
+              function_block1, function_block2, reward_acc]
 
     state_ph.add_input(control_block2)
     reward_ph.add_input(control_block2)
@@ -114,10 +111,9 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     function_block1.add_input(control_block1)
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
-    function_block3.add_input(function_block2)
 
     control_block2.add_input(function_block1)
-    control_block2.add_reward(function_block3)
+    control_block2.add_reward(function_block2)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
     core = HierarchicalCore(computational_graph)
 
