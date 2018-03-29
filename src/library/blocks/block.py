@@ -14,9 +14,7 @@ class Block(object):
         self.input_connections = list()
         self.reward_connection = None
         self.alarm_connections = list()
-        #self.clock_counter = 0
         self.last_output = None
-        #self.wake_time = wake_time
         self.name = name
         self.alarm_output = False
     def __call__(self, inputs, reward, absorbing, last, learn_flag, alarms):

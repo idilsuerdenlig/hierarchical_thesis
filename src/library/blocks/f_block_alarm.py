@@ -7,7 +7,7 @@ class fBlockAlarm(Block):
 
     def __init__(self, phi, name=None):
         self.phi = phi
-        super(fBlock, self).__init__(name=name)
+        super(fBlockAlarm, self).__init__(name=name)
 
     def _call(self, inputs, reward, absorbing, last, learn_flag):
         self.last_output = None
