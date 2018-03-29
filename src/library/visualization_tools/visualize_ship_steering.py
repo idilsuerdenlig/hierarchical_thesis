@@ -3,37 +3,21 @@ import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
-
-def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None, n_gates=1, small=True, how_many=1, n_runs=1, ep_per_run=1):
+def visualize_ship_steering(datalist_eval, name, range_eps=None, small=True):
 
     plt.figure()
 
-    ax1 = plt.subplot2grid((4,3), (0,0), rowspan=4, projection='3d')
-    ax2 = plt.subplot2grid((4,3), (0,1))
-    ax3 = plt.subplot2grid((4,3), (1,1))
-    ax4 = plt.subplot2grid((4,3), (2,1))
-    ax5 = plt.subplot2grid((4,3), (3,1))
-    ax6 = plt.subplot2grid((4,3), (0,2), rowspan=4)
+    ax1 = plt.subplot2grid((4, 3), (0, 0), rowspan=4, projection='3d')
+    ax2 = plt.subplot2grid((4, 3), (0, 1))
+    ax3 = plt.subplot2grid((4, 3), (1, 1))
+    ax4 = plt.subplot2grid((4, 3), (2, 1))
+    ax5 = plt.subplot2grid((4, 3), (3, 1))
+    ax6 = plt.subplot2grid((4, 3), (0, 2), rowspan=4)
 
-    if not n_gates == 1:
-        xs1=30 if small else 80
-        xe1=50 if small else 100
-        ys1=50 if small else 100
-        ye1=30 if small else 80
-        xs2=30 if small else 80
-        xe2=50 if small else 100
-        ys2=100 if small else 900
-        ye2=120 if small else 920
-        xs3=100 if small else 900
-        xe3=120 if small else 920
-        ys3=30 if small else 80
-        ye3=50 if small else 100
-
-    else:
-        xs = 100 if small else 900
-        xe = 120 if small else 920
-        ys = 120 if small else 920
-        ye = 100 if small else 900
+    xs = 100 if small else 350
+    xe = 120 if small else 450
+    ys = 120 if small else 400
+    ye = 100 if small else 400
 
 
     x_ep = list()
@@ -49,14 +33,9 @@ def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None, n_gates
     thetadot_list = list()
     ep_size = 0
     n_eps = 0
-    dataset_eval_eps = list()
-    dataset_ep = list()
-
-
-
-
 
     for dataset_step in datalist_eval:
+
         if not dataset_step[-1]:
             states_step = dataset_step[0]
             action_step = dataset_step[1]
@@ -96,8 +75,6 @@ def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None, n_gates
     if range_eps is None:
         range_eps = range(len(x_list))
 
-
-
     for episode in range_eps:
         time =np.arange(len(x_list[episode]))
         x = x_list[episode]
@@ -117,22 +94,6 @@ def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None, n_gates
         ax1.set_ylim([0, 1100])
 
     ax1.add_collection3d(Poly3DCollection(verts),zs=zg)
-    if not n_gates == 1:
-        xg1 = [xs1, xe1, xe1, xs1]
-        yg1 = [ys1, ye1, ye1, ys1]
-        verts1 = [list(zip(xg1,yg1,zg))]
-        ax1.add_collection3d(Poly3DCollection(verts1),zs=zg)
-
-        xg2 = [xs2, xe2, xe2, xs2]
-        yg2 = [ys2, ye2, ye2, ys2]
-        verts2 = [list(zip(xg2,yg2,zg))]
-        ax1.add_collection3d(Poly3DCollection(verts2),zs=zg)
-
-        xg3 = [xs3, xe3, xe3, xs3]
-        yg3 = [ys3, ye3, ye3, ys3]
-        verts3 = [list(zip(xg3,yg3,zg))]
-        ax1.add_collection3d(Poly3DCollection(verts3),zs=zg)
-
 
     for episode in range_eps:
         x_ep = x_list[episode]
@@ -151,16 +112,6 @@ def visualize_ship_steering(datalist_eval, name, J=None, range_eps=None, n_gates
         ax5.set_xlabel('time')
 
     ax6.plot(size_eps)
+    ax6.set_ylabel('size of episodes')
 
-    if J is not None:
-        fig4=plt.figure()
-        plt.plot(J)
-
-        axes=fig4.gca()
-        axes.set_ylim([-700, -50])
-        plt.title('J')
-
-    plt.tight_layout()
-
-    plt.suptitle(name)
 
