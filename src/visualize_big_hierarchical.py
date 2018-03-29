@@ -9,7 +9,7 @@ import numpy as np
 from tqdm import tqdm
 
 
-def visualize_bonarini_hierarchical(gamma=1, range_vis=None):
+def visualize_big_hierarchical(gamma=1, range_vis=None):
 
     fig = plt.figure()
     ax1 = fig.add_subplot(121)
@@ -66,6 +66,8 @@ def visualize_bonarini_hierarchical(gamma=1, range_vis=None):
 
     dataset_eval = np.load('latest/' + str(how_many - 1) + '/dataset_eval_file.npy')
     low_level_dataset = np.load('latest/' + str(exp_no) + '/low_level_dataset_file.npy')
+
+
     dataset_eval_vis = list()
     for run in range(n_runs):
         dataset_eval_run = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
@@ -76,11 +78,11 @@ def visualize_bonarini_hierarchical(gamma=1, range_vis=None):
     small = False
 
     visualize_policy_params(parameter_dataset1, parameter_dataset2, small=small, how_many=how_many)
-    visualize_ship_steering(dataset_eval_vis, 'evaluate', small=small, range_eps=range_vis, n_gates=1, how_many=how_many, n_runs=n_runs, ep_per_run=ep_per_run)
+    visualize_ship_steering(dataset_eval_vis, 'evaluate', small=small, range_eps=range_vis)
     visualize_control_block(datalist_control=low_level_dataset, ep_count=5, how_many=how_many)
 
     plt.show()
 
 if __name__ == '__main__':
     # range_vis must be a range()
-    visualize_bonarini_hierarchical(gamma=0.99, range_vis=None)
+    visualize_big_hierarchical(gamma=0.99, range_vis=None)
