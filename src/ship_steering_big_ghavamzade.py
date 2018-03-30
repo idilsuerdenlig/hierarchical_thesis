@@ -29,24 +29,26 @@ from library.blocks.hold_state import hold_state
 
 class TerminationCondition(object):
 
-    def __init__(self, active_dir, small=True):
+    def __init__(self, active_dir):
         self.active_direction = active_dir
-        self.small = small
 
     def __call__(self, state):
-        if self.active_direction <= 4:
+        if self.active_direction == '+':
             goal_pos = np.array([140, 75])
-        else:
+        elif self.active_direction == 'x':
             goal_pos = np.array([140, 140])
 
         pos = np.array([state[0], state[1]])
         if np.linalg.norm(pos-goal_pos) <= 10 or pos[0] > 150 or pos[0] < 0 or pos[1] > 150 or pos[1] < 0:
+            #if np.linalg.norm(pos-goal_pos) <= 10:
+            #    print('reached ', self.active_direction)
             return True
         else:
             return False
 
 def selector_function(inputs):
-    return 0 if np.asscalar(inputs[0]) < 4 else 1
+    action = np.asscalar(inputs[0])
+    return 0 if action < 4 else 1
 
 
 def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
@@ -54,7 +56,6 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     np.random.seed()
 
     # Model Block
-    small=False
     mdp = ShipSteering(small=False, hard=True, n_steps_action=3)
 
     #State Placeholder
@@ -75,7 +76,7 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     featuresH = Features(tilings=tilingsH)
 
     # PolicyH
-    epsilon = ExponentialDecayParameter(value=0.1, decay_exp=0.51)
+    epsilon = Parameter(value=0.1)
     piH = EpsGreedy(epsilon=epsilon)
 
     # AgentH
@@ -123,11 +124,12 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
                               **approximator_params)
 
     # Policy1
-    sigma = np.array([[1e-4]])
-    pi1 = MultivariateGaussianPolicy(mu=approximator1, sigma=sigma)
+    std1 = np.array([3e-2])
+    pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1, std=std1)
 
     # Policy2
-    pi2 = MultivariateGaussianPolicy(mu=approximator2, sigma=sigma)
+    std2 = np.array([3e-2])
+    pi2 = MultivariateDiagonalGaussianPolicy(mu=approximator2, std=std2)
 
     # Agent1
     learning_rate1 = params.get('learning_rate_low')
@@ -139,22 +141,24 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
 
 
     #Termination Conds
-    termination_condition1 = TerminationCondition(active_dir=1, small=small)
-    termination_condition2 = TerminationCondition(active_dir=5, small=small)
+    termination_condition1 = TerminationCondition(active_dir='+')
+    termination_condition2 = TerminationCondition(active_dir='x')
+
+    low_ep_per_fit = params.get('low_ep_per_fit')
 
     # Control Block +
-    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=20,
+    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=low_ep_per_fit,
                                   termination_condition=termination_condition1)
 
     # Control Block x
-    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=20,
+    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=low_ep_per_fit,
                                   termination_condition=termination_condition2)
 
     # Function Block 1: picks state for hi lev ctrl
     function_block1 = fBlock(phi=pick_state, name='f1 pickstate')
 
     # Function Block 2: maps the env to low lev ctrl state
-    function_block2 = fBlock(phi=rototranslate(small=small), name='f2 rotot')
+    function_block2 = fBlock(phi=rototranslate(small=False), name='f2 rotot')
 
     # Function Block 3: holds curr state as ref
     function_block3 = hold_state(name='f3 holdstate')
@@ -169,7 +173,7 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     function_block6 = fBlock(phi=G_high, name='f6 G_hi')
 
     # Function Block 7: ext rew of low lev ctrl
-    function_block7 = fBlock(phi=G_low(small=small), name='f7 G_lo')
+    function_block7 = fBlock(phi=G_low, name='f7 G_lo')
 
     #Reward Accumulator H:
     reward_acc_H = reward_accumulator_block(gamma=mdp_info_agentH.gamma, name='reward_acc_H')
@@ -210,7 +214,7 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     function_block3.add_alarm_connection(control_block2)
     function_block4.add_input(function_block6)
     function_block4.add_input(reward_acc_H)
-    function_block5.add_input(reward_ph)
+    #function_block5.add_input(reward_ph)
     function_block5.add_input(function_block7)
     function_block6.add_input(reward_ph)
     function_block7.add_input(control_blockH)
@@ -266,20 +270,22 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
 
 if __name__ == '__main__':
 
-    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_bonarini_ghavamzade/'
+    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_big_ghavamzade/'
     alg_high = TrueOnlineSARSALambda
     alg_low = GPOMDP
-    learning_rate_high = ExponentialDecayParameter(value=1.0, decay_exp=0.8)
+    learning_rate_high = Parameter(value=0.1)
     learning_rate_low = AdaptiveParameter(value=1e-3)
     n_jobs=1
     how_many = 1
-    n_runs = 5
+    n_runs = 10
     n_iterations = 10
     ep_per_run = 20
+    low_ep_per_fit = 40
     mk_dir_recursive('./' + subdir)
     force_symlink('./' + subdir, './latest')
 
-    params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low}
+    params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low,
+              'low_ep_per_fit': low_ep_per_fit}
     experiment_params = {'how_many': how_many, 'n_runs': n_runs,
                          'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)

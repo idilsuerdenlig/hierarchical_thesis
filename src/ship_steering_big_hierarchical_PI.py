@@ -21,6 +21,7 @@ from library.blocks.control_block import ControlBlock
 from library.blocks.functions.feature_angle_diff_ship_steering import *
 from library.blocks.basic_operation_block import *
 from library.blocks.model_placeholder import PlaceHolder
+from library.blocks.error_accumulator import ErrorAccumulatorBlock
 from library.blocks.reward_accumulator import reward_accumulator_block
 from library.blocks.functions.cost_cosine import cost_cosine
 from library.policy.deterministic_control_policy import \
@@ -55,6 +56,10 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     function_block2 = fBlock(name='f2 (cost cosine)', phi=cost_cosine)
 
 
+    #Error Acc
+    error_acc = ErrorAccumulatorBlock(name='error acc')
+
+
     #Features
     features = Features(basis_list=[PolynomialBasis()])
 
@@ -68,7 +73,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
 
     # Policy 2
-    pi2 = DeterministicControlPolicy(weights=np.array([0]))
+    pi2 = DeterministicControlPolicy(weights=np.array([0, 0]))
     mu2 = np.zeros(pi2.weights_size)
     sigma2 = 1e-3 * np.ones(pi2.weights_size)
     distribution2 = GaussianDiagonalDistribution(mu2, sigma2)
@@ -86,7 +91,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
     # Agent 2
     learning_rate2 = params.get('learning_rate_low')
-    mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
+    mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (2,)),
                               action_space=mdp.info.action_space,
                               gamma=mdp.info.gamma, horizon=100)
     agent2 = alg_low(distribution=distribution2, policy=pi2,
@@ -112,7 +117,8 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
     # Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_block1,
-              control_block2, function_block1, function_block2, reward_acc]
+              control_block2, function_block1, function_block2, reward_acc,
+              error_acc]
 
     state_ph.add_input(control_block2)
     reward_ph.add_input(control_block2)
@@ -125,8 +131,10 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     function_block1.add_input(control_block1)
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
+    error_acc.add_input(function_block1)
 
     control_block2.add_input(function_block1)
+    control_block2.add_input(error_acc)
     control_block2.add_reward(function_block2)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
     core = HierarchicalCore(computational_graph)

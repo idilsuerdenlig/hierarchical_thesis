@@ -42,6 +42,7 @@ class ShipSteering(Environment):
         self._gate_e[1] = 100 if small else 400
         self._out_reward = -100 if self.hard else -10000
         self._success_reward = 0 if self.hard else 100
+        self._small = small
 
         self.n_steps_action = n_steps_action
         # MDP properties
@@ -55,7 +56,12 @@ class ShipSteering(Environment):
 
     def reset(self, state=None):
         if state is None:
-            self._state = np.zeros(4)
+            if self._small:
+                self._state = np.zeros(4)
+            else:
+                low = self.info.observation_space.low
+                high = self.info.observation_space.high
+                self._state = (high-low)*np.random.rand(4) + low
         else:
             self._state = state
 
