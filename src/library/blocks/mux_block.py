@@ -1,5 +1,5 @@
 from .block import Block
-
+from .control_block import ControlBlock
 
 class MuxBlock(Block):
     """
@@ -70,3 +70,9 @@ class MuxBlock(Block):
                 block.init()
         for i in range(len(self.first)):
             self.first[i] = True
+
+    def stop(self):
+        for block_list in self.block_lists:
+            for block in block_list:
+                if isinstance(block, ControlBlock):
+                    block.stop()
