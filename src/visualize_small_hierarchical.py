@@ -4,12 +4,14 @@ from library.visualization_tools.visualize_control_block import visualize_contro
 from library.visualization_tools.visualize_policy_parameters import visualize_policy_params
 from library.utils.pick_last_ep_dataset import pick_last_ep
 from library.utils.pick_eps import pick_eps
+from library.utils.check_no_of_eps import check_no_of_eps
+
 from mushroom.utils.dataset import compute_J
 import numpy as np
 from tqdm import tqdm
 
 
-def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
+def visualize_small_hierarchical(runs, gamma=1, range_vis=(499, 500)):
 
     fig = plt.figure()
     ax1 = fig.add_subplot(121)
@@ -69,12 +71,26 @@ def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
     low_level_dataset = np.load('latest/' + str(exp_no) + '/low_level_dataset_file.npy')
 
     small=True
-    dataset_eval_vis = list()
-    for run in range(n_runs):
+    dataset_eval_vis= list()
+    for _ in runs:
+        dataset_eval_vis.append(list())
+    for i, run in enumerate(runs):
         dataset_eval_run = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
-        last_ep_of_run = pick_last_ep(dataset_eval_run)
+        first_ep_of_run = dataset_eval_run[0]
+        last_ep_of_run = dataset_eval_run[-1]
+        no_of_eps = len(dataset_eval_run)
+        ep_skip = no_of_eps // 3
+        mid1_ep_of_run = dataset_eval_run[ep_skip]
+        mid2_ep_of_run = dataset_eval_run[2 * ep_skip]
+
+        for step in first_ep_of_run:
+            dataset_eval_vis[i].append(step)
+        for step in mid1_ep_of_run:
+            dataset_eval_vis[i].append(step)
+        for step in mid2_ep_of_run:
+            dataset_eval_vis[i].append(step)
         for step in last_ep_of_run:
-            dataset_eval_vis.append(step)
+            dataset_eval_vis[i].append(step)
 
         # parameter print
     unstable_count = 0
@@ -88,7 +104,6 @@ def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
         if last_val[0] > 0:
             unstable_count += 1
         max_len2 = max(len(params2_one_experiment), max_len2)
-    print('UNSTABLE COUNT:  ', unstable_count)
 
     a = list()
     for _ in range(how_many):
@@ -100,7 +115,7 @@ def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
             a[i].append(each)
         if diff_len is not 0:
             for m in range(diff_len):
-                a[i].append(np.array([np.NaN, np.NaN]))
+                a[i].append(np.array([np.NaN, np.NaN, np.NaN, np.NaN]))
     param2_avg = np.nanmean(a, axis=0)
     print(param2_avg.shape)
 
@@ -108,11 +123,12 @@ def visualize_small_hierarchical(gamma=1, range_vis=(499, 500)):
     ax2.set_title('pi2 parameters averaged')
 
     visualize_policy_params(parameter_dataset1, parameter_dataset2, small=small, how_many=how_many)
-    visualize_ship_steering(dataset_eval_vis, 'evaluate', small=small, range_eps=range_vis)
+    for i, run in enumerate(runs):
+        visualize_ship_steering(dataset_eval_vis[i], 'evaluate_'+str(run), small=small, range_eps=range_vis)
     visualize_control_block(datalist_control=low_level_dataset, ep_count=5, how_many=how_many)
 
     plt.show()
 
 if __name__ == '__main__':
     # range_vis must be a range()
-    visualize_small_hierarchical(gamma=0.99, range_vis=None)
+    visualize_small_hierarchical(runs=[0, 12, 24] , gamma=0.99, range_vis=None)

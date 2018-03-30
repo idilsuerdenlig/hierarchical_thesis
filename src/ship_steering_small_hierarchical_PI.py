@@ -157,7 +157,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
 if __name__ == '__main__':
 
-    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_hierarchical/'
+    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_hierarchical_PI/'
     alg_high = GPOMDP
     alg_low = PGPE
     learning_rate_high = AdaptiveParameter(value=10)

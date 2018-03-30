@@ -1,14 +1,14 @@
-import numpy as np
-
 
 def pick_eps(dataset, start, end):
 
-    ep_end_indices = list()
-    ep_end_indices.append(-1)
-    for i, dataset_step in enumerate(dataset):
-        if dataset_step[-1]:
-            ep_end_indices.append(i)
-    start_ep_begin = ep_end_indices[start]+1
-    end_ep_end = ep_end_indices[end+1]
-
-    return dataset[start_ep_begin:end_ep_end+1]
+    dataset_ep = list()
+    dataset_ep_list = list()
+    for dataset_step in dataset:
+        if not dataset_step[-1]:
+            dataset_ep.append(dataset_step)
+        else:
+            dataset_ep.append(dataset_step)
+            dataset_ep_list.append(dataset_ep)
+            dataset_ep = list()
+    print(len(dataset_ep_list[start:end]))
+    return dataset_ep_list[start:end]

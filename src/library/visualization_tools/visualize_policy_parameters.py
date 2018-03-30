@@ -54,8 +54,6 @@ def visualize_policy_params(parameter_dataset1, parameter_dataset2, parameter_da
         ax1 = fig.add_subplot(221, projection='3d')
         time =np.arange(len(paramx_avg))
         ax1.plot(paramx_avg, paramy_avg, time)
-        ax1.scatter(paramx_avg[0], paramy_avg[0], time[0], marker='o',color='g')
-        ax1.scatter(paramx_avg[-1], paramy_avg[-1], time[-1], marker='o', color='r')
         ax1.set_title('pi1 parameters averaged')
 
         ax2 = fig.add_subplot(223)

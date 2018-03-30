@@ -3,11 +3,13 @@ import numpy as np
 
 def pick_last_ep(dataset):
 
-    ep_end_indices = list()
-    for i, dataset_step in enumerate(dataset):
-        if dataset_step[-1]:
-            ep_end_indices.append(i)
-
-    last_ep_begin = ep_end_indices[-2]
-    last_ep_end = ep_end_indices[-1]
-    return dataset[last_ep_begin+1:last_ep_end+1]
+    dataset_ep = list()
+    dataset_ep_list = list()
+    for dataset_step in dataset:
+        if not dataset_step[-1]:
+            dataset_ep.append(dataset_step)
+        else:
+            dataset_ep.append(dataset_step)
+            dataset_ep_list.append(dataset_ep)
+            dataset_ep = list()
+    return dataset_ep_list[-1]

@@ -7,7 +7,7 @@ def visualize_ship_steering(datalist_eval, name, range_eps=None, small=True):
 
     plt.figure()
 
-    ax1 = plt.subplot2grid((4, 3), (0, 0), rowspan=4, projection='3d')
+    ax1 = plt.subplot2grid((4, 3), (0, 0), rowspan=4)
     ax2 = plt.subplot2grid((4, 3), (0, 1))
     ax3 = plt.subplot2grid((4, 3), (1, 1))
     ax4 = plt.subplot2grid((4, 3), (2, 1))
@@ -76,16 +76,12 @@ def visualize_ship_steering(datalist_eval, name, range_eps=None, small=True):
         range_eps = range(len(x_list))
 
     for episode in range_eps:
-        time =np.arange(len(x_list[episode]))
         x = x_list[episode]
         y = y_list[episode]
-        ax1.plot(x,y,time)
-        maxt = max(maxt,len(x))
+        ax1.plot(x,y)
 
-    xg = [xs, xe, xe, xs]
-    yg = [ys, ye, ye, ys]
-    zg = [0, 0, maxt, maxt]
-    verts = [list(zip(xg,yg,zg))]
+    xg = [xs, xe]
+    yg = [ys, ye]
     if small:
         ax1.set_xlim([0, 160])
         ax1.set_ylim([0, 160])
@@ -93,7 +89,8 @@ def visualize_ship_steering(datalist_eval, name, range_eps=None, small=True):
         ax1.set_xlim([0, 1100])
         ax1.set_ylim([0, 1100])
 
-    ax1.add_collection3d(Poly3DCollection(verts),zs=zg)
+    ax1.plot(xg, yg)
+    ax1.set_title(name)
 
     for episode in range_eps:
         x_ep = x_list[episode]
