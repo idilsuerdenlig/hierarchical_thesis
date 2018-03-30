@@ -21,6 +21,7 @@ from library.blocks.control_block import ControlBlock
 from library.blocks.functions.feature_angle_diff_ship_steering import *
 from library.blocks.basic_operation_block import *
 from library.blocks.model_placeholder import PlaceHolder
+from library.blocks.error_accumulator import ErrorAccumulatorBlock
 from library.blocks.reward_accumulator import reward_accumulator_block
 from library.blocks.functions.cost_cosine import cost_cosine
 from library.policy.deterministic_control_policy import \
@@ -179,7 +180,7 @@ if __name__ == '__main__':
     how_many = 100
     n_runs = 25
     n_iterations = 20
-    ep_per_run = 20
+    ep_per_run = 40
     eval_run = 50
     mk_dir_recursive('./' + subdir)
     force_symlink('./' + subdir, 'latest')
