@@ -9,16 +9,16 @@ import numpy as np
 from tqdm import tqdm
 
 
-def visualize_big_hierarchical(gamma=1, range_vis=None):
+def visualize_big_hierarchical(folder, gamma=1, range_vis=None):
 
     fig = plt.figure()
     ax1 = fig.add_subplot(121)
     ax2 = fig.add_subplot(122)
 
-    experiment_params = np.load('latest/experiment_params_dictionary.npy')
+    experiment_params = np.load(folder+'/experiment_params_dictionary.npy')
     how_many = experiment_params.item().get('how_many')
     n_runs = experiment_params.item().get('n_runs')
-    ep_per_run = experiment_params.item().get('ep_per_run')
+    ep_per_run = experiment_params.item().get('eval_run')
     parameter_dataset1 = list()
     parameter_dataset2 = list()
     size_eps = list()
@@ -30,9 +30,9 @@ def visualize_big_hierarchical(gamma=1, range_vis=None):
 
     for exp_no in range(how_many):
 
-        parameter_dataset1 += [np.load('latest/' + str(exp_no) + '/parameter_dataset1_file.npy')]
-        parameter_dataset2 += [np.load('latest/' + str(exp_no) + '/parameter_dataset2_file.npy')]
-        dataset_eval = np.load('latest/' + str(exp_no) + '/dataset_eval_file.npy')
+        parameter_dataset1 += [np.load(folder+'/' + str(exp_no) + '/parameter_dataset1_file.npy')]
+        parameter_dataset2 += [np.load(folder+'/' + str(exp_no) + '/parameter_dataset2_file.npy')]
+        dataset_eval = np.load(folder+'/' + str(exp_no) + '/dataset_eval_file.npy')
 
         J_runs_eps = compute_J(dataset_eval, gamma)
         for i in range(n_runs):
@@ -64,8 +64,8 @@ def visualize_big_hierarchical(gamma=1, range_vis=None):
     ax2.errorbar(x=np.arange(n_runs) + 1, y=size_all_avg, yerr=size_all_avg_err)
     ax2.set_title('size_eps_averaged')
 
-    dataset_eval = np.load('latest/' + str(how_many - 1) + '/dataset_eval_file.npy')
-    low_level_dataset = np.load('latest/' + str(exp_no) + '/low_level_dataset_file.npy')
+    dataset_eval = np.load(folder+'/' + str(how_many - 1) + '/dataset_eval_file.npy')
+    low_level_dataset = np.load(folder+'/' + str(exp_no) + '/low_level_dataset_file.npy')
 
 
     dataset_eval_vis = list()
@@ -85,5 +85,6 @@ def visualize_big_hierarchical(gamma=1, range_vis=None):
     plt.show()
 
 if __name__ == '__main__':
+    folder = '/home/dave/Documenti/results_idil/2018-03-30_02-07-43_big_hierarchical'
     # range_vis must be a range()
-    visualize_big_hierarchical(gamma=0.99, range_vis=None)
+    visualize_big_hierarchical(folder, gamma=0.99, range_vis=None)
