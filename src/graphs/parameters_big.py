@@ -89,8 +89,8 @@ def high_level_parameter_plot_small(output_dir):
         ax2.add_patch(ellipse0)
         ax2.add_patch(ellipse1)
         ax2.add_patch(ellipse2)
-        ax2.set_xlim(-50, 200)
-        ax2.set_ylim(-50, 200)
+        ax2.set_xlim(-100, 1100)
+        ax2.set_ylim(-100, 1100)
         ax2.set_title(alg+'_95% interval pi1 parameters averaged')
 
         tikz_save(output_dir + '/' + alg + '.tex',
