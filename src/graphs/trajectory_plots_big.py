@@ -19,7 +19,7 @@ def pick_eps(dataset, start, end):
             dataset_ep = list()
     return dataset_ep_list[start:end]
 
-def trajectory_plot_small(n_trajectories, output_dir):
+def trajectory_plot_small(epochs, output_dir):
     base_dir = '/home/dave/Documenti/results_idil/Big/'
     algorithms = ['H-PGPE', 'H-PI']
 
@@ -32,14 +32,12 @@ def trajectory_plot_small(n_trajectories, output_dir):
         n_epochs = experiment_params.item().get('n_runs')
         ep_per_run = experiment_params.item().get('ep_per_run')
 
-        dataset_eval = np.load(dir + str(how_many - 1) + '/dataset_eval_file.npy')
-        dataset_eval_vis = list()
-        for run in range(n_epochs):
+        for run in epochs:
+            dataset_eval_vis = list()
             dataset_eval_epoch = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
-            for traj in range(n_trajectories):
-                dataset_eval_vis += dataset_eval_epoch[-traj - 1]
-
-        visualize_traj(dataset_eval_vis, alg, output_dir)
+            for traj in range(3):
+                dataset_eval_vis += dataset_eval_epoch[-traj-1]
+            visualize_traj(dataset_eval_vis, alg+'_'+str(run), output_dir)
 
 
 def visualize_traj(dataset_eval_vis, name, output_dir):
