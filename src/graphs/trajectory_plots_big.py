@@ -37,7 +37,7 @@ def trajectory_plot_small(n_trajectories, output_dir):
         for run in range(n_epochs):
             dataset_eval_epoch = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
             for traj in range(n_trajectories):
-                dataset_eval_vis.append(dataset_eval_epoch[-traj - 1])
+                dataset_eval_vis += dataset_eval_epoch[-traj - 1]
 
         visualize_traj(dataset_eval_vis, alg, output_dir)
 
@@ -78,7 +78,7 @@ def visualize_traj(dataset_eval_vis, name, output_dir):
             y_ep = []
             n_eps += 1
 
-    for episode in len(x_list):
+    for episode in range(len(x_list)):
         x = x_list[episode]
         y = y_list[episode]
         plt.plot(x, y)
@@ -89,7 +89,7 @@ def visualize_traj(dataset_eval_vis, name, output_dir):
     plt.ylim(0, 1100)
 
     plt.plot(xg, yg)
-    plt.set_title(name)
+    plt.title(name)
 
     tikz_save(output_dir + '/' + name + '.tex',
               figureheight='\\figureheight',
