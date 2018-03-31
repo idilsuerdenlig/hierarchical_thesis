@@ -98,7 +98,7 @@ def create_plot(algs, colors, dictionary, plot_name, y_label, legend=False, x_la
 
 
 if __name__ == '__main__':
-    load = False
+    load = True
 
     output_dir = './big'
     mk_dir_recursive(output_dir)
