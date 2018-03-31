@@ -36,7 +36,7 @@ def trajectory_plot_small(n_trajectories, output_dir):
 
         dataset_eval = np.load(dir+ str(how_many - 1) + '/dataset_eval_file.npy')
         dataset_eval_vis = list()
-        for i, run in enumerate(n_epochs):
+        for run in range(n_epochs):
             dataset_eval_epoch = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
             for traj in range(n_trajectories):
                 dataset_eval_vis.append(dataset_eval_epoch[-traj-1])
