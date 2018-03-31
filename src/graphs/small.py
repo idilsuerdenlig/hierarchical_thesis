@@ -2,7 +2,10 @@ import numpy as np
 import scipy.stats as st
 import matplotlib.pyplot as plt
 from mushroom.utils.dataset import compute_J
+from mushroom.utils.folder import *
 from tqdm import tqdm, trange
+from matplotlib2tikz import save as tikz_save
+
 
 def compute_episode_lenght(dataset_eval, n_runs, ep_per_run):
     size_eps_avg = np.zeros(n_runs+1)
@@ -38,11 +41,10 @@ def get_mean_and_confidence(data):
 
     return mean, interval
 
+
 def compute_data():
     base_dir = '/home/dave/Documenti/results_idil/Small/'
     algorithms = ['GPOMDP', 'hierarchical_GPOMDP', 'hierarchical_PGPE', 'hierarchical_PI', 'PGPE', 'REPS', 'RWR']
-
-
 
     len_results = dict()
     j_results = dict()
@@ -77,30 +79,56 @@ def compute_data():
     return j_results, len_results
 
 
+def create_plot(algs, colors, dictionary, plot_name, y_label, legend=False, x_label='epoch'):
+    plt.figure()
+    for alg, c in zip(algs, colors):
+        (mean, err) = dictionary[alg]
+        plt.errorbar(x=np.arange(len(mean)), y=mean, yerr=err, color=c)
+
+    if legend:
+        plt.legend(algs)
+
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+
+    tikz_save(output_dir + '/' + plot_name + '.tex',
+                  figureheight='\\figureheight',
+                  figurewidth='\\figurewidth')
+
+
 if __name__ == '__main__':
-    load = False
+    load = True
+
+    output_dir = './small'
+    mk_dir_recursive(output_dir)
 
     if load:
-        j_results = np.load('small_J.npy').item()
-        len_results = np.load('small_L.npy').item()
+        j_results = np.load(output_dir + '/small_J.npy').item()
+        len_results = np.load(output_dir + '/small_L.npy').item()
     else:
         j_results, len_results = compute_data()
 
-        np.save('small_J.npy', j_results)
-        np.save('small_L.npy', len_results)
+        np.save(output_dir + '/small_J.npy', j_results)
+        np.save(output_dir + '/small_L.npy', len_results)
 
-    # J plot
-    plt.figure()
-    for alg, (Jmean, Jerr) in j_results.items():
-        plt.errorbar(x=np.arange(len(Jmean)), y=Jmean, yerr=Jerr)
+    # State of the art comparison
+    create_plot(['hierarchical_PGPE', 'REPS', 'RWR', 'PGPE', 'GPOMDP'],
+                ['b', 'r', 'g', 'c', 'm'],
+                j_results, 'art_J', 'J', True,
+                )
+    create_plot(['REPS', 'RWR', 'PGPE', 'GPOMDP'],
+                ['r', 'g', 'c', 'm'],
+                len_results, 'art_L', 'episode length')
+    create_plot(['hierarchical_PGPE', 'REPS'],
+                ['b', 'r'],
+                len_results, 'comp_art_L', 'episode length')
 
-    plt.legend(list(j_results.keys()))
-
-    # Episode len plot
-    plt.figure()
-    for alg, (Lmean, Lerr) in len_results.items():
-        plt.errorbar(x=np.arange(len(Lmean)), y=Lmean, yerr=Lerr)
-
+    # hierarchical comparison
+    algs = ['hierarchical_PGPE', 'hierarchical_PI', 'hierarchical_GPOMDP']
+    colors = ['b', 'tab:orange', 'tab:purple']
+    create_plot(algs, colors, j_results, 'hier_J', 'J', True)
+    create_plot(algs, colors, len_results, 'hier_L', 'episode length')
 
     plt.show()
+
 
