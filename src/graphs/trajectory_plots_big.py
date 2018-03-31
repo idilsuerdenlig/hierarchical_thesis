@@ -5,8 +5,19 @@ from mushroom.utils.dataset import compute_J
 from mushroom.utils.folder import *
 from tqdm import tqdm, trange
 from matplotlib2tikz import save as tikz_save
-from library.utils.pick_eps import pick_eps
 
+def pick_eps(dataset, start, end):
+
+    dataset_ep = list()
+    dataset_ep_list = list()
+    for dataset_step in dataset:
+        if not dataset_step[-1]:
+            dataset_ep.append(dataset_step)
+        else:
+            dataset_ep.append(dataset_step)
+            dataset_ep_list.append(dataset_ep)
+            dataset_ep = list()
+    return dataset_ep_list[start:end]
 
 def trajectory_plot_small(n_trajectories, output_dir):
     base_dir = '/home/dave/Documenti/results_idil/Big/'
@@ -26,7 +37,7 @@ def trajectory_plot_small(n_trajectories, output_dir):
         for i, run in enumerate(n_epochs):
             dataset_eval_epoch = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
             for traj in range(n_trajectories):
-                dataset_eval_vis.append(dataset_eval_epoch[-traj + 1])
+                dataset_eval_vis.append(dataset_eval_epoch[-traj - 1])
 
         visualize_traj(dataset_eval_vis, alg, output_dir)
 
