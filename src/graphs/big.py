@@ -7,7 +7,7 @@ from tqdm import tqdm, trange
 from matplotlib2tikz import save as tikz_save
 
 
-def compute_episode_lenght(dataset_eval, n_runs, ep_per_run):
+def compute_episode_lenght(dataset_eval, n_runs, eval_run):
     size_eps_avg = np.zeros(n_runs+1)
     size_eps = list()
     ep_step_no = 0
@@ -19,15 +19,16 @@ def compute_episode_lenght(dataset_eval, n_runs, ep_per_run):
             ep_step_no = 0
 
     for i in range(n_runs+1):
-        size_eps_avg[i] = np.mean(size_eps[ep_per_run * i:ep_per_run * i + ep_per_run], axis=0)
+        size_eps_avg[i] = np.mean(size_eps[eval_run * i:eval_run * i + eval_run], axis=0)
 
     return size_eps_avg
 
-def compute_mean_J(dataset_eval, n_runs, ep_per_run, gamma):
+
+def compute_mean_J(dataset_eval, n_runs, eval_run, gamma):
     J_runs_eps = compute_J(dataset_eval, gamma)
     J_avg = np.zeros(n_runs+1)
     for i in range(n_runs+1):
-        J_avg[i] = np.mean(J_runs_eps[ep_per_run * i:ep_per_run * i + ep_per_run], axis=0)
+        J_avg[i] = np.mean(J_runs_eps[eval_run * i:eval_run * i + eval_run], axis=0)
 
     return J_avg
 
@@ -43,8 +44,8 @@ def get_mean_and_confidence(data):
 
 
 def compute_data():
-    base_dir = '/home/dave/Documenti/results_idil/Small/'
-    algorithms = ['GPOMDP', 'hierarchical_GPOMDP', 'hierarchical_PGPE', 'hierarchical_PI', 'PGPE', 'REPS', 'RWR']
+    base_dir = '/home/dave/Documenti/results_idil/Big/'
+    algorithms = ['H-PGPE', 'H-PI']
 
     len_results = dict()
     j_results = dict()
@@ -57,15 +58,15 @@ def compute_data():
 
         how_many = experiment_params.item().get('how_many')
         n_runs = experiment_params.item().get('n_runs')
-        ep_per_run = experiment_params.item().get('ep_per_run')
+        eval_run = experiment_params.item().get('eval_run')
 
         Jep = list()
         Lep = list()
 
         for exp_no in trange(how_many):
             dataset_eval = np.load(dir + str(exp_no) + '/dataset_eval_file.npy')
-            J_avg = compute_mean_J(dataset_eval, n_runs, ep_per_run, 0.99)
-            L_avg = compute_episode_lenght(dataset_eval, n_runs, ep_per_run)
+            J_avg = compute_mean_J(dataset_eval, n_runs, eval_run, 0.99)
+            L_avg = compute_episode_lenght(dataset_eval, n_runs, eval_run)
 
             Jep.append(J_avg)
             Lep.append(L_avg)
@@ -97,9 +98,9 @@ def create_plot(algs, colors, dictionary, plot_name, y_label, legend=False, x_la
 
 
 if __name__ == '__main__':
-    load = True
+    load = False
 
-    output_dir = './small'
+    output_dir = './big'
     mk_dir_recursive(output_dir)
 
     if load:
@@ -111,21 +112,10 @@ if __name__ == '__main__':
         np.save(output_dir + '/J.npy', j_results)
         np.save(output_dir + '/L.npy', len_results)
 
-    # State of the art comparison
-    create_plot(['hierarchical_PGPE', 'REPS', 'RWR', 'PGPE', 'GPOMDP'],
-                ['b', 'r', 'g', 'c', 'm'],
-                j_results, 'art_J', 'J', True,
-                )
-    create_plot(['REPS', 'RWR', 'PGPE', 'GPOMDP'],
-                ['r', 'g', 'c', 'm'],
-                len_results, 'art_L', 'episode length')
-    create_plot(['hierarchical_PGPE', 'REPS'],
-                ['b', 'r'],
-                len_results, 'comp_art_L', 'episode length')
 
     # hierarchical comparison
-    algs = ['hierarchical_PGPE', 'hierarchical_PI', 'hierarchical_GPOMDP']
-    colors = ['b', 'tab:orange', 'tab:purple']
+    algs = ['H-PGPE', 'H-PI']
+    colors = ['b', 'tab:orange']
     create_plot(algs, colors, j_results, 'hier_J', 'J', True)
     create_plot(algs, colors, len_results, 'hier_L', 'episode length')
 
