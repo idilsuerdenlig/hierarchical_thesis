@@ -10,8 +10,8 @@ from matplotlib2tikz import save as tikz_save
 
 
 def high_level_parameter_plot_small(output_dir):
-    base_dir = '/home/dave/Documenti/results_idil/Small/'
-    algorithms = ['H-GPOMDP','H-PGPE','H-PI']
+    base_dir = '/home/dave/Documenti/results_idil/Big/'
+    algorithms = ['H-PGPE', 'H-PI']
 
     for alg in tqdm(algorithms):
         dir = base_dir + alg + '/'
@@ -100,7 +100,7 @@ def high_level_parameter_plot_small(output_dir):
 if __name__ == '__main__':
     load = False
 
-    output_dir = './small'
+    output_dir = './big'
     mk_dir_recursive(output_dir)
     high_level_parameter_plot_small(output_dir)
 
