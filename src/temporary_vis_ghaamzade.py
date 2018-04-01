@@ -107,13 +107,13 @@ def visualize_control_block_ghavamzade(controller_dataset_vis, J_avg, ep_step_av
             reward_ep.append(step[2])
             ax1.plot(x_ep, y_ep)
             ax1.scatter(x_ep[0], y_ep[0], marker='o', color='g')
-            ax1.scatter(x_ep[-1], y_ep[-1],  marker='o', color='r')
             ax2.plot(theta_ep)
             ax2.plot(theta_ep)
             ax3.plot(theta_dot_ep)
             ax4.plot(action_ep)
             ax5.plot(reward_ep)
-
+        ax1.scatter(x_ep[-1], y_ep[-1], marker='o', color='r')
+        
         ax1.set_xlim(0, 150)
         ax1.set_ylim(0, 150)
         ax1.set_title('trajectories '+name)
