@@ -1,9 +1,7 @@
 import numpy as np
-import scipy.stats as st
 import matplotlib.pyplot as plt
-from mushroom.utils.dataset import compute_J
 from mushroom.utils.folder import *
-from tqdm import tqdm, trange
+from tqdm import tqdm
 from matplotlib.patches import Ellipse
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from matplotlib2tikz import save as tikz_save
@@ -11,7 +9,7 @@ from matplotlib2tikz import save as tikz_save
 
 def high_level_parameter_plot_small(output_dir):
     base_dir = '/home/dave/Documenti/results_idil/Big/'
-    algorithms = ['H-PGPE', 'H-PI']
+    algorithms = ['H-PGPE','H-PI']
 
     for alg in tqdm(algorithms):
         dir = base_dir + alg + '/'
@@ -19,8 +17,6 @@ def high_level_parameter_plot_small(output_dir):
         experiment_params = np.load(dir + 'experiment_params_dictionary.npy')
 
         how_many = experiment_params.item().get('how_many')
-        n_epochs = experiment_params.item().get('n_runs')
-        ep_per_run = experiment_params.item().get('ep_per_run')
 
         parameter_dataset = list()
         for exp_no in range(how_many):
@@ -65,7 +61,16 @@ def high_level_parameter_plot_small(output_dir):
         ax1 = fig.add_subplot(111, projection='3d')
         time = np.arange(len(paramx_avg))
         ax1.plot(paramx_avg, paramy_avg, time)
-        ax1.set_title(alg+'_pi1 parameters averaged')
+
+        ax1.set_xlabel('x')
+        ax1.set_ylabel('y')
+        ax1.set_zlabel('t')
+
+        ax1.view_init(30, 75)
+
+        plt.savefig(output_dir + '/' + alg + '-mu.png', bbox_inches='tight')
+        #ax1.set_title(alg+'_pi1 parameters averaged')
+
         fig2 = plt.figure()
         ax2 = fig2.add_subplot(111)
         x0 = paramx_avg[0]
@@ -91,11 +96,25 @@ def high_level_parameter_plot_small(output_dir):
         ax2.add_patch(ellipse2)
         ax2.set_xlim(-100, 1100)
         ax2.set_ylim(-100, 1100)
-        ax2.set_title(alg+'_95% interval pi1 parameters averaged')
 
-        tikz_save(output_dir + '/' + alg + '.tex',
+        xs = 350
+        xe = 450
+        ys = 400
+        ye = 400
+
+        xg = [xs, xe]
+        yg = [ys, ye]
+
+        plt.plot(xg, yg, color='k')
+
+        plt.ylabel('y')
+        plt.xlabel('x')
+
+        tikz_save(output_dir + '/' + alg + '-sigma.tex',
                   figureheight='\\figureheight',
                   figurewidth='\\figurewidth')
+
+        ax2.set_title(alg + '_95% interval pi1 parameters averaged')
 
 if __name__ == '__main__':
     load = False

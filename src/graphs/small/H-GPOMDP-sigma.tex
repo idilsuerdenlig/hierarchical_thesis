@@ -1,0 +1,26 @@
+% This file was created by matplotlib2tikz v0.6.16.
+\begin{tikzpicture}
+
+\begin{axis}[
+xlabel={x},
+ylabel={y},
+xmin=-50, xmax=200,
+ymin=-50, ymax=200,
+width=\figurewidth,
+height=\figureheight,
+tick align=outside,
+tick pos=left,
+x grid style={white!69.01960784313725!black},
+y grid style={white!69.01960784313725!black}
+]
+\draw[draw=green!50.0!black,fill opacity=0] (axis cs:75.1317003831378,74.6768050837108) ellipse (79.9353395250666 and 79.9382234702847);
+\draw[draw=blue,fill opacity=0] (axis cs:110.103388580383,78.5924390364371) ellipse (26.7223871913147 and 35.8134359062225);
+\draw[draw=red,fill opacity=0] (axis cs:118.293361504868,80.6952184954765) ellipse (21.7729869463623 and 28.8294594115844);
+\addplot [semithick, black, forget plot]
+table {%
+100 120
+120 100
+};
+\end{axis}
+
+\end{tikzpicture}
