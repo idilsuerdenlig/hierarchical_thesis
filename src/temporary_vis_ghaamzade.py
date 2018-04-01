@@ -225,16 +225,15 @@ def ghavamzade_plot(epochs, output_dir):
             dataset_eval_vis += dataset_eval_epoch[-traj - 1]
         visualize_traj(dataset_eval_vis+'_'+ str(run), output_dir)
 
-    for i in range(how_many):
 
-        low_level_dataset1 = np.load('latest/'+str(i)+'/low_level_dataset1_file.npy')
-        low_level_dataset2 = np.load('latest/'+str(i)+'/low_level_dataset2_file.npy')
+    low_level_dataset1 = np.load('latest/'+str(how_many-1)+'/low_level_dataset1_file.npy')
+    low_level_dataset2 = np.load('latest/'+str(how_many-1)+'/low_level_dataset2_file.npy')
 
     visualize_control_block_ghavamzade(low_level_dataset1, ep_count=2)
     plt.suptitle('ctrl+')
     visualize_control_block_ghavamzade(low_level_dataset2, ep_count=2)
     plt.suptitle('ctrlx')
-    visualize_ship_steering(dataset_eval, name='evaluate', small=small)
+
 
 
 
