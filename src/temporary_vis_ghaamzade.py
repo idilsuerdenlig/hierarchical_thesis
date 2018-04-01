@@ -3,6 +3,7 @@ import scipy.stats as st
 import matplotlib.pyplot as plt
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.folder import *
+from matplotlib.patches import Circle
 from tqdm import tqdm, trange
 
 
@@ -41,8 +42,8 @@ def pick_last_ep(dataset):
             dataset_ep = list()
     return dataset_ep_list[-1]
 
-def plot_arrows(act_max_q_val_tiled):
 
+def plot_arrows(act_max_q_val_tiled):
     plt.figure()
     ax = plt.axes()
     n_tiles = [act_max_q_val_tiled.shape[0], act_max_q_val_tiled.shape[1]]
@@ -77,7 +78,6 @@ def plot_arrows(act_max_q_val_tiled):
 
             else:
                 ax.arrow(xs, ys, -15, 15, head_width=5, head_length=2, fc='k', ec='k')
-
 
 
 def visualize_control_block_ghavamzade(controller_dataset_vis, J_avg, ep_step_avg, name=None):
@@ -121,6 +121,22 @@ def visualize_control_block_ghavamzade(controller_dataset_vis, J_avg, ep_step_av
         ax3.set_ylabel('theta_dot')
         ax4.set_ylabel('action')
         ax5.set_ylabel('reward')
+
+    x_llo = 140
+
+    if name == 'ctrl+':
+        print('should be + ', name)
+        y_llo = 75
+    else:
+        print('should be x ',name)
+        y_llo = 140
+
+    print((x_llo, y_llo))
+
+    goal_area = Circle(xy=(x_llo, y_llo), radius=10,
+                               edgecolor='k', fc='None', lw=2)
+    ax1.add_patch(goal_area)
+
 
     plt.figure()
     plt.plot(J_avg)
@@ -186,6 +202,11 @@ def ghavamzade_plot(epochs, output_dir):
     fig, axis = plt.subplots()
     heatmap = axis.pcolor(max_q_val_tiled, cmap=plt.cm.Blues)
     plt.colorbar(heatmap)
+
+    x = np.arange(20)
+    labels = np.arange(0, 1000, 50)
+    plt.xticks(x, labels)
+    plt.yticks(x, labels)
 
     dataset_eval = np.load('latest/'+str(how_many-1)+'/dataset_eval_file.npy')
     for run in epochs:

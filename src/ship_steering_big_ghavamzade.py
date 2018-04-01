@@ -147,18 +147,18 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     low_ep_per_fit = params.get('low_ep_per_fit')
 
     # Control Block +
-    control_block1 = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=low_ep_per_fit,
+    control_block_plus = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=low_ep_per_fit,
                                   termination_condition=termination_condition1)
 
     # Control Block x
-    control_block2 = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=low_ep_per_fit,
+    control_block_cross = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=low_ep_per_fit,
                                   termination_condition=termination_condition2)
 
     # Function Block 1: picks state for hi lev ctrl
     function_block1 = fBlock(phi=pick_state, name='f1 pickstate')
 
     # Function Block 2: maps the env to low lev ctrl state
-    function_block2 = fBlock(phi=rototranslate(small=False), name='f2 rotot')
+    function_block2 = fBlock(phi=rototranslate, name='f2 rotot')
 
     # Function Block 3: holds curr state as ref
     function_block3 = hold_state(name='f3 holdstate')
@@ -178,14 +178,13 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     #Reward Accumulator H:
     reward_acc_H = reward_accumulator_block(gamma=mdp_info_agentH.gamma, name='reward_acc_H')
 
-
     # Selector Block
     function_block8 = fBlock(phi=selector_function, name='f7 G_lo')
 
     #Mux_Block
     mux_block = MuxBlock(name='mux')
-    mux_block.add_block_list([control_block1])
-    mux_block.add_block_list([control_block2])
+    mux_block.add_block_list([control_block_plus])
+    mux_block.add_block_list([control_block_cross])
 
     #Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_blockH, mux_block,
@@ -195,23 +194,23 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
               reward_acc_H]
 
     reward_acc_H.add_input(reward_ph)
-    reward_acc_H.add_alarm_connection(control_block1)
-    reward_acc_H.add_alarm_connection(control_block2)
+    reward_acc_H.add_alarm_connection(control_block_plus)
+    reward_acc_H.add_alarm_connection(control_block_cross)
     control_blockH.add_input(function_block1)
     control_blockH.add_reward(function_block4)
-    control_blockH.add_alarm_connection(control_block1)
-    control_blockH.add_alarm_connection(control_block2)
+    control_blockH.add_alarm_connection(control_block_plus)
+    control_blockH.add_alarm_connection(control_block_cross)
     mux_block.add_input(function_block8)
     mux_block.add_input(function_block2)
-    control_block1.add_reward(function_block5)
-    control_block2.add_reward(function_block5)
+    control_block_plus.add_reward(function_block5)
+    control_block_cross.add_reward(function_block5)
     function_block1.add_input(state_ph)
     function_block2.add_input(control_blockH)
     function_block2.add_input(state_ph)
     function_block2.add_input(function_block3)
     function_block3.add_input(state_ph)
-    function_block3.add_alarm_connection(control_block1)
-    function_block3.add_alarm_connection(control_block2)
+    function_block3.add_alarm_connection(control_block_plus)
+    function_block3.add_alarm_connection(control_block_cross)
     function_block4.add_input(function_block6)
     function_block4.add_input(reward_acc_H)
     #function_block5.add_input(reward_ph)
@@ -243,8 +242,8 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
         J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
         print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
         dataset_eval += dataset_eval_run
-        low_level_dataset_eval1.append(control_block1.dataset.get())
-        low_level_dataset_eval2.append(control_block2.dataset.get())
+        low_level_dataset_eval1.append(control_block_plus.dataset.get())
+        low_level_dataset_eval2.append(control_block_cross.dataset.get())
 
     # Tile data
     hi_lev_params = agentH.Q.get_weights()

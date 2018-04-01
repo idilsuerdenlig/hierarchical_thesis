@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def G_high(inputs):
 
     if inputs == 0:
