@@ -277,10 +277,10 @@ if __name__ == '__main__':
     learning_rate_low = AdaptiveParameter(value=1e-3)
     n_jobs=1
     how_many = 1
-    n_runs = 10
-    n_iterations = 10
-    ep_per_run = 20
-    low_ep_per_fit = 40
+    n_runs = 5
+    n_iterations = 20
+    ep_per_run = 40
+    low_ep_per_fit = 10
     mk_dir_recursive('./' + subdir)
     force_symlink('./' + subdir, './latest')
 

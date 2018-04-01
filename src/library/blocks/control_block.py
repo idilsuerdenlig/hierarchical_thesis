@@ -1,7 +1,7 @@
 from .block import Block
 import numpy as np
 from mushroom.utils.dataset import compute_J
-
+from copy import deepcopy
 
 
 class ControlDataset():
@@ -26,7 +26,7 @@ class ControlDataset():
         del self.dataset[:]
 
     def get(self):
-        return self.dataset
+        return deepcopy(self.dataset)
 
     def __len__(self):
         return len(self.dataset)

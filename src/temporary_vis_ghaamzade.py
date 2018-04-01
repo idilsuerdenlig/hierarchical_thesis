@@ -150,32 +150,16 @@ def visualize_traj(dataset_eval_vis, name, output_dir):
     ys = 400
     ye = 400
 
-    for dataset_step in dataset_eval_vis:
+    for dataset_ep in dataset_eval_vis:
+        for step in dataset_ep:
 
-        if not dataset_step[-1]:
-            states_step = dataset_step[0]
-            x_step = states_step[0]
-            y_step = states_step[1]
+            x_step = step[0][0]
+            y_step = step[0][1]
 
             x_ep.append(x_step)
             y_ep.append(y_step)
-            ep_size += 1
-        else:
-            size_eps.append(ep_size)
-            ep_size = 0
-            x_ep.append(dataset_step[3][0])
-            y_ep.append(dataset_step[3][1])
-            x_list.append(x_ep)
-            y_list.append(y_ep)
-            x_ep = []
-            y_ep = []
-            n_eps += 1
 
-
-    for episode in range(len(x_list)):
-        x = x_list[episode]
-        y = y_list[episode]
-        plt.plot(x, y)
+        plt.plot(x_ep, y_ep)
 
     xg = [xs, xe]
     yg = [ys, ye]
@@ -207,9 +191,8 @@ def ghavamzade_plot(epochs, output_dir):
     for run in epochs:
         dataset_eval_vis = list()
         dataset_eval_epoch = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
-        for traj in range(3):
-            dataset_eval_vis += dataset_eval_epoch[-traj - 1]
-        visualize_traj(dataset_eval_vis, '_'+ str(run), output_dir)
+        dataset_eval_vis += dataset_eval_epoch[30:40]
+        visualize_traj(dataset_eval_vis, 'last 10 trajectories of epoch_'+ str(run), output_dir)
 
     low_level_dataset1 = np.load('latest/'+str(how_many-1)+'/low_level_dataset1_file.npy')
     low_level_dataset2 = np.load('latest/'+str(how_many-1)+'/low_level_dataset2_file.npy')
@@ -230,11 +213,13 @@ def ghavamzade_plot(epochs, output_dir):
 
     for run in range(n_epochs):
         low_level_dataset1_run = low_level_dataset1[run]
+
         low_level_dataset2_run = low_level_dataset2[run]
         J_runs_eps1= compute_J(low_level_dataset1_run, 0.99)
         J_runs_eps2 = compute_J(low_level_dataset2_run, 0.99)
         total_steps1 = len(low_level_dataset1_run)
         total_steps2 = len(low_level_dataset2_run)
+
         n_eps1 = len(J_runs_eps1)
         n_eps2 = len(J_runs_eps2)
         eps_step_avg1.append(total_steps1 // n_eps1)
@@ -254,7 +239,7 @@ if __name__ == '__main__':
 
     output_dir = './small'
     mk_dir_recursive(output_dir)
-    ghavamzade_plot(epochs=[0, 6, 10, 20], output_dir=output_dir)
+    ghavamzade_plot(epochs=[0, 2, 4], output_dir=output_dir)
 
     plt.show()
 
