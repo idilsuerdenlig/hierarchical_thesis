@@ -1,9 +1,7 @@
 import numpy as np
-import scipy.stats as st
 import matplotlib.pyplot as plt
-from mushroom.utils.dataset import compute_J
 from mushroom.utils.folder import *
-from tqdm import tqdm, trange
+from tqdm import tqdm
 from matplotlib2tikz import save as tikz_save
 
 
@@ -93,11 +91,12 @@ def visualize_traj(dataset_eval_vis, name, epoch, output_dir):
     xg = [xs, xe]
     yg = [ys, ye]
 
-    plt.xlim(0, 160)
-    plt.ylim(0, 160)
+    plt.xlim(0, 150)
+    plt.ylim(0, 150)
 
     plt.xticks([])
     plt.yticks([])
+    plt.xlabel(str(epoch))
 
     plt.plot(xg, yg)
 
