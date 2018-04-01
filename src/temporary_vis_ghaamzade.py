@@ -1,10 +1,8 @@
 import numpy as np
-import scipy.stats as st
 import matplotlib.pyplot as plt
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.folder import *
 from matplotlib.patches import Circle
-from tqdm import tqdm, trange
 
 
 def check_no_of_eps(dataset):
@@ -43,6 +41,16 @@ def pick_last_ep(dataset):
     return dataset_ep_list[-1]
 
 
+def pick_first_ep(dataset):
+    dataset_ep = list()
+    for dataset_step in dataset:
+        if not dataset_step[-1]:
+            dataset_ep.append(dataset_step)
+        else:
+            dataset_ep.append(dataset_step)
+            break
+    return dataset_ep
+
 def plot_arrows(act_max_q_val_tiled):
     plt.figure()
     ax = plt.axes()
@@ -80,7 +88,7 @@ def plot_arrows(act_max_q_val_tiled):
                 ax.arrow(xs, ys, -15, 15, head_width=5, head_length=2, fc='k', ec='k')
 
 
-def visualize_control_block_ghavamzade(controller_dataset_vis, J_avg, ep_step_avg, name=None):
+def visualize_control_block_ghavamzade(controller_dataset_vis, J_avg, ep_step_avg, name, epochs=None):
 
     plt.figure()
 
@@ -90,14 +98,14 @@ def visualize_control_block_ghavamzade(controller_dataset_vis, J_avg, ep_step_av
     ax4 = plt.subplot2grid((3, 3), (0, 2))
     ax5 = plt.subplot2grid((3, 3), (1, 2))
 
-    x_ep = list()
-    y_ep = list()
-    theta_ep = list()
-    theta_dot_ep = list()
-    action_ep = list()
-    reward_ep = list()
-
     for episode in controller_dataset_vis:
+        x_ep = list()
+        y_ep = list()
+        theta_ep = list()
+        theta_dot_ep = list()
+        action_ep = list()
+        reward_ep = list()
+
         for step in episode:
             x_ep.append(step[0][0])
             y_ep.append(step[0][1])
@@ -105,13 +113,13 @@ def visualize_control_block_ghavamzade(controller_dataset_vis, J_avg, ep_step_av
             theta_dot_ep.append(step[0][3])
             action_ep.append(step[1])
             reward_ep.append(step[2])
-            ax1.plot(x_ep, y_ep)
-            ax1.scatter(x_ep[0], y_ep[0], marker='o', color='g')
-            ax2.plot(theta_ep)
-            ax2.plot(theta_ep)
-            ax3.plot(theta_dot_ep)
-            ax4.plot(action_ep)
-            ax5.plot(reward_ep)
+        ax1.plot(x_ep, y_ep)
+        ax1.scatter(x_ep[0], y_ep[0], marker='o', color='g')
+        ax2.plot(theta_ep)
+        ax2.plot(theta_ep)
+        ax3.plot(theta_dot_ep)
+        ax4.plot(action_ep)
+        ax5.plot(reward_ep)
         ax1.scatter(x_ep[-1], y_ep[-1], marker='o', color='r')
         
         ax1.set_xlim(0, 150)
@@ -125,17 +133,16 @@ def visualize_control_block_ghavamzade(controller_dataset_vis, J_avg, ep_step_av
     x_llo = 140
 
     if name == 'ctrl+':
-        print('should be + ', name)
         y_llo = 75
     else:
-        print('should be x ',name)
         y_llo = 140
-
-    print((x_llo, y_llo))
 
     goal_area = Circle(xy=(x_llo, y_llo), radius=10,
                                edgecolor='k', fc='None', lw=2)
     ax1.add_patch(goal_area)
+
+    if epochs is not None:
+        ax1.legend(epochs)
 
 
     plt.figure()
@@ -150,23 +157,14 @@ def visualize_control_block_ghavamzade(controller_dataset_vis, J_avg, ep_step_av
     plt.tight_layout()
 
 
-def visualize_traj(dataset_eval_vis, name, output_dir):
+def visualize_traj(dataset_eval_vis, name):
 
-    fig = plt.figure()
-    x_ep = list()
-    y_ep = list()
-    size_eps = list()
-    x_list = list()
-    y_list = list()
-    ep_size = 0
-    n_eps = 0
-
-    xs = 350
-    xe = 450
-    ys = 400
-    ye = 400
+    plt.figure()
 
     for dataset_ep in dataset_eval_vis:
+        x_ep = list()
+        y_ep = list()
+
         for step in dataset_ep:
 
             x_step = step[0][0]
@@ -177,17 +175,23 @@ def visualize_traj(dataset_eval_vis, name, output_dir):
 
         plt.plot(x_ep, y_ep)
 
+
+    xs = 350
+    xe = 450
+    ys = 400
+    ye = 400
+
     xg = [xs, xe]
     yg = [ys, ye]
-    plt.xlim(-100, 1100)
-    plt.ylim(-100, 1100)
+    plt.xlim(0, 1000)
+    plt.ylim(0, 1000)
 
     plt.plot(xg, yg)
     plt.title(name)
 
 
 
-def ghavamzade_plot(epochs, output_dir):
+def ghavamzade_plot(epochs):
 
     dir = 'latest/'
     experiment_params = np.load(dir + 'experiment_params_dictionary.npy')
@@ -213,7 +217,7 @@ def ghavamzade_plot(epochs, output_dir):
         dataset_eval_vis = list()
         dataset_eval_epoch = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
         dataset_eval_vis += dataset_eval_epoch[30:40]
-        visualize_traj(dataset_eval_vis, 'last 10 trajectories of epoch_'+ str(run), output_dir)
+        visualize_traj(dataset_eval_vis, 'last 10 trajectories of epoch_'+ str(run))
 
     low_level_dataset1 = np.load('latest/'+str(how_many-1)+'/low_level_dataset1_file.npy')
     low_level_dataset2 = np.load('latest/'+str(how_many-1)+'/low_level_dataset2_file.npy')
@@ -221,14 +225,14 @@ def ghavamzade_plot(epochs, output_dir):
     low_level_dataset2_vis = list()
     eps_step_avg1 = list()
     eps_step_avg2 = list()
-    J_avg1 = np.zeros((n_epochs,))
-    J_avg2 = np.zeros((n_epochs,))
+    J_avg1 = np.zeros(n_epochs)
+    J_avg2 = np.zeros(n_epochs)
 
     for run in epochs:
         low_level_dataset1_run = low_level_dataset1[run]
         low_level_dataset2_run = low_level_dataset2[run]
-        last_ep_of_run1 = pick_last_ep(low_level_dataset1_run)
-        last_ep_of_run2 = pick_last_ep(low_level_dataset2_run)
+        last_ep_of_run1 = pick_first_ep(low_level_dataset1_run)
+        last_ep_of_run2 = pick_first_ep(low_level_dataset2_run)
         low_level_dataset1_vis.append(last_ep_of_run1)
         low_level_dataset2_vis.append(last_ep_of_run2)
 
@@ -249,18 +253,16 @@ def ghavamzade_plot(epochs, output_dir):
         J_avg2[run] = np.mean(J_runs_eps2)
 
 
-
-    visualize_control_block_ghavamzade(low_level_dataset1_vis, J_avg1, eps_step_avg1, name='ctrl+')
-    visualize_control_block_ghavamzade(low_level_dataset2_vis, J_avg2, eps_step_avg2, name='ctrlx')
-
-
+    visualize_control_block_ghavamzade(low_level_dataset1_vis, J_avg1, eps_step_avg1, 'ctrl+', epochs)
+    visualize_control_block_ghavamzade(low_level_dataset2_vis, J_avg2, eps_step_avg2, 'ctrlx', epochs)
 
 
 if __name__ == '__main__':
 
     output_dir = './small'
     mk_dir_recursive(output_dir)
-    ghavamzade_plot(epochs=[0, 2, 4], output_dir=output_dir)
+
+    ghavamzade_plot(epochs=[0, 2, 4])
 
     plt.show()
 

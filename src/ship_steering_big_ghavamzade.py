@@ -196,28 +196,39 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     reward_acc_H.add_input(reward_ph)
     reward_acc_H.add_alarm_connection(control_block_plus)
     reward_acc_H.add_alarm_connection(control_block_cross)
+
     control_blockH.add_input(function_block1)
     control_blockH.add_reward(function_block4)
     control_blockH.add_alarm_connection(control_block_plus)
     control_blockH.add_alarm_connection(control_block_cross)
+
     mux_block.add_input(function_block8)
     mux_block.add_input(function_block2)
+
     control_block_plus.add_reward(function_block5)
     control_block_cross.add_reward(function_block5)
+
     function_block1.add_input(state_ph)
+
     function_block2.add_input(control_blockH)
     function_block2.add_input(state_ph)
     function_block2.add_input(function_block3)
+
     function_block3.add_input(state_ph)
     function_block3.add_alarm_connection(control_block_plus)
     function_block3.add_alarm_connection(control_block_cross)
+
     function_block4.add_input(function_block6)
     function_block4.add_input(reward_acc_H)
-    #function_block5.add_input(reward_ph)
+
+    function_block5.add_input(reward_ph)
     function_block5.add_input(function_block7)
+
     function_block6.add_input(reward_ph)
+
     function_block7.add_input(control_blockH)
     function_block7.add_input(function_block2)
+
     function_block8.add_input(control_blockH)
 
 
@@ -240,16 +251,26 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
         core.learn(n_episodes=n_iterations*ep_per_run, skip=True)
         dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
         J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
+
         print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
         dataset_eval += dataset_eval_run
-        low_level_dataset_eval1.append(control_block_plus.dataset.get())
-        low_level_dataset_eval2.append(control_block_cross.dataset.get())
+
+        dataset_plus = control_block_plus.dataset.get()
+        J_plus = compute_J(dataset_plus, mdp.info.gamma)
+        dataset_cross = control_block_cross.dataset.get()
+        J_cross = compute_J(dataset_cross, mdp.info.gamma)
+
+        low_level_dataset_eval1.append(dataset_plus)
+        low_level_dataset_eval2.append(dataset_cross)
+
+        print('J ll PLUS at iteration  ' + str(n) + ': ' + str(np.mean(J_plus)))
+        print('J ll CROSS at iteration ' + str(n) + ': ' + str(np.mean(J_cross)))
 
     # Tile data
     hi_lev_params = agentH.Q.get_weights()
     hi_lev_params = np.reshape(hi_lev_params, (8, n_tiles_high[0]**2))
-    max_q_val = np.zeros(shape=(n_tiles_high[0]**2,))
-    act_max_q_val = np.zeros(shape=(n_tiles_high[0]**2,))
+    max_q_val = np.zeros(n_tiles_high[0]**2)
+    act_max_q_val = np.zeros(n_tiles_high[0]**2)
     for n in range(n_tiles_high[0]**2):
         max_q_val[n] = np.amax(hi_lev_params[:,n])
         act_max_q_val[n] = np.argmax(hi_lev_params[:,n])
@@ -273,7 +294,7 @@ if __name__ == '__main__':
     alg_high = TrueOnlineSARSALambda
     alg_low = GPOMDP
     learning_rate_high = Parameter(value=0.1)
-    learning_rate_low = AdaptiveParameter(value=1e-3)
+    learning_rate_low = AdaptiveParameter(value=1e-2)
     n_jobs=1
     how_many = 1
     n_runs = 5
