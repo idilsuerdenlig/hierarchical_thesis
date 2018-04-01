@@ -20,28 +20,24 @@ def pick_eps(dataset, start, end):
             dataset_ep = list()
     return dataset_ep_list[start:end]
 
-def trajectory_plot_small(epochs, output_dir):
-    base_dir = '/home/dave/Documenti/results_idil/Small/'
-    algorithms = ['H-GPOMDP','H-PGPE','H-PI']
-    for alg in tqdm(algorithms):
-        dir = base_dir + alg + '/'
 
-        experiment_params = np.load(dir + 'experiment_params_dictionary.npy')
+def trajectory_plot_small(run, epochs, n_traj, alg, base_dir, output_dir):
+    dir = base_dir + alg + '/'
 
-        how_many = experiment_params.item().get('how_many')
-        n_epochs = experiment_params.item().get('n_runs')
-        ep_per_run = experiment_params.item().get('ep_per_run')
+    experiment_params = np.load(dir + 'experiment_params_dictionary.npy')
+    ep_per_run = experiment_params.item().get('ep_per_run')
 
-        dataset_eval = np.load(dir+ str(how_many - 1) + '/dataset_eval_file.npy')
-        for run in epochs:
-            dataset_eval_vis = list()
-            dataset_eval_epoch = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
-            for traj in range(3):
-                dataset_eval_vis += dataset_eval_epoch[-traj-1]
-            visualize_traj(dataset_eval_vis, alg+'_'+str(run), output_dir)
+    dataset_eval = np.load(dir + str(run) + '/dataset_eval_file.npy')
 
-def visualize_traj(dataset_eval_vis, name, output_dir):
-    fig = plt.figure()
+    for run in epochs:
+        dataset_eval_vis = list()
+        dataset_eval_epoch = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
+        for traj in range(n_traj):
+            dataset_eval_vis += dataset_eval_epoch[-traj-1]
+        visualize_traj(dataset_eval_vis, alg+str(run), run, output_dir)
+
+
+def visualize_traj(dataset_eval_vis, name, epoch, output_dir):
     x_ep = list()
     y_ep = list()
     size_eps = list()
@@ -77,29 +73,56 @@ def visualize_traj(dataset_eval_vis, name, output_dir):
             n_eps += 1
 
 
+    subsampling = 4
+    plt.figure()
+
     for episode in range(len(x_list)):
         x = x_list[episode]
         y = y_list[episode]
-        plt.plot(x, y)
+
+        x_plotted = x[0::subsampling]
+        y_plotted = y[0::subsampling]
+
+        if len(x_plotted) % subsampling is not 0:
+            x_plotted.append(x[-1])
+            y_plotted.append(y[-1])
+
+        plt.plot(x_plotted, y_plotted)
+
 
     xg = [xs, xe]
     yg = [ys, ye]
+
     plt.xlim(0, 160)
     plt.ylim(0, 160)
 
+    plt.xticks([])
+    plt.yticks([])
+
     plt.plot(xg, yg)
-    plt.title(name)
+
 
     tikz_save(output_dir + '/' + name + '.tex',
               figureheight='\\figureheight',
-              figurewidth='\\figurewidth')
+              figurewidth='\\figurewidth',
+              extra_axis_parameters=['ticks=none'])
+
+    plt.title(name)
 
 
 if __name__ == '__main__':
 
-    output_dir = './small'
+    output_dir = './small/traj'
     mk_dir_recursive(output_dir)
-    trajectory_plot_small(epochs=[0, 6, 9], output_dir=output_dir)
+    base_dir = '/home/dave/Documenti/results_idil/Small/'
+    algorithms = ['H-GPOMDP','H-PGPE','H-PI', 'RWR', 'REPS', 'PGPE', 'GPOMDP']
+    for alg in tqdm(algorithms):
+        trajectory_plot_small(run=25,
+                              epochs=[0, 3, 12, 24],
+                              n_traj=5,
+                              alg=alg,
+                              base_dir=base_dir,
+                              output_dir=output_dir)
 
     plt.show()
 
