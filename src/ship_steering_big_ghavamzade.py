@@ -99,7 +99,7 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     #FeaturesL
     high = [150, 150, np.pi]
     low = [0, 0, -np.pi]
-    n_tiles = [5, 5, 36]
+    n_tiles = [5, 5, 10]
     low = np.array(low, dtype=np.float)
     high = np.array(high, dtype=np.float)
     n_tilings = 1
@@ -221,7 +221,7 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     function_block4.add_input(function_block6)
     function_block4.add_input(reward_acc_H)
 
-    function_block5.add_input(reward_ph)
+    #function_block5.add_input(reward_ph)
     function_block5.add_input(function_block7)
 
     function_block6.add_input(reward_ph)
@@ -297,7 +297,7 @@ if __name__ == '__main__':
     learning_rate_low = AdaptiveParameter(value=1e-2)
     n_jobs=1
     how_many = 1
-    n_runs = 5
+    n_runs = 50
     n_iterations = 20
     ep_per_run = 40
     low_ep_per_fit = 10
