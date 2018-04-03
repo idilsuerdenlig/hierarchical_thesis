@@ -10,5 +10,4 @@ def pick_eps(dataset, start, end):
             dataset_ep.append(dataset_step)
             dataset_ep_list.append(dataset_ep)
             dataset_ep = list()
-    print(len(dataset_ep_list[start:end]))
     return dataset_ep_list[start:end]
