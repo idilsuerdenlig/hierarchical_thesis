@@ -5,6 +5,7 @@ from mushroom.utils import spaces
 from mushroom.utils.angles_utils import normalize_angle
 from mushroom.utils.angles_utils import *
 
+
 class ShipSteering(Environment):
     """
     The Ship Steering environment as presented in:
@@ -58,6 +59,7 @@ class ShipSteering(Environment):
         if state is None:
             if self._small:
                 self._state = np.zeros(4)
+                self._state[2] = np.pi/2
             else:
                 low = self.info.observation_space.low
                 high = self.info.observation_space.high
@@ -71,9 +73,9 @@ class ShipSteering(Environment):
 
         r = np.maximum(-self.omega_max, np.minimum(self.omega_max, action[0]))
         new_state = np.empty(4)
-        new_state[0] = self._state[0] + self._v * np.sin(self._state[2]) * \
+        new_state[0] = self._state[0] + self._v * np.cos(self._state[2]) * \
                        self._dt
-        new_state[1] = self._state[1] + self._v * np.cos(self._state[2]) * \
+        new_state[1] = self._state[1] + self._v * np.sin(self._state[2]) * \
                        self._dt
         new_state[2] = normalize_angle(self._state[2] + self._state[3] * self._dt)
         new_state[3] = self._state[3] + (r - self._state[3]) * self._dt / \

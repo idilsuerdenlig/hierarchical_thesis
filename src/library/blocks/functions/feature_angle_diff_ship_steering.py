@@ -11,13 +11,12 @@ def pos_ref_angle_difference(ins):
     del_x = x_ref-x
     del_y = y_ref-y
     theta_ref = normalize_angle(np.arctan2(del_y, del_x))
-    theta = normalize_angle(np.pi/2-theta)
-    del_theta = shortest_angular_distance(from_angle=theta,to_angle=theta_ref)
+    del_theta = shortest_angular_distance(from_angle=theta, to_angle=theta_ref)
     return np.array([del_theta])
+
 
 def angle_ref_angle_difference(ins):
     theta_ref = normalize_angle(ins[0])
     theta = ins[1][2]
-    theta = normalize_angle(np.pi / 2 - theta)
     del_theta = shortest_angular_distance(from_angle=theta, to_angle=theta_ref)
     return np.array([del_theta])
