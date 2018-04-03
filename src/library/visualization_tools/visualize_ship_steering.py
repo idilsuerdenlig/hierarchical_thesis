@@ -83,11 +83,11 @@ def visualize_ship_steering(datalist_eval, name, range_eps=None, small=True):
     xg = [xs, xe]
     yg = [ys, ye]
     if small:
-        ax1.set_xlim([0, 160])
-        ax1.set_ylim([0, 160])
+        ax1.set_xlim([0, 150])
+        ax1.set_ylim([0, 150])
     else:
-        ax1.set_xlim([0, 1100])
-        ax1.set_ylim([0, 1100])
+        ax1.set_xlim([0, 1000])
+        ax1.set_ylim([0, 1000])
 
     ax1.plot(xg, yg)
     ax1.set_title(name)

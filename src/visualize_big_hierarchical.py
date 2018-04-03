@@ -9,7 +9,7 @@ import numpy as np
 from tqdm import tqdm
 
 
-def visualize_big_hierarchical(folder, gamma=1, range_vis=None):
+def visualize_big_hierarchical(folder, gamma=1, epochs=None, range_vis=None):
 
     fig = plt.figure()
     ax1 = fig.add_subplot(121)
@@ -67,24 +67,28 @@ def visualize_big_hierarchical(folder, gamma=1, range_vis=None):
     dataset_eval = np.load(folder+'/' + str(how_many - 1) + '/dataset_eval_file.npy')
     low_level_dataset = np.load(folder+'/' + str(exp_no) + '/low_level_dataset_file.npy')
 
-
-    dataset_eval_vis = list()
-    for run in range(n_runs):
-        if run == 0 or run == n_runs-1 or run == 6 or run == 12 or run == 19:
-            dataset_eval_run = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
-            last_ep_of_run = pick_last_ep(dataset_eval_run)
-            for step in last_ep_of_run:
-                dataset_eval_vis.append(step)
-
     small = False
+    for run in epochs:
+        dataset_eval_vis = list()
+        dataset_eval_run = pick_eps(dataset_eval, start=run * ep_per_run,
+                                    end=run * ep_per_run + ep_per_run)
+        eps_of_run = dataset_eval_run[:5]
+
+        for ep in eps_of_run:
+            for step in ep:
+                dataset_eval_vis.append(step)
+        visualize_ship_steering(dataset_eval_vis, 'epoch ' + str(run),
+                                small=small, range_eps=range_vis)
 
     visualize_policy_params(parameter_dataset1, parameter_dataset2, small=small, how_many=how_many)
-    visualize_ship_steering(dataset_eval_vis, 'evaluate', small=small, range_eps=range_vis)
     visualize_control_block(datalist_control=low_level_dataset, ep_count=5, how_many=how_many)
 
     plt.show()
 
 if __name__ == '__main__':
-    folder = '/home/dave/Documenti/results_idil/2018-03-30_02-07-43_big_hierarchical'
+    #folder = '/home/dave/Documenti/results_idil/2018-03-30_02-07-43_big_hierarchical'
+    folder = 'latest'
+
+    epochs=[0, 6, 12, 24]
     # range_vis must be a range()
-    visualize_big_hierarchical(folder, gamma=0.99, range_vis=None)
+    visualize_big_hierarchical(folder, gamma=0.99, epochs=epochs, range_vis=None)

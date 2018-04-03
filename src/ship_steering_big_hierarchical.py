@@ -169,7 +169,7 @@ if __name__ == '__main__':
     learning_rate_high = AdaptiveParameter(value=50)
     learning_rate_low = AdaptiveParameter(value=5e-4)
     n_jobs = -1
-    how_many = 100
+    how_many = 1
     n_runs = 25
     n_iterations = 20
     ep_per_run = 40
