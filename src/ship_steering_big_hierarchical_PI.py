@@ -37,7 +37,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     np.random.seed()
 
     # Model Block
-    mdp = ShipSteering(small=False, hard=True, n_steps_action=3)
+    mdp = ShipSteering(small=False, n_steps_action=3)
 
     #State Placeholder
     state_ph = PlaceHolder(name='state_ph')

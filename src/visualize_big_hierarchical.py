@@ -17,7 +17,7 @@ def visualize_big_hierarchical(folder, gamma=1, epochs=None, range_vis=None):
 
     experiment_params = np.load(folder+'/experiment_params_dictionary.npy')
     how_many = experiment_params.item().get('how_many')
-    n_runs = experiment_params.item().get('n_runs')
+    n_runs = experiment_params.item().get('n_runs') + 1
     ep_per_run = experiment_params.item().get('eval_run')
     parameter_dataset1 = list()
     parameter_dataset2 = list()

@@ -19,7 +19,7 @@ def visualize_small_hierarchical(runs, gamma=1, range_vis=(499, 500)):
 
     experiment_params = np.load('latest/experiment_params_dictionary.npy')
     how_many = experiment_params.item().get('how_many')
-    n_runs = experiment_params.item().get('n_runs')
+    n_runs = experiment_params.item().get('n_runs') + 1
     ep_per_run = experiment_params.item().get('ep_per_run')
     parameter_dataset1 = list()
     parameter_dataset2 = list()

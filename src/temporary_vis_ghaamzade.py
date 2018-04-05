@@ -13,6 +13,7 @@ def check_no_of_eps(dataset):
             no_of_eps += 1
     return no_of_eps
 
+
 def pick_eps(dataset, start, end):
 
     dataset_ep = list()
@@ -64,31 +65,40 @@ def plot_arrows(act_max_q_val_tiled):
             ys = 25 + j*50
             act_no = act_max_q_val_tiled[i, j]
             if act_no == 0:
-                ax.arrow(xs, ys, 12, 0, head_width=5, head_length=2, fc='k', ec='k')
+                ax.arrow(xs, ys, 12, 0, head_width=5,
+                         head_length=2, fc='k', ec='k')
 
             elif act_no == 1:
-                ax.arrow(xs, ys, 0, -12, head_width=5, head_length=2, fc='k', ec='k')
+                ax.arrow(xs, ys, 0, -12, head_width=5,
+                         head_length=2, fc='k', ec='k')
 
             elif act_no == 2:
-                ax.arrow(xs, ys, -12, 0, head_width=5, head_length=2, fc='k', ec='k')
+                ax.arrow(xs, ys, -12, 0, head_width=5,
+                         head_length=2, fc='k', ec='k')
 
             elif act_no == 3:
-                ax.arrow(xs, ys, 0, 12, head_width=5, head_length=2, fc='k', ec='k')
+                ax.arrow(xs, ys, 0, 12, head_width=5,
+                         head_length=2, fc='k', ec='k')
 
             elif act_no == 4:
-                ax.arrow(xs, ys, 15, 15, head_width=5, head_length=2, fc='k', ec='k')
+                ax.arrow(xs, ys, 15, 15, head_width=5,
+                         head_length=2, fc='k', ec='k')
 
             elif act_no == 5:
-                ax.arrow(xs, ys, 15, -15, head_width=5, head_length=2, fc='k', ec='k')
+                ax.arrow(xs, ys, 15, -15, head_width=5,
+                         head_length=2, fc='k', ec='k')
 
             elif act_no == 6:
-                ax.arrow(xs, ys, -15, -15, head_width=5, head_length=2, fc='k', ec='k')
+                ax.arrow(xs, ys, -15, -15, head_width=5,
+                         head_length=2, fc='k', ec='k')
 
             else:
-                ax.arrow(xs, ys, -15, 15, head_width=5, head_length=2, fc='k', ec='k')
+                ax.arrow(xs, ys, -15, 15, head_width=5,
+                         head_length=2, fc='k', ec='k')
 
 
-def visualize_control_block_ghavamzade(controller_dataset_vis, J_avg, ep_step_avg, name, epochs=None):
+def visualize_control_block_ghavamzade(controller_dataset_vis,
+                                       J_avg, ep_step_avg, name, epochs=None):
 
     plt.figure()
 
@@ -200,8 +210,10 @@ def ghavamzade_plot(epochs):
     n_epochs = experiment_params.item().get('n_runs')
     ep_per_run = experiment_params.item().get('ep_per_run')
 
-    act_max_q_val_tiled = np.load('latest/' + str(how_many-1) + '/act_max_q_val_tiled_file.npy')
-    max_q_val_tiled = np.load('latest/' + str(how_many-1) + '/max_q_val_tiled_file.npy')
+    act_max_q_val_tiled = np.load('latest/' + str(how_many-1)
+                                  + '/act_max_q_val_tiled_file.npy')
+    max_q_val_tiled = np.load('latest/' + str(how_many-1)
+                              + '/max_q_val_tiled_file.npy')
     plot_arrows(act_max_q_val_tiled)
     fig, axis = plt.subplots()
     heatmap = axis.pcolor(max_q_val_tiled, cmap=plt.cm.Blues)
@@ -215,12 +227,16 @@ def ghavamzade_plot(epochs):
     dataset_eval = np.load('latest/'+str(how_many-1)+'/dataset_eval_file.npy')
     for run in epochs:
         dataset_eval_vis = list()
-        dataset_eval_epoch = pick_eps(dataset_eval, start=run * ep_per_run, end=run * ep_per_run + ep_per_run)
+        dataset_eval_epoch = pick_eps(dataset_eval, start=run * ep_per_run,
+                                      end=run * ep_per_run + ep_per_run)
         dataset_eval_vis += dataset_eval_epoch[30:40]
-        visualize_traj(dataset_eval_vis, 'last 10 trajectories of epoch_'+ str(run))
+        visualize_traj(dataset_eval_vis,
+                       'last 10 trajectories of epoch_'+ str(run))
 
-    low_level_dataset1 = np.load('latest/'+str(how_many-1)+'/low_level_dataset1_file.npy')
-    low_level_dataset2 = np.load('latest/'+str(how_many-1)+'/low_level_dataset2_file.npy')
+    low_level_dataset1 = np.load('latest/'+str(how_many-1)+
+                                 '/low_level_dataset1_file.npy')
+    low_level_dataset2 = np.load('latest/'+str(how_many-1)+
+                                 '/low_level_dataset2_file.npy')
     low_level_dataset1_vis = list()
     low_level_dataset2_vis = list()
     eps_step_avg1 = list()
@@ -253,8 +269,10 @@ def ghavamzade_plot(epochs):
         J_avg2[run] = np.mean(J_runs_eps2)
 
 
-    visualize_control_block_ghavamzade(low_level_dataset1_vis, J_avg1, eps_step_avg1, 'ctrl+', epochs)
-    visualize_control_block_ghavamzade(low_level_dataset2_vis, J_avg2, eps_step_avg2, 'ctrlx', epochs)
+    visualize_control_block_ghavamzade(low_level_dataset1_vis, J_avg1,
+                                       eps_step_avg1, 'ctrl+', epochs)
+    visualize_control_block_ghavamzade(low_level_dataset2_vis, J_avg2,
+                                       eps_step_avg2, 'ctrlx', epochs)
 
 
 if __name__ == '__main__':
@@ -262,7 +280,7 @@ if __name__ == '__main__':
     output_dir = './small'
     mk_dir_recursive(output_dir)
 
-    ghavamzade_plot(epochs=[0, 2, 4])
+    ghavamzade_plot(epochs=[0, 50, 75, 99])
 
     plt.show()
 

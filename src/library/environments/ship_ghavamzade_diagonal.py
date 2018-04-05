@@ -94,10 +94,12 @@ class ShipGhavamzadeDiagonal(Environment):
             self.success_count = 0
             self.ep_count = 0
 
-        theta_ref = normalize_angle(np.arctan2(self.goal_pos[1] - pos[1], self.goal_pos[0] - pos[0]))
+        theta_ref = normalize_angle(np.arctan2(self.goal_pos[1] - pos[1],
+                                               self.goal_pos[0] - pos[0]))
         theta = new_state[2]
         theta = normalize_angle(np.pi / 2 - theta)
-        del_theta = shortest_angular_distance(from_angle=theta, to_angle=theta_ref)
+        del_theta = shortest_angular_distance(from_angle=theta,
+                                              to_angle=theta_ref)
         power = -del_theta ** 2 / ((np.pi / 6) * (np.pi / 6))
 
         reward = reward + np.expm1(power)

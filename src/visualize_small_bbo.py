@@ -9,7 +9,7 @@ def visualize_small_bbo(folder, alg, gamma=1, range_vis=None):
 
     experiment_params = np.load(folder + 'experiment_params_dictionary.npy')
     how_many = experiment_params.item().get('how_many')
-    n_runs = experiment_params.item().get('n_runs')
+    n_runs = experiment_params.item().get('n_runs') + 1
     ep_per_run = experiment_params.item().get('ep_per_run')
 
     fig = plt.figure()
@@ -39,23 +39,23 @@ def visualize_small_bbo(folder, alg, gamma=1, range_vis=None):
                 size_eps.append(ep_step_no)
                 ep_step_no = 0
         J_exp.append(J_avg)
-        J_avg = np.zeros((n_runs,))
+        J_avg = np.zeros(n_runs)
 
         for i in range(n_runs):
             size_eps_avg[i] = np.mean(size_eps[ep_per_run * i:ep_per_run * i + ep_per_run], axis=0)
 
         size_exp_list.append(size_eps_avg)
         size_eps = list()
-        size_eps_avg = np.zeros((n_runs,))
+        size_eps_avg = np.zeros(n_runs)
 
     J_all_avg = np.mean(J_exp, axis=0)
     J_all_avg_err = np.std(J_exp, axis=0) / np.sqrt(how_many) * 1.96 if how_many > 1 else 0
     size_all_avg = np.mean(size_exp_list, axis=0)
     size_all_avg_err = np.std(size_all_avg, axis=0) / np.sqrt(how_many) * 1.96 if how_many > 1 else 0
-    ax1.errorbar(x=np.arange(n_runs) + 1, y=J_all_avg, yerr=J_all_avg_err)
+    ax1.errorbar(x=np.arange(n_runs), y=J_all_avg, yerr=J_all_avg_err)
     ax1.set_title('J_eps_averaged')
 
-    ax2.errorbar(x=np.arange(n_runs) + 1, y=size_all_avg, yerr=size_all_avg_err)
+    ax2.errorbar(x=np.arange(n_runs), y=size_all_avg, yerr=size_all_avg_err)
     ax2.set_title('size_eps_averaged')
     fig.suptitle(alg)
 

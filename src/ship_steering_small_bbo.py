@@ -23,7 +23,7 @@ def experiment(alg, params, subdir, exp_no):
     np.random.seed()
 
     # MDP
-    mdp = ShipSteering(small=True, hard=True, n_steps_action=3)
+    mdp = ShipSteering(small=True, n_steps_action=3)
 
     high = [150, 150, np.pi]
     low = [0, 0, -np.pi]

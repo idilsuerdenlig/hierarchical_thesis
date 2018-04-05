@@ -4,10 +4,11 @@ from joblib import Parallel, delayed
 from mushroom.environments.environment import MDPInfo
 from mushroom.algorithms.policy_search import *
 from mushroom.algorithms.value.td import *
+from mushroom.approximators.parametric import LinearApproximator
 from mushroom.features.features import *
 from mushroom.features.tiles import Tiles
 from mushroom.policy.gaussian_policy import *
-from mushroom.policy import EpsGreedy
+from mushroom.policy import Boltzmann
 from mushroom.utils import spaces
 from mushroom.utils.parameters import *
 from mushroom.utils.dataset import compute_J
@@ -39,7 +40,9 @@ class TerminationCondition(object):
             goal_pos = np.array([140, 140])
 
         pos = np.array([state[0], state[1]])
-        if np.linalg.norm(pos-goal_pos) <= 10 or pos[0] > 150 or pos[0] < 0 or pos[1] > 150 or pos[1] < 0:
+        if np.linalg.norm(pos-goal_pos) <= 10 \
+                or pos[0] > 150 or pos[0] < 0 \
+                or pos[1] > 150 or pos[1] < 0:
             #if np.linalg.norm(pos-goal_pos) <= 10:
             #    print('reached ', self.active_direction)
             return True
@@ -56,7 +59,7 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     np.random.seed()
 
     # Model Block
-    mdp = ShipSteering(small=False, hard=True, n_steps_action=3)
+    mdp = ShipSteering(small=False, n_steps_action=3)
 
     #State Placeholder
     state_ph = PlaceHolder(name='state_ph')
@@ -72,29 +75,41 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     n_tiles_high = [20, 20]
     n_tilings = 1
 
-    tilingsH= Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles_high, low=[0,0], high=[lim, lim])
+    tilingsH= Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles_high,
+                             low=[0,0], high=[lim, lim])
     featuresH = Features(tilings=tilingsH)
 
     # PolicyH
-    epsilon = Parameter(value=0.1)
-    piH = EpsGreedy(epsilon=epsilon)
+    #epsilon = Parameter(value=0.1)
+    #piH = EpsGreedy(epsilon=epsilon)
+    beta = Parameter(value=1.0)
+    piH = Boltzmann(beta=beta)
 
     # AgentH
     learning_rate = params.get('learning_rate_high')
 
 
-    mdp_info_agentH = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]),
-                                                           high=np.array([lim, lim]), shape=(2,)),
-                              action_space=spaces.Discrete(8), gamma=1, horizon=10000)
+    mdp_info_agentH = MDPInfo(
+        observation_space=spaces.Box(low=np.array([0, 0]),
+                                     high=np.array([lim, lim]),
+                                     shape=(2,)),
+        action_space=spaces.Discrete(8), gamma=1, horizon=10000)
     approximator_paramsH = dict(input_shape=(featuresH.size,),
                                output_shape=mdp_info_agentH.action_space.size,
                                n_actions=mdp_info_agentH.action_space.n)
 
-    agentH = alg_high(policy=piH, mdp_info=mdp_info_agentH, learning_rate=learning_rate,
-                                   lambda_coeff=0.9, approximator_params=approximator_paramsH, features=featuresH)
+    agentH = alg_high(policy=piH,
+                      approximator=LinearApproximator,
+                      mdp_info=mdp_info_agentH,
+                      learning_rate=learning_rate,
+                      lambda_coeff=0.9,
+                      approximator_params=approximator_paramsH,
+                      features=featuresH)
 
     # Control Block H
-    control_blockH = ControlBlock(name='control block H', agent=agentH, n_steps_per_fit=1)
+    control_blockH = ControlBlock(name='control block H',
+                                  agent=agentH,
+                                  n_steps_per_fit=1)
 
     #FeaturesL
     high = [150, 150, np.pi]
@@ -104,13 +119,16 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     high = np.array(high, dtype=np.float)
     n_tilings = 1
 
-    tilingsL= Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low, high=high)
+    tilingsL= Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles,
+                             low=low, high=high)
 
     featuresL = Features(tilings=tilingsL)
 
-    mdp_info_agentL = MDPInfo(observation_space=spaces.Box(low=np.array([0, 0]),
-                                                           high=np.array([150, 150]), shape=(2,)),
-                              action_space=mdp.info.action_space, gamma=0.99, horizon=10000)
+    mdp_info_agentL = MDPInfo(
+        observation_space=spaces.Box(low=np.array([0, 0]),
+                                     high=np.array([150, 150]),
+                                     shape=(2,)),
+        action_space=mdp.info.action_space, gamma=0.99, horizon=10000)
 
     # Approximators
     input_shape = (featuresL.size,)
@@ -147,11 +165,13 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     low_ep_per_fit = params.get('low_ep_per_fit')
 
     # Control Block +
-    control_block_plus = ControlBlock(name='control block 1', agent=agent1, n_eps_per_fit=low_ep_per_fit,
+    control_block_plus = ControlBlock(name='control block 1', agent=agent1,
+                                      n_eps_per_fit=low_ep_per_fit,
                                   termination_condition=termination_condition1)
 
     # Control Block x
-    control_block_cross = ControlBlock(name='control block 2', agent=agent2, n_eps_per_fit=low_ep_per_fit,
+    control_block_cross = ControlBlock(name='control block 2', agent=agent2,
+                                       n_eps_per_fit=low_ep_per_fit,
                                   termination_condition=termination_condition2)
 
     # Function Block 1: picks state for hi lev ctrl
@@ -176,7 +196,8 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     function_block7 = fBlock(phi=G_low, name='f7 G_lo')
 
     #Reward Accumulator H:
-    reward_acc_H = reward_accumulator_block(gamma=mdp_info_agentH.gamma, name='reward_acc_H')
+    reward_acc_H = reward_accumulator_block(gamma=mdp_info_agentH.gamma,
+                                            name='reward_acc_H')
 
     # Selector Block
     function_block8 = fBlock(phi=selector_function, name='f7 G_lo')
@@ -221,7 +242,7 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     function_block4.add_input(function_block6)
     function_block4.add_input(reward_acc_H)
 
-    #function_block5.add_input(reward_ph)
+    function_block5.add_input(reward_ph)
     function_block5.add_input(function_block7)
 
     function_block6.add_input(reward_ph)
@@ -275,7 +296,8 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
         max_q_val[n] = np.amax(hi_lev_params[:,n])
         act_max_q_val[n] = np.argmax(hi_lev_params[:,n])
     max_q_val_tiled = np.reshape(max_q_val, (n_tiles_high[0], n_tiles_high[1]))
-    act_max_q_val_tiled = np.reshape(act_max_q_val, (n_tiles_high[0], n_tiles_high[1]))
+    act_max_q_val_tiled = np.reshape(act_max_q_val, (n_tiles_high[0],
+                                                     n_tiles_high[1]))
 
     mk_dir_recursive('./' + subdir + str(i))
 
@@ -290,24 +312,29 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
 
 if __name__ == '__main__':
 
-    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_big_ghavamzade/'
-    alg_high = TrueOnlineSARSALambda
+    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') \
+             + '_big_ghavamzade/'
+    alg_high = SARSALambdaContinuous
     alg_low = GPOMDP
-    learning_rate_high = Parameter(value=0.1)
+    learning_rate_high = Parameter(value=8e-2)
     learning_rate_low = AdaptiveParameter(value=1e-2)
     n_jobs=1
     how_many = 1
-    n_runs = 50
+    n_runs = 100
     n_iterations = 20
     ep_per_run = 40
-    low_ep_per_fit = 10
+    low_ep_per_fit = 50
     mk_dir_recursive('./' + subdir)
     force_symlink('./' + subdir, './latest')
 
-    params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low,
+    params = {'learning_rate_high': learning_rate_high,
+              'learning_rate_low': learning_rate_low,
               'low_ep_per_fit': low_ep_per_fit}
-    experiment_params = {'how_many': how_many, 'n_runs': n_runs,
-                         'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
+    experiment_params = {'how_many': how_many,
+                         'n_runs': n_runs,
+                         'n_iterations': n_iterations,
+                         'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
-    Js = Parallel(n_jobs=n_jobs)(delayed(experiment_ghavamzade)(alg_high, alg_low, params,
-                                                           subdir, i) for i in range(how_many))
+    Js = Parallel(n_jobs=n_jobs)(delayed(experiment_ghavamzade)
+                                 (alg_high, alg_low, params,
+                                  subdir, i) for i in range(how_many))

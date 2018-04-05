@@ -15,7 +15,7 @@ def visualize_small_flat(gamma=1, range_vis=None):
 
     experiment_params = np.load('latest/experiment_params_dictionary.npy')
     how_many = experiment_params.item().get('how_many')
-    n_runs = experiment_params.item().get('n_runs')
+    n_runs = experiment_params.item().get('n_runs') + 1
     ep_per_run = experiment_params.item().get('ep_per_run')
 
     fig = plt.figure()
