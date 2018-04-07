@@ -2,17 +2,13 @@ import numpy as np
 
 from hierarchical_core import HierarchicalCore
 from computational_graph import ComputationalGraph
-from .library.blocks.model_placeholder import ModelPlaceholder
 from blocks.control_block import ControlBlock
 
 from mushroom.algorithms.value.td import QLearning, DoubleQLearning,\
     WeightedQLearning, SpeedyQLearning, SARSA
-from mushroom.environments import *
 from mushroom.policy import EpsGreedy
-from mushroom.utils.parameters import Parameter
 from mushroom.utils.callbacks import CollectDataset
 from mushroom.core.core import Core
-from mushroom.environments import *
 from mushroom.utils.parameters import ExponentialDecayParameter
 from visualize_control_block import VisualizeControlBlock
 

@@ -108,10 +108,10 @@ def experiment():
                              output_shape=mdp.info.action_space.shape,
                              **approximator_params)
     sigma = np.array([[1.3e-2]])
-    pi1 = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
+    pi1 = GaussianPolicy(mu=approximator, sigma=sigma)
 
     # Policy2
-    pi2 = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
+    pi2 = GaussianPolicy(mu=approximator, sigma=sigma)
 
     # Agent1
     learning_rate1 = AdaptiveParameter(value=1e-5)

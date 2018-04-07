@@ -2,11 +2,9 @@ from hierarchical_core import HierarchicalCore
 from computational_graph import ComputationalGraph
 from control_block import ControlBlock
 from mushroom.utils import spaces
-from mushroom.environments import *
 from ship_steering_multiple_gates import ShipSteeringMultiGate
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 from mushroom.utils.callbacks import CollectDataset
-from mushroom.utils.dataset import compute_J
 from mushroom.features.basis import *
 from mushroom.features.features import *
 from mushroom.policy.gaussian_policy import *
@@ -55,7 +53,7 @@ def experiment():
     approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
     approximator1.set_weights(np.array([75, 75]))
 
-    pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
+    pi1 = DiagonalGaussianPolicy(mu=approximator1,sigma=sigma1)
 
     # Policy 2
     sigma2 = Parameter(value=.01)

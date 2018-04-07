@@ -58,7 +58,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     approximator1 = Regressor(LinearApproximator, input_shape=(features.size,), output_shape=(2,))
     approximator1.set_weights(np.array([75, 75]))
 
-    pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1,std=sigma1)
+    pi1 = DiagonalGaussianPolicy(mu=approximator1,std=sigma1)
 
 
     # Policy 2

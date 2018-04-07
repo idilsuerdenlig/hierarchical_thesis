@@ -1,17 +1,12 @@
 import numpy as np
 from library.agents.ghavamzade_agent import GhavamzadeAgent
-from mushroom.algorithms.policy_search import REINFORCE, GPOMDP, eNAC
-from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.core import Core
-from mushroom.environments import ShipSteering
-from mushroom.features.features import Features
 from mushroom.features.tiles import Tiles
-from mushroom.policy import GaussianPolicy, MultivariateGaussianPolicy, MultivariateDiagonalGaussianPolicy
+from mushroom.policy import GaussianPolicy
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.parameters import *
 from tqdm import tqdm
-from mushroom.utils.angles_utils import shortest_angular_distance, normalize_angle
 from library.approximator.CMAC import CMACApproximator
 from library.environments.ship_ghavamzade_diagonal import ShipGhavamzadeDiagonal
 
@@ -41,7 +36,7 @@ def experiment(n_runs, n_iterations, ep_per_run):
                              output_shape=mdp.info.action_space.shape,
                              **approximator_params)
     sigma = np.array([[1.3e-2]])
-    policy = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
+    policy =  GaussianPolicy(mu=approximator, sigma=sigma)
 
     # Agent
     learning_rate = Parameter(value=1e-10)

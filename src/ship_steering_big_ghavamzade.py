@@ -143,11 +143,11 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
 
     # Policy1
     std1 = np.array([3e-2])
-    pi1 = MultivariateDiagonalGaussianPolicy(mu=approximator1, std=std1)
+    pi1 = DiagonalGaussianPolicy(mu=approximator1, std=std1)
 
     # Policy2
     std2 = np.array([3e-2])
-    pi2 = MultivariateDiagonalGaussianPolicy(mu=approximator2, std=std2)
+    pi2 = DiagonalGaussianPolicy(mu=approximator2, std=std2)
 
     # Agent1
     learning_rate1 = params.get('learning_rate_low')

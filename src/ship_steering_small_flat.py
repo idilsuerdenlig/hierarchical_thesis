@@ -8,7 +8,7 @@ from library.environments.idilshipsteering import ShipSteering
 from mushroom.features.tiles import Tiles
 from mushroom.features.features import Features
 from mushroom.features.tensors import gaussian_tensor
-from mushroom.policy import GaussianPolicy, MultivariateGaussianPolicy, MultivariateDiagonalGaussianPolicy
+from mushroom.policy import GaussianPolicy, DiagonalGaussianPolicy
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 from tqdm import tqdm
@@ -55,8 +55,8 @@ def experiment(alg, params, experiment_params ,subdir, i):
 
     #sigma = np.array([[1e-4]])
     std = np.array([3e-2])
-    policy = MultivariateDiagonalGaussianPolicy(mu=approximator, std=std)
-    #policy = MultivariateGaussianPolicy(mu=approximator, sigma=sigma)
+    policy = DiagonalGaussianPolicy(mu=approximator, std=std)
+    #policy = GaussianPolicy(mu=approximator, sigma=sigma)
 
     # Agent
     agent = alg(policy, mdp.info, features=phi, **params)
