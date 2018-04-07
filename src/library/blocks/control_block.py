@@ -95,8 +95,11 @@ class ControlBlock(Block):
 
             self.alarm_output = local_last
 
+
     def reset(self, inputs):
         state = np.concatenate(inputs, axis=0)
+        if self.name != 'control block H':
+            assert(state[0] == 40.0)
         self.agent.episode_start()
         action = self.agent.draw_action(state)
         self.dataset.add_first(state, action)

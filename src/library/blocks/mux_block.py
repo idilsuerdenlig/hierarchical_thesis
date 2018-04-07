@@ -9,7 +9,6 @@ class MuxBlock(Block):
     def __init__(self, name=None):
 
         self.block_lists = list()
-        self.last_selection = None
         self.first = list()
 
         super(MuxBlock, self).__init__(name=name)
@@ -17,7 +16,9 @@ class MuxBlock(Block):
     def _call(self, inputs, reward, absorbing, last, learn_flag):
         selector = inputs[0]
         state = inputs[1:]
-
+        #print('MUX BLOCK-------')
+        #print('selector in  : ', selector)
+        #print('state in : ', state)
         alarms = list()
         for i in range(len(self.block_lists)):
             if i == selector:
@@ -53,15 +54,17 @@ class MuxBlock(Block):
 
     def reset(self, inputs):
         selector = inputs[0]
-        selected_block_list = self.block_lists[selector]
-
         state = inputs[1:]
-        for block in selected_block_list:
-            block.reset(inputs=state)
-            state = block.last_output
+        for i in range(len(self.block_lists)):
+            if i == selector:
+                selected_block_list = self.block_lists[i]
+                for block in selected_block_list:
+                    block.reset(inputs=state)
+                self.first[i] = False
+            else:
+                self.first[i] = True
 
-        self.first[selector] = False
-        self.last_output = state
+        self.last_output = selected_block_list[-1].last_output
 
     def init(self):
         self.last_output = None
