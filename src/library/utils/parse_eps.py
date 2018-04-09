@@ -1,5 +1,4 @@
-
-def pick_eps(dataset, start, end):
+def parse_eps(dataset):
 
     dataset_ep = list()
     dataset_ep_list = list()
@@ -10,6 +9,4 @@ def pick_eps(dataset, start, end):
             dataset_ep.append(dataset_step)
             dataset_ep_list.append(dataset_ep)
             dataset_ep = list()
-    return dataset_ep_list[start:end]
-
-
+    return dataset_ep_list

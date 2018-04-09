@@ -4,7 +4,7 @@ def findTrajectory(in_these_lines):
     i=0
     for line in in_these_lines:
         cols = line.split(",")
-        if cols[0] != '1' and cols [1] != '1':
+        if cols[0] != '1' and cols[1] != '1':
             i = i+1
         else:
             break

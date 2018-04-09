@@ -32,13 +32,12 @@ class ComputationalGraph(object):
         self.ordered[2].last_output = action
         #print 'ENV STATE, REW', self.state, self.reward
         for block in self.ordered:
-            #print 'NAME  :',block.name
-            #print 'ORDER :',index
+            #print('NAME  :',block.name)
             inputs = list()
             alarms = list()
             for input_block in block.input_connections:
                 inputs.append(input_block.last_output)
-            #print 'INPUTS: ', inputs
+            #print('INPUTS: ', inputs)
 
             for i in inputs:
                 if i is not None:
