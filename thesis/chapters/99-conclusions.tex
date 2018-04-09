@@ -1,0 +1,49 @@
+\chapter{Conclusions and Future works}
+\label{conclusions}
+\thispagestyle{empty}
+
+\begin{quotation}
+{\footnotesize
+\noindent{\emph{``Teacher Rick: Tomorrow you will be transferred to your new Ricks. Hopefully they will be your last. Yes, Slow Ri-- Tall Morty? \\
+Tall Morty (Slow Rick): Di-Did I gragitate this time yet? \\
+Teacher Rick: Anything’s possible, Tall Morty. Ugh… ''}}
+\begin{flushright}
+Rick and Morty (Season 3, Episode 7)
+\end{flushright}
+}
+\end{quotation}
+
+
+
+\vspace{0.5cm}
+
+We developed a novel framework to design hierarchical structure in reinforcement learning that exploits the design tool of control theory: the block diagram. To achieve this, the block diagram is adapted to the context of hierarchical reinforcement learning. Our framework describes a computational graph that contains blocks and connections. Unlike the block diagram of control theory, in our approach blocks and the interconnections are of various nature. The type of connection depends on the use of the signal it carries, whereas the type of the block depends on the subsystem it represents. 
+
+By running the computational graph, the hierarchical agent can interact with the environment and update all levels of its hierarchy. Similarly to the block diagram of the control theory, this framework can be applied to implement different types of hierarchical topologies. Therefore, the designer is free to implement his/her own hierarchical structure. Combining the strengths of both fields, we filled up a gap between control theory and machine learning.
+
+Hierarchical approaches simplify the tasks of designing a policy and possibly adding prior knowledge: with our framework, we can exploit the existing hierarchical control structures and initial parameters for the well-known problems of control theory. Adapting a control theoretical perspective, policies are often simpler to interpret and with fewer parameters, without losing representation power. In control theoretic approaches, typically a human operator is needed to close the control loop for high level logic. With our framework we can assign the task of the human operator to a suitable learning agent. 
+  
+These advantages makes our framework suitable for complex robotics tasks, even with continuous action-spaces and high state-action dimensionality because the problem can be easily decomposed into different abstraction layers. The lower levels can control directly the actuators of the robot whereas the higher levels can focus on the more generic and complex tasks. 
+
+Existing methods to introduce hierarchy to reinforcement learning are based on the idea of partial policies with well defined termination conditions. MAXQ uses stack discipline to execute the hierarchical policy. Options framework adds the subtasks to the available action set. HAMs constrain the low level policy. Despite the fact that we can implement partial policies, we should take an action also in the last step of the low level episode. This is due to the fact that, differently from the other HRL approaches, our computational graph executes continuously, that is, blocks operate sequentially and only in one direction. An outcome of this feature is that the agents in the lower levels of the hierarchy must take an action even in the last steps of their episodes. It is not possible to go back to the higher level controller during the cycle. Another cycle is needed to reset and start a new episode for the low level controller that has its episode finished. This is the fundamental difference between our approach and the state of the art. A subtask cannot exist by itself but is always part of the complete system.
+
+Designing hierarchical algorithms is not trivial due to the interaction between the layers. Typically, the algorithms in different layers are not aware of each other performance. They do not know about each other tasks. This causes the agents to interpret the outcomes in a wrong way. For instance, if the outcome of the environment is bad after the execution of an action drawn by an agent, the agent that receives the bad reward will assume the poor performance is due to its choice, and updates its quality to avoid such policy, even when it is not the case. In addition, since the agents observe the environment only partially, and it may change its dynamics due to the actions of other layers, their perception of the environment is non-stationary. This problem is more clearly seen in our framework. Blocks observe the environment only through their connections. This means that their observation over the graph is only partial and, as it changes in time, it is non-stationary. This behavior can be clearly identified in the ship steering environment: when the high level policy has not yet identified the gate position, low level agent learns a policy stating that it should not to follow the reference of the high level agent, and learning becomes unstable. To avoid the instability of the low level controller, we used a deterministic policy that guarantees the stability criterion. 
+
+We used this framework as a tool to build a hierarchical reinforcement learning solution for the ship steering problem that has continuous state-action space. Ship steering task is suitable for hierarchical decomposition and our control theoretic decomposition approach is easily adopted. The higher level subtask is defined as estimating the reference points in the map for the low level to follow and pass through a gate that is in an unknown fixed position. The low level subtask is to manipulate the rudder to decrease the error between the reference angle and the actual angle. A function block is added between these controllers to convert the reference position output of the high level controller to angle error input of the low level controller. Flat REPS and RWR algorithms learn faster than the hierarchical algorithms in the small domain. However, they suffer from premature convergence. Our frameworks performance is more stable and reliable compared to flat RWR and REPS and much faster than the flat PG algorithms. In the regular domain, learning curve is steeper when the learning algorithm of the low level controller is a black box optimization method. Also in the regular domain, the hierarchical algorithms built with our framework showed good performance in terms of learning speed and stability.
+
+The task decomposition of the ship steering problem has a cascaded control structure as in DC motor control example. The framework supports building more complex hierarchical control systems such as those typical for hybrid systems. This can be achieved with selector blocks. Selector blocks implement the mode switching behavior in our framework. They contain block lists and activate one list at each cycle. 
+
+The proposed framework should be tested in more challenging environments and with more complex learning algorithms. Learning speed can be improved using off policy learning methods, exploiting the performance of the active controller to update the policy also of inactive controllers. This would result in more algorithms learning in parallel, similar to intra-option learning.
+
+Another important issue to analyze is the fact that each controller see the rest of the system as a partially observable and non-stationary environment. Both distributed and global learning algorithm should be considered to face this issue and speed up learning. 
+
+% 1) Brief summary of what we did, explain how we bring the gap between Control theory and ML
+% 2) Explain why a hierarchical policy is better than a flat one, advantages and disadvantages
+% 3) talk about the difference with the options, maxq and other frameworks. Talk about the termination condition of the blocks, and the fact that we must take a last action
+% 4) Talk about the issue of the approach: each controller see the rest of the system as a partially observable nonstationary environment
+% 5) talk about the good results achieved in the ship steering environment
+% 6) Talk briefly that we can add support for the hybrid system control stuff, with the selector block.
+% 7) Future works: explain that the approach need to be tested in more challenging environments and more complex learning: e.g. learning off policy using a mux block (that means, more algorithm learning in parallel, intra policy learning). Say that the issue of nostationarity and partial observability should be taken seriosly in consideration
+
+
+ 

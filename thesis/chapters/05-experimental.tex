@@ -1,0 +1,345 @@
+\chapter{Experimental Results}
+\label{experimental}
+\thispagestyle{empty}
+
+\begin{quotation}
+{\footnotesize
+\noindent{\emph{``Rick: Come on, flip the pickle, Morty. You're not gonna regret it. The payoff is huge.
+(Morty hesitantly picks up the screwdriver and turns the pickle over. The pickle has Rick's face on it) I turned myself into a pickle, Morty! Boom! Big reveal: I'm a pickle. What do you think about that? I turned myself into a pickle! W-what are you just staring at me for, bro. I turned myself into a pickle, Morty! \\
+Morty: And? \\
+Rick: "And"? What more do you want tacked on to this? I turned myself into a pickle, and 9/11 was an inside job?\\
+... \\
+Morty: I-I'm just trying to figure out why you would do this. Why anyone would do this. \\
+Rick: The reason anyone would do this is, if they could, which they can't, would be because they could, which they can't.''}}
+\begin{flushright}
+Rick and Morty (Season 3, Episode 3)
+\end{flushright}
+}
+\end{quotation}
+
+ 
+
+
+\section{Ship Steering Domain}
+We chose ship steering task~\cite{Anderson:1990:CSC:104204.104226} to test the framework. Ship steering has complex low level dynamics due to its continuous state-action space and it is well suited for designing hierarchies. The task was initially studied as a control theory problem~\cite{shipsteeringACD}. Later, \cite{GhavamzadehHierarchicalPG} introduced the problem to machine learning literature and suggested Hierarchical Policy Gradient Algorithms as a solution. 
+Ship steering domain is shown in Figure \ref{fig:shipsteeringdomainbig}.
+
+\begin{figure}[t]
+      \centering
+      \includegraphics[width = 0.5\textwidth]{./pictures/shipbigenv.png}
+      \caption{Ship steering domain}
+      \label{fig:shipsteeringdomainbig}
+\end{figure}
+    
+A ship starts at a randomly chosen position, orientation and turning rate and has to be maneuvered at a constant speed through a gate placed at a fixed position in minimum time. Since the ship speed is constant, minimum-time policy is equivalent to shortest-path policy. We consider the ship model given by a set of nonlinear difference equations~\ref{eqn:shipsteeringequation}.
+
+\begin{equation}
+\label{eqn:shipsteeringequation}
+\begin{split}
+     &x\left[t+1 \right] = x[t] + \Delta V \sin \theta \left[t\right]\\
+     &y\left[t+1 \right] = y[t] + \Delta V \cos \theta \left[t\right]\\
+     &\theta\left[t+1 \right] = \theta[t] + \Delta \dot{\theta} \left[t\right]\\
+     &\dot{\theta} \left[t+1\right] =  \dot{\theta} \left[t\right] +\Delta (r\left[t\right] - \dot{\theta}\left[t\right])/T
+\end{split}
+\end{equation}
+where $T = 5$ is the constant time needed to converge to the desired turning rate, $V = 3\frac{m}{s}$ is the constant speed of the ship, and $\Delta = 0.2 s$ is the sampling interval. The control interval is $0.6 s$ (three times the sampling interval).
+There is a time lag between changes in the desired turning rate and the actual action, modeling the effects of a real ship’s inertia and the resistance of the water. The state variables are the coordinates ($x$, $y$), the orientation ($\theta$) and the actual turning rate of the ship ($\dot{\theta}$). The control signal is the desired turning rate of the ship ($r$). The state variables and the control signal are continuous within their range given in the table \ref{table:ranges}.
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{c r r}
+     \toprule
+     Variable & Min & Max \\
+     \midrule
+     $x$ & 0 & 1000 \\ 
+     $y$ & 0 & 1000 \\
+     $\theta$ & $-\pi$ & $\pi$ \\
+     $\dot{\theta}$ & $-\frac{\pi}{12}$ & $\frac{\pi}{12}$ \\
+     $r$ & $-\frac{\pi}{12}$ & $\frac{\pi}{12}$ \\
+     \bottomrule
+  \end{tabular}
+  \caption{State and action variable ranges}
+  \label{table:ranges}
+\end{table}
+
+The ship steering problem is episodic. In each episode, the goal is to learn the sequence of control actions that steer the center of the ship through the gate in the minimum amount of time. To make sure the optimal policy is to find the shortest path, every step of an episode has a reward of -1. If the ship moves out of bound, the episode terminates and is considered as a failure. In this case, environment returns -100 as a reward. The sides of the gate are placed at coordinates (350,400) and (450,400). If the center of the ship passes through the gate, episode ends with a success and a reward 0 is received. 
+
+The task is not simple for classical RL algorithms for several reasons~\cite{GhavamzadehHierarchicalPG}. First, since the ship cannot turn faster than $\frac{\pi}{12} \frac{rad}{s}$, all state variables change only by a small amount at each control interval. Thus, we need a high resolution discretization of the state space in order to accurately model state transitions, which requires a large number of parameters for the function approximator and makes the problem intractable. Second, there is a time lag between changes in the desired turning rate $r$ and the actual turning rate, ship’s position $x$, $y$ and orientation $\theta$, which requires the controller to deal with long delays. In addition, the reward is not much informative. 
+
+Thus, we used a simplified version of the problem for the early experiments. The simplified ship steering domain is given in Figure~\ref{fig:shipsteeringdomain}. The domain boundaries are smaller, to shrink the state space. Ranges of the state and action variables are given in Table~\ref{table:rangessmall}. In this case, the gate is positioned in the upper right corner of the map at the coordinates (100,120) and (120,100). The ship starts at the origin of the state space, i.e., fixed at position (0, 0) with orientation 0 and no angular velocity.   
+\begin{figure}[t]
+      \centering
+      \includegraphics[width = 0.45\textwidth]{./pictures/shipsteeringdomain.png}
+      \caption{Ship steering small domain}
+      \label{fig:shipsteeringdomain}
+\end{figure}
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{c r r}
+     \toprule
+     Variable & Min & Max \\
+     \midrule
+     $x$ & 0 & 150 \\ 
+     $y$ & 0 & 150 \\
+     $\theta$ & $-\pi$ & $\pi$ \\
+     $\dot{\theta}$ & $-\frac{\pi}{12}$ & $\frac{\pi}{12}$ \\
+     $r$ & $-\frac{\pi}{12}$ & $\frac{\pi}{12}$ \\
+     \bottomrule
+  \end{tabular}
+  \caption{State and action variable ranges for small environment}
+  \label{table:rangessmall}
+\end{table}
+
+\section{Flat Policy Search Algorithms}
+Experiments with flat PS algorithms are implemented for the small domain using \texttt{mushroom} library. The flat algorithms use a tiling with three dimensions to divide the state space $5 \times 5 \times 6$ tiles each. 100 experiments have been carried out for each flat algorithm. Every experiment lasted 25 epochs. In every epoch, the learning algorithm runs for 200 episodes. Then the evaluation run is carried out. The resulting dataset of the evaluation run is used to compute cumulative discounted rewards ($\mathcal{J}$) for each episode in the evaluation dataset and averaged for each epoch. With the same method, also the mean length of the episodes for each epoch is computed. These data are averaged for 100 experiments.
+
+For the major part of the experiments, PG algorithms are implemented with an adaptive learning rate. Adaptive learning rate constrains the step of the learning algorithm with a given metric, instead of moving of a step proportional to the gradient. The step rule is given in Equation~\ref{eqn:adaptivelr}. Adaptive learning rate can be used to prevent jumps when the gradient magnitude is big. 
+
+\begin{equation}
+\label{eqn:adaptivelr}
+    \begin{aligned}
+    \Delta\theta=\argmax_{\Delta\vartheta}\Delta\vartheta^{t}\nabla_{\theta}J
+    \\
+    s.t.:\Delta\vartheta^{T}M\Delta\vartheta\leq\varepsilon
+    \end{aligned}
+\end{equation} 
+
+
+GPOMDP, a step-based PG algorithm, has been implemented to learn the parameters of a multivariate Gaussian policy with diagonal standard deviation. The initial standard deviation ($\sigma)$ is set to $3\times10^{-2}$. The mean of the Gaussian is formulated with a linear function approximator with tiles. Learning parameter is adaptive with a value of $10^{-5}$. Policy is fit every 40 episodes during the learning run. Number of episodes of an evaluation run is also 40. 
+
+RWR, REPS and PGPE algorithms work on a distribution of policy parameters and they can be used with deterministic policies. They have been implemented to learn the distribution of the mean $\mu$ of a deterministic policy. Mean is linearly parameterized with the tiles. The distribution is a Gaussian distribution with diagonal standard deviation. The initial mean $\mu$ is the null vector, and $4\times10^{-1}$ variance $\sigma^2$ for every dimension. All three algorithms are run for 200 episodes to learn at each epoch. Every 20 episodes, the distribution parameters are updated. The evaluation run lasts 20 episodes. The learning rate of PGPE is adaptive and the value is initially set to $1.5$. REPS and RWR do not require the learning rate to be specified as explained in Chapter~\ref{stateoftheart}. REPS is used with a max KL step $\epsilon = 1$, and RWR with a constant $\beta = 0.7$ for the exponential transformation. 
+
+\section{Hierarchical Block Diagram Approach}
+
+The ship steering control system consists fundamentally of two parts~\cite{shipsteeringACD}:
+ 
+\begin{itemize}
+   \item a ship autopilot which automatically manipulates the rudder to decrease the error between the reference heading angle and the actual heading angle, and
+   \item an operator, either human or a machine, that closes up the control loop given the reference angles to follow a desired trajectory on the ocean.
+\end{itemize}
+
+The control theory approach to ship steering problem is preserved for the subtask definitions with our framework. The corresponding block diagram is given in Figure~\ref{fig:blockdiagramship}. 
+
+\begin{figure}[t] 
+      \centering
+      \includegraphics[width = \textwidth]{./pictures/blockdiagramshipsteering.png}
+      \caption{HRL block diagram for ship steering task}
+      \label{fig:blockdiagramship}
+\end{figure} 
+
+Low level controller learns to approximate the optimal policy to decrease the error between the reference angle and the actual angle.  High level controller learns to drive the low level by producing reference positions in the map that approximate the shortest paths to the gate. A function block in between the control blocks ($f_1( \cdot )$) computes the reference angle for the low level, given the reference position and the states. The performance metric of the high level control is the extrinsic reward, whereas the one of the low level is computed by another function block, $f_2( \cdot )$. $f_2( \cdot )$ returns the cosine of the angle difference computed by $f_1( \cdot )$. As the difference of the reference angle and the actual angle gets close to 0, the reward advances to 1 and as it grows, the reward decreases to -1. 
+
+When the low level controller finishes its episode, it raises an alarm for the high level. In the following cycle, a new reference point is estimated for the level. The same alarm signal is passed to the reward accumulator of the high level controller with the motivations described in Chapter~\ref{proposed}. 
+
+The high level controller uses the GPOMDP algorithm to learn a multivariate Gaussian policy with diagonal standard deviation. Its mean is initialized in the middle of the map, that is $(75, 75)$, for the small domain. The variance of both dimensions is $40$. The algorithm fits every 20 episodes with an adaptive learning rate of 10. Horizon is 100 steps for both controllers.
+
+Low level control policy should steer the ship in the direction of the angle error. That is, if the reference angle is larger than the current angle, angular velocity output of the low level control should be positive and vice versa. Low level controller is first tested with a GPOMDP algorithm with a differentiable parameterized policy such as a linear one given as $\pi(x) = \omega x$, where $x$ is the error $\Delta\theta$ over the angle. In this scheme, the parameters of the low level policy are expected to be positive to make sure that the input error and the output angular velocity have the same sign. However, when the high level policy is not reliable, low level policy may choose to go outside of the map to finish the episode quickly. In addition, when the optimal parameter is lower than the current one, a big gradient step may cause trespassing the 0 limit, which results in instability. 
+To ensure stability, the parameter of the policy needs to be forced to have a positive value. This can be achieved with a deterministic policy by using the absolute values of  weights, that is,  $\pi(x) = \left|\omega\right|x$. However, this policy is not differentiable. Therefore, classical PG algorithms cannot be exploited. Thus, the low level controller uses a black box optimization method. PGPE algorithm learns the distribution of the weights of a non-differentiable deterministic policy. The distribution over the weights has zero mean and $10^{-3}$ as variance initially. The algorithm fits at every 10 episode of the low level controller. The action taken by the low level is indeed a proportional control action. The error signal is multiplied by a constant, $K_P$. The distribution over $K_P$ is learned by the PGPE algorithm. An adaptive learning rate is used with a value $5\times10{-4}$.
+
+Another experimental setup is constructed in which the low level control applies also the integral action. To achieve this, an error accumulator block is added between $f_1( \cdot )$ and the low level controller as shown in Figure~\ref{fig:shipsteeringpi}.
+
+\begin{figure}[t]
+      \centering
+      \includegraphics[width = \textwidth]{./pictures/pishipsteering.png}
+      \caption{HRL block diagram for ship steering task, PI control action}
+      \label{fig:shipsteeringpi}
+\end{figure}
+
+ In this case, the state of the low level control is two dimensional. The adopted deterministic policy is $\pi(x) = \left|\boldsymbol{\omega}^T\right|x$. The state vector is $x=\left[\Delta\theta, \int\Delta\theta dt\right]$. The parameter vector is $\boldsymbol{\omega}=\left[K_P, K_I\right]$, where the $K_P$ parameter corresponds to the proportional gain, and the $K_I$ parameter is the integral gain, as they multiply the error and the integral of the error respectively.
+
+
+\section{Results in Small Domain}
+
+Results of the flat algorithms and of the hierarchical schemes designed with the block diagram approach are compared. 
+
+Figure~\ref{fig:art_J} shows the mean of the objective function for every epoch, averaged for 100 experiments for each algorithm. It shows that flat PG algorithms, i.e., PGPE and GPOMDP, converge much more slowly than the other ones. This is due to the fact that for these algorithms learning rate should be defined. If the learning rate is low, the convergence is slow and if it is too high, learning may be unstable. 
+
+\begin{figure}[t!]
+	\centering
+    \vspace{-1.0 cm}
+    \setlength\figureheight{5.5cm}  
+	\setlength\figurewidth{.9\textwidth}
+	\input{plots/small/art_J.tex}
+    \caption[J comparison, hierarchical vs. flat, small environment]{Comparison of the hierarchical structure w.r.t. flat policy search for small environment. Mean values of objective functions with 95\% confidence intervals are shown}
+    \label{fig:art_J}
+\end{figure} 
+
+\begin{figure}[t!]
+	\centering
+	\setlength\figureheight{5.5cm}  
+	\setlength\figurewidth{.9\textwidth}
+	\input{plots/small/art_L.tex}
+    \caption[Epiosde length comparison, flat algorithms, small environment]{Comparison between flat policy search algorithms for small environment. Mean values of episode lengths with 95\% confidence intervals are shown}
+    	\label{fig:art_j}
+\end{figure}
+\begin{figure}[t!]
+	\centering
+    \setlength\figureheight{5.5cm}  
+	\setlength\figurewidth{.9\textwidth}
+	\input{plots/small/comp_art_L.tex}
+    \caption[J comparison, flat vs. hierarchical, small environment]{Comparison of the hierarchical structure w.r.t. flat policy search for small environment. Mean values of episode lengths with 95\% confidence intervals are shown}
+    	\label{fig:comp_art_l}
+\end{figure}
+
+Figure~\ref{fig:art_j} and Figure~\ref{fig:comp_art_l} show the mean length of the episodes for each epoch, averaged for 100 experiments for different algorithms. Hierarchical algorithm has a large episode length for the first runs. Since the controller is stable, it learns first to avoid to get out of the boundaries, which causes the long episodes exploring the middle of the map. Once the gate is identified well, the shortest path is approximated, which results in gradually lowered episode lengths. 
+
+\begin{figure}[t!]
+	\centering
+    \setlength\figureheight{6cm}  
+	\setlength\figurewidth{\textwidth}
+	\input{plots/small/hier_J.tex}
+    \caption[J comparison, hierarchical algorithms, small environment]{Comparison between the hierarchical structures search for small environment. Mean values of objective functions with 95\% confidence intervals are shown}
+    \label{fig:hier_J}
+\end{figure}
+\begin{figure}[t!]
+	\centering
+    \setlength\figureheight{6cm}  
+	\setlength\figurewidth{\textwidth}
+	\input{plots/small/hier_L.tex}
+    \caption[Episode length comparison, hierarchical algorithms, small environment]{Comparison between the hierarchical structures search for small environment. Mean values of episode lengths with 95\% confidence intervals are shown}
+    \label{fig:hier_L}
+\end{figure}
+
+\clearpage
+
+\figuretraj{small}{GPOMDP}{GPOMDP trajectories}{flat-GPOMDP, last 5 trajectories of the epochs}{fig:small_traj_gpomdp}
+\figuretraj{small}{PGPE}{PGPE trajectories}{flat-PGPE, last 5 trajectories of the epochs}{fig:small_traj_pgpe}
+\figuretraj{small}{RWR}{RWR trajectories}{flat-RWR, last 5 trajectories of the epochs}{fig:small_traj_rwr}
+\figuretraj{small}{REPS}{REPS trajectories}{flat-REPS, last 5 trajectories of the epochs}{fig:small_traj_reps}
+
+\clearpage
+
+The performance of hierarchical algorithms with and without the deterministic policies in the low level are compared in Figures~\ref{fig:hier_J}~and~\ref{fig:hier_L}. H-PGPE and H-PI algorithms use PGPE to learn the distribution of parameters of a deterministic low level policy that is ensured to be stable and H-GPOMDP uses GPOMDP with a stochastic policy. H-PI has the error accumulator block before the low level control block, which results in integral action in the low level policy. Forcing the stabilization of the low level controller causes the learning curves to be much steeper w.r.t. the other method. Adding the integral action does not cause a big change in the learning performance, but in the quality of the trajectories.
+
+
+
+Figure~\ref{fig:small_traj_gpomdp} depicts the trajectories of the last 5 episodes of the epochs 0, 3, 12 and 24 for the flat-GPOMDP. Even in the 25th epoch some trajectories are not able to reach the gate. Convergence is very slow due to the low learning rate and the step-based exploration. If the learning rate is increased, the policy may become unstable. Figure~\ref{fig:small_traj_pgpe} shows the same trajectories for the flat-PGPE algorithm. It explores a larger part of the map as it learns the parameters of the distribution over the policy parameters. However, convergence is still slow due to small learning rate. Moreover, the variance of the policy distribution is not reducing sufficiently faster.
+As can be seen in Figures~\ref{fig:small_traj_rwr} and ~\ref{fig:small_traj_reps}, REPS and RWR identify the gate much faster than the PG algorithms. However, they suffer from premature convergence as the variance that shrinks too rapidly. These characteristics may cause the policies to get stuck in a suboptimal policy.
+
+Trajectories of the hierarchical algorithm with GPOMDP algorithm in the low level (H-GPOMDP) are given in Figure~\ref{fig:small_traj_h_gpomdp}. Convergence is faster than that of the flat PG algorithms. However, this algorithm sometimes fails to learn. This is because in some runs, the low level policy learns to leave the map and becomes unstable.
+Learning speed is improved when black box optimization methods are used in the low level as seen in Figure~\ref{fig:small_traj_h_pgpe} since the learning rate can be increased while ensuring stability with a deterministic policy. Hierarchical algorithms produce policies that are closer to the optimal one with much less parameters than the flat ones. When the lower policy applies also the integral action, angle reference is followed more effectively, see Figure~\ref{fig:small_traj_h_pi}.
+
+\clearpage
+\figuretraj{small}{H-GPOMDP}{H-GPOMDP trajectories}{H-	GPOMDP, last 5 trajectories of the epochs}{fig:small_traj_h_gpomdp}
+\figuretraj{small}{H-PGPE}{H-PGPE trajectories}{H-PGPE, last 5 trajectories of the epochs}{fig:small_traj_h_pgpe}
+\figuretraj{small}{H-PI}{H-PI trajectories}{H-PI, last 5 trajectories of the epochs}{fig:small_traj_h_pi} 
+
+Figure~\ref{fig:small_h_gpomdp_mu_sigma} shows the average parameters of the Gaussian policy of the high level controller for hierarchical algorithm with GPOMDP used to find the low level policy (H-GPOMDP). On the left, the mean parameter evolution over time is shown. On the right, the ellipses indicate the area where $95\%$ of the samples falls into. Green ellipse is of the initial distribution. Blue ellipse refers to the distribution in the middle of the learning run and the red one is of the final. Both the mean and the elliptic areas are computed averaging 100 experiments. Figure~\ref{fig:small_h_pgpe_mu_sigma} demonstrates the same variables for the hierarchical algorithm with PGPE in the lower level policy (H-PGPE). 
+
+It can be seen that despite having the same policies and learning algorithms in the higher level, the hierarchical algorithm with GPOMDP in the low level (H-GPOMDP) performs much worse than the other one (H-PGPE). It is unable to identify the gate and the variance is still high at the end of the learning run. This is because, the low level policy is not fast enough in learning to follow the references of the high level. Moreover, the high level does not get a meaningful information from the environment before the low level is able to follow. This issue is evaded using a deterministic policy that is enforced to be stable as in H-PGPE. Another thing to notice is that the high level controller of H-PGPE algorithm approximates the gate position to be slightly further than the actual one. This is due to the fact that when a point just behind the gate is given as a reference, the ship will have to pass the gate to reach that point. Figure~\ref{fig:small_h_pi_mu_sigma} also depicts the parameter distribution properties of the high level policy. They refer to the hierarchical algorithm with PGPE in the lower level policy with integral action (H-PI). The results are similar to that of the H-PGPE. Comparing the 3D mean parameter graphs of the hierarchical policies, we can see that the algorithms with PGPE in the low level converge towards to the goal with a much smoother trajectory than the algorithm with GPOMDP in the low level.   
+
+\begin{figure}[b!]
+	\centering
+    \begin{minipage}{0.55\textwidth}
+		\includegraphics[width=\textwidth]{plots/small/H-GPOMDP-mu.png}
+    \end{minipage}
+    \vspace{0.5cm}
+    \begin{minipage}{0.44\textwidth}
+    	\setlength\figureheight{5cm}  
+		\setlength\figurewidth{5cm}
+		\input{plots/small/H-GPOMDP-sigma.tex}
+    \end{minipage}
+    \caption[H-GPOMDP mean value and variance in small environment]{H-GPOMDOP. Left: Mean parameters of the high level policy parameters. Right: The areas in which the $95\%$ of the samples of the high level policy parameters fall into}
+    \label{fig:small_h_gpomdp_mu_sigma}
+\end{figure}
+ 
+\begin{figure}[t!]
+	\centering
+    \begin{minipage}{0.55\textwidth}
+        \includegraphics[width=\textwidth]{plots/small/H-PGPE-mu.png}
+    \end{minipage}
+    \begin{minipage}{0.44\textwidth}
+    	\setlength\figureheight{5cm}  
+		\setlength\figurewidth{5cm}
+		\input{plots/small/H-PGPE-sigma.tex}	
+    \end{minipage}
+    \caption[H-PGPE mean value and variance in small environment]{H-PGPE. Left: Mean parameters of the high level policy parameters. Right: The areas in which the $95\%$ of the samples of the high level policy parameters fall into}    
+    \label{fig:small_h_pgpe_mu_sigma}
+\end{figure}
+
+
+\begin{figure}[t!]
+	\centering
+    \begin{minipage}{0.55\textwidth}
+    	\includegraphics[width=\textwidth]{plots/small/H-PI-mu.png}
+    \end{minipage}
+    \begin{minipage}{0.44\textwidth}
+    	\setlength\figureheight{5cm}  
+		\setlength\figurewidth{5cm}
+		\input{plots/small/H-PI-sigma.tex}
+    \end{minipage}
+    \caption[H-PI mean value and variance in small environment]{H-PI. Left: Mean parameters of the high level policy parameters. Right: The areas in which the $95\%$ of the samples of the high level policy parameters fall into}
+    \label{fig:small_h_pi_mu_sigma}
+    
+\end{figure}
+
+\clearpage
+
+\section{Results in Regular Domain}
+
+The task in the regular ship steering domain possibly is too complex for the flat algorithms due to the larger state-space and random initialization of the ship position. Scaling the discretization from the small to the big environment makes the policy intractable. Therefore, experiments are conducted only with hierarchical algorithms that had a good performance in the small domain: H-PGPE and H-PI. 
+
+The high level controllers use the GPOMDP algorithm to learn a multivariate Gaussian policy with diagonal standard deviation. Policy distribution mean is initialized in the middle of the map, that is $(500, 500)$. The variance of the two dimensions is 255. The algorithm fits every 40 episodes with an adaptive learning rate of 50. Horizon is 100 steps for both the low level and the high level algorithms.
+
+A deterministic policy is constructed by using the absolute values of  weights, that is,  $\pi(x) = \left|\omega\right|x$ for the low level policies. PGPE algorithm learns the distribution over the weights that is initialized with zero mean and $10^{-3}$ variance. The algorithm fits every 10 episodes of the low level controller with an adaptive learning rate of $5\times10{-4}$. The action taken by the low level is a proportional control action for H-PGPE and proportional-integral for H-PI. 
+
+The learning curves of the algorithms are given in Figure~\ref{fig:big_hier_J}. The values are computed with the mean of the objective function for every epoch, averaged for 100 experiments for each algorithm. Curves are slightly less steep than the ones of the smaller domain. This is because the regular domain task is harder. Figure~\ref{fig:big_hier_L} shows the average episode lengths for each epoch, for both algorithms. In the first epochs, low level learns to stay in the map and to follow the referenced angle. Once the high level algorithm detects the gate position, episodes become much shorter, to approximate the shortest path. 
+
+\begin{figure}[t]
+	\centering
+    \setlength\figureheight{6cm}  
+	\setlength\figurewidth{\textwidth}
+	\input{plots/big/hier_J.tex}
+    \caption[J comparison, regular environment]{Average of objective function of the hierarchical algorithms at every epoch}
+    \label{fig:big_hier_J}
+\end{figure}
+\begin{figure}[t]
+    \setlength\figureheight{6cm}  
+	\setlength\figurewidth{\textwidth}
+	\input{plots/big/hier_L.tex}
+    \caption[Episode length comparison, regular environment]{Average episode lengths of hierarchical algorithms at every epoch}
+    \label{fig:big_hier_L}
+\end{figure}
+
+\clearpage
+
+Figure~\ref{fig:big_traj_h_pgpe} depicts the trajectories of the last 5 episodes of the epochs 0, 3, 12 and 24 for the H-PGPE algorithm and Figure~\ref{fig:big_traj_h_pi} shows that of the H-PI algorithm. The trajectories start at random points as the high level task requires. In both figures we observe a stroll around the gate at the last steps. This is because the ship starts at random points and the gate is in the middle of the map. These characteristics of the regular domain eliminate the possibility of placing the reference position behind the gate. Moreover, when the ship is almost reaching the gate, low level policy performance is lousy. We observe a negative peak in the low level intrinsic reward as the angle difference jumps from 0 to $\pi$ while the ship trespass the reference point.
+
+
+\figuretraj{big}{H-PGPE}{H-PGPE trajectories, regular environment}{hierarchical algorithm with PGPE in the low level, last 5 trajectories of the epochs}{fig:big_traj_h_pgpe}
+\figuretraj{big}{H-PI}{H-PI trajectories, regular environment}{hierarchical algorithm with PGPE in the low level, with integral action, last 5 trajectories of the epochs}{fig:big_traj_h_pi}
+
+ 
+ The average of the parameters of the hierarchical algorithm with PGPE in the low level (H-PGPE) is shown in Figure~\ref{fig:big_h_pgpe_mu_sigma}. Figure~\ref{fig:big_h_pi_mu_sigma} demonstrates the same observations for hierarchical algorithm with PGPE learning a policy with integral action in the low level (H-PI). We observe that both algorithms are able to identify the gate position quite fast, almost as fast as they identified the gate in the small domain. The fast convergence is explained by the fact that the position of the gate is near to the middle of the map and the initial distribution of the high level is centered in there. 
+
+\begin{figure}[t]
+	\centering
+    \begin{minipage}{0.55\textwidth}
+        \includegraphics[width=\textwidth]{plots/big/H-PGPE-mu.png}
+    \end{minipage}
+    \begin{minipage}{0.44\textwidth}
+    	\setlength\figureheight{5cm}  
+		\setlength\figurewidth{5cm}
+		\input{plots/big/H-PGPE-sigma.tex}
+    \end{minipage}
+    \caption[H-PGPE mean value and variance in regular environment]{H-PGPE in regular domain. Left: Mean parameters of the high level policy parameters. Right: The areas in which the $95\%$ of the samples of the high level policy parameters fall into}
+    \label{fig:big_h_pgpe_mu_sigma}
+\end{figure}
+
+
+\begin{figure}[t]
+	\centering
+    \begin{minipage}{0.55\textwidth}
+    	\includegraphics[width=\textwidth]{plots/big/H-PI-mu.png}
+    \end{minipage}
+    \begin{minipage}{0.44\textwidth}
+    	\setlength\figureheight{5cm}  
+		\setlength\figurewidth{5cm}
+		\input{plots/big/H-PI-sigma.tex}
+    \end{minipage}
+    \caption[H-PI mean value and variance in regular environment]{H-PI in regular domain. Left: Mean parameters of the high level policy parameters. Right: The areas in which the $95\%$ of the samples of the high level policy parameters fall into}
+    \label{fig:big_h_pi_mu_sigma}
+\end{figure}
+
+

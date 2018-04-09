@@ -1,4 +1,41 @@
-\select@language {italian}
-\select@language {italian}
+\select@language {english}
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {1.1}{\ignorespaces DC motor control scheme\relax }}{2}{figure.caption.7}
+\contentsline {figure}{\numberline {1.2}{\ignorespaces Adaptive control with two subsystems\relax }}{4}{figure.caption.8}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Mode switching control\relax }}{6}{figure.caption.9}
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Options over MDPs\relax }}{8}{figure.caption.10}
+\contentsline {figure}{\numberline {2.3}{\ignorespaces policy search, actor critic and value-based}}{12}{figure.caption.11}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Digital control system}}{17}{figure.caption.12}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces event-based control}}{18}{figure.caption.13}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Example of a conventional block diagram\relax }}{18}{figure.caption.14}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces System architecture\relax }}{23}{figure.caption.15}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Ship steering domain\relax }}{30}{figure.caption.16}
+\contentsline {figure}{\numberline {5.2}{\ignorespaces Ship steering small domain\relax }}{31}{figure.caption.18}
+\contentsline {figure}{\numberline {5.3}{\ignorespaces HRL block diagram for ship steering task\relax }}{33}{figure.caption.20}
+\contentsline {figure}{\numberline {5.4}{\ignorespaces HRL block diagram for ship steering task, PI control action\relax }}{35}{figure.caption.21}
+\contentsline {figure}{\numberline {5.5}{\ignorespaces J comparison, hierarchical vs. flat, small environment}}{36}{figure.caption.22}
+\contentsline {figure}{\numberline {5.6}{\ignorespaces Epiosde length comparison, flat algorithms, small environment}}{36}{figure.caption.23}
+\contentsline {figure}{\numberline {5.7}{\ignorespaces J comparison, flat vs. hierarchical, small environment}}{36}{figure.caption.24}
+\contentsline {figure}{\numberline {5.8}{\ignorespaces J comparison, hierarchical algorithms, small environment}}{37}{figure.caption.25}
+\contentsline {figure}{\numberline {5.9}{\ignorespaces Episode length comparison, hierarchical algorithms, small environment}}{37}{figure.caption.26}
+\contentsline {figure}{\numberline {5.10}{\ignorespaces GPOMDP trajectories}}{38}{figure.caption.27}
+\contentsline {figure}{\numberline {5.11}{\ignorespaces PGPE trajectories}}{38}{figure.caption.28}
+\contentsline {figure}{\numberline {5.12}{\ignorespaces RWR trajectories}}{38}{figure.caption.29}
+\contentsline {figure}{\numberline {5.13}{\ignorespaces REPS trajectories}}{38}{figure.caption.30}
+\contentsline {figure}{\numberline {5.14}{\ignorespaces H-GPOMDP trajectories}}{40}{figure.caption.31}
+\contentsline {figure}{\numberline {5.15}{\ignorespaces H-PGPE trajectories}}{40}{figure.caption.32}
+\contentsline {figure}{\numberline {5.16}{\ignorespaces H-PI trajectories}}{40}{figure.caption.33}
+\contentsline {figure}{\numberline {5.17}{\ignorespaces H-GPOMDP mean value and variance in small environment}}{41}{figure.caption.34}
+\contentsline {figure}{\numberline {5.18}{\ignorespaces H-PGPE mean value and variance in small environment}}{42}{figure.caption.35}
+\contentsline {figure}{\numberline {5.19}{\ignorespaces H-PI mean value and variance in small environment}}{42}{figure.caption.36}
+\contentsline {figure}{\numberline {5.20}{\ignorespaces J comparison, regular environment}}{44}{figure.caption.37}
+\contentsline {figure}{\numberline {5.21}{\ignorespaces Episode length comparison, regular environment}}{44}{figure.caption.38}
+\contentsline {figure}{\numberline {5.22}{\ignorespaces H-PGPE trajectories, regular environment}}{45}{figure.caption.39}
+\contentsline {figure}{\numberline {5.23}{\ignorespaces H-PI trajectories, regular environment}}{45}{figure.caption.40}
+\contentsline {figure}{\numberline {5.24}{\ignorespaces H-PGPE mean value and variance in regular environment}}{46}{figure.caption.41}
+\contentsline {figure}{\numberline {5.25}{\ignorespaces H-PI mean value and variance in regular environment}}{46}{figure.caption.42}
 \addvspace {10\p@ }

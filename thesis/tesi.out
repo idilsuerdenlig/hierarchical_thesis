@@ -1,12 +1,33 @@
-\BOOKMARK [0][-]{chapter*.1}{Sommario}{}% 1
-\BOOKMARK [0][-]{chapter*.2}{Abstract}{}% 2
-\BOOKMARK [0][-]{chapter*.3}{Indice}{}% 3
-\BOOKMARK [0][-]{chapter*.4}{Elenco delle figure}{}% 4
-\BOOKMARK [0][-]{chapter*.5}{Ringraziamenti}{}% 5
-\BOOKMARK [0][-]{chapter.1}{Introduzione}{}% 6
-\BOOKMARK [0][-]{chapter.2}{Stato dell'arte}{}% 7
-\BOOKMARK [1][-]{section.2.1}{SLAM}{chapter.2}% 8
-\BOOKMARK [1][-]{section.2.2}{Rappresentazione del Mondo}{chapter.2}% 9
-\BOOKMARK [1][-]{section.2.3}{Riconoscimento di Oggetti}{chapter.2}% 10
-\BOOKMARK [1][-]{section.2.4}{Reasoning}{chapter.2}% 11
-\BOOKMARK [0][-]{chapter*.6}{Bibliografia}{}% 12
+\BOOKMARK [0][-]{chapter*.2}{Abstract}{}% 1
+\BOOKMARK [0][-]{chapter*.3}{Sommario}{}% 2
+\BOOKMARK [0][-]{chapter*.6}{Acknowledgements}{}% 3
+\BOOKMARK [0][-]{chapter.1}{Introduction}{}% 4
+\BOOKMARK [0][-]{chapter.2}{State of the Art}{}% 5
+\BOOKMARK [1][-]{section.2.1}{Hierarchy in control systems}{chapter.2}% 6
+\BOOKMARK [1][-]{section.2.2}{Hierarchy in Reinforcement Learning}{chapter.2}% 7
+\BOOKMARK [2][-]{subsection.2.2.1}{Options}{section.2.2}% 8
+\BOOKMARK [2][-]{subsection.2.2.2}{Hierarchy of Abstract Machines}{section.2.2}% 9
+\BOOKMARK [2][-]{subsection.2.2.3}{MAX-Q Value Function Decomposition}{section.2.2}% 10
+\BOOKMARK [1][-]{section.2.3}{Policy Search Methods}{chapter.2}% 11
+\BOOKMARK [2][-]{subsection.2.3.1}{Policy gradient}{section.2.3}% 12
+\BOOKMARK [2][-]{subsection.2.3.2}{Expectation-Maximization \(EM\)}{section.2.3}% 13
+\BOOKMARK [2][-]{subsection.2.3.3}{Information Theoretic Approach \(Inf. Th.\)}{section.2.3}% 14
+\BOOKMARK [1][-]{section.2.4}{Hierarchical Policy Gradient Algorithm}{chapter.2}% 15
+\BOOKMARK [0][-]{chapter.3}{Proposed Method}{}% 16
+\BOOKMARK [0][-]{chapter.4}{System Architecture}{}% 17
+\BOOKMARK [1][-]{section.4.1}{Hierarchical Core}{chapter.4}% 18
+\BOOKMARK [1][-]{section.4.2}{Computational Graph}{chapter.4}% 19
+\BOOKMARK [1][-]{section.4.3}{Blocks}{chapter.4}% 20
+\BOOKMARK [2][-]{subsection.4.3.1}{Function Block}{section.4.3}% 21
+\BOOKMARK [2][-]{subsection.4.3.2}{Event Generator}{section.4.3}% 22
+\BOOKMARK [2][-]{subsection.4.3.3}{Control Block}{section.4.3}% 23
+\BOOKMARK [2][-]{subsection.4.3.4}{Placeholders}{section.4.3}% 24
+\BOOKMARK [2][-]{subsection.4.3.5}{Selector Block}{section.4.3}% 25
+\BOOKMARK [0][-]{chapter.5}{Experimental Results}{}% 26
+\BOOKMARK [1][-]{section.5.1}{Ship Steering Domain}{chapter.5}% 27
+\BOOKMARK [1][-]{section.5.2}{Flat Policy Search Algorithms}{chapter.5}% 28
+\BOOKMARK [1][-]{section.5.3}{Hierarchical Block Diagram Approach}{chapter.5}% 29
+\BOOKMARK [1][-]{section.5.4}{Results in Small Domain}{chapter.5}% 30
+\BOOKMARK [1][-]{section.5.5}{Results in Regular Domain}{chapter.5}% 31
+\BOOKMARK [0][-]{chapter.6}{Conclusions and Future works}{}% 32
+\BOOKMARK [0][-]{chapter.6}{Bibliografy}{}% 33

@@ -1,54 +1,60 @@
 This is BibTeX, Version 0.99d (TeX Live 2015/Debian)
 Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: tesi.aux
-A level-1 auxiliary file: altro/dedica.aux
-A level-1 auxiliary file: altro/sommario.aux
-A level-1 auxiliary file: altro/ringraziamenti.aux
-A level-1 auxiliary file: capitoli/1-Introduction.aux
-A level-1 auxiliary file: capitoli/2-StateoftheArt.aux
+A level-1 auxiliary file: other/titlepage.aux
+A level-1 auxiliary file: other/dedica.aux
+A level-1 auxiliary file: other/abstract.aux
+A level-1 auxiliary file: other/acknowledgements.aux
+A level-1 auxiliary file: chapters/01-introduction.aux
+A level-1 auxiliary file: chapters/02-stateoftheart.aux
+A level-1 auxiliary file: chapters/03-proposed.aux
+A level-1 auxiliary file: chapters/04-architecture.aux
+A level-1 auxiliary file: chapters/05-experimental.aux
+A level-1 auxiliary file: chapters/99-conclusions.aux
 The style file: plain.bst
-Database file #1: altro/bibliografia.bib
-Warning--empty publisher in joseph1994riley
-Warning--empty booktitle in Viola01rapidobject
-You've used 32 entries,
+Database file #1: hierarchical.bib
+Warning--empty booktitle in Anderson:1990:CSC:104204.104226
+Warning--empty booktitle in Baxter1999DirectGR
+Warning--empty booktitle in Marbach1998SimulationB
+You've used 23 entries,
             2118 wiz_defined-function locations,
-            703 strings with 10586 characters,
-and the built_in function-call counts, 13282 in all, are:
-= -- 1298
-> -- 642
-< -- 16
-+ -- 253
-- -- 216
-* -- 915
-:= -- 2076
-add.period$ -- 106
-call.type$ -- 32
-change.case$ -- 194
+            655 strings with 8005 characters,
+and the built_in function-call counts, 6931 in all, are:
+= -- 643
+> -- 309
+< -- 2
++ -- 123
+- -- 98
+* -- 417
+:= -- 1162
+add.period$ -- 70
+call.type$ -- 23
+change.case$ -- 118
 chr.to.int$ -- 0
-cite$ -- 34
-duplicate$ -- 541
-empty$ -- 1038
-format.name$ -- 216
-if$ -- 2900
+cite$ -- 26
+duplicate$ -- 292
+empty$ -- 623
+format.name$ -- 98
+if$ -- 1471
 int.to.chr$ -- 0
-int.to.str$ -- 32
-missing$ -- 35
-newline$ -- 166
-num.names$ -- 69
-pop$ -- 244
+int.to.str$ -- 23
+missing$ -- 22
+newline$ -- 118
+num.names$ -- 46
+pop$ -- 153
 preamble$ -- 1
-purify$ -- 166
+purify$ -- 95
 quote$ -- 0
-skip$ -- 413
+skip$ -- 185
 stack$ -- 0
-substring$ -- 851
-swap$ -- 182
-text.length$ -- 16
+substring$ -- 351
+swap$ -- 41
+text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 120
-warning$ -- 2
-while$ -- 113
-width$ -- 34
-write$ -- 361
-(There were 2 warnings)
+type$ -- 92
+warning$ -- 3
+while$ -- 59
+width$ -- 25
+write$ -- 240
+(There were 3 warnings)
