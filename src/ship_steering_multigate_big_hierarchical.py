@@ -185,7 +185,7 @@ if __name__ == '__main__':
     ep_per_run = 40
     eval_run = 50
     mk_dir_recursive('./' + subdir)
-    force_symlink('./' + subdir, 'latest')
+    force_symlink('./' + subdir, 'latest_big_multigate_hierarchical')
 
 
     params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low}

@@ -174,20 +174,22 @@ def vis_performance_params(J_avg, ep_step_avg, name='ctrl+'):
 
 def ghavamzade_plot(epochs):
 
-    dir = 'latest/'
+    dir = 'latest_big_ghavamzade/'
     experiment_params = np.load(dir + 'experiment_params_dictionary.npy')
 
     how_many = experiment_params.item().get('how_many')
     n_epochs = experiment_params.item().get('n_runs')
     ep_per_run = experiment_params.item().get('ep_per_run')
 
-    act_max_q_val_tiled = np.load('latest/' + str(how_many-1)
+    act_max_q_val_tiled = np.load('latest_big_ghavamzade/' + str(how_many-1)
                                   + '/act_max_q_val_tiled_file.npy')
-    max_q_val_tiled = np.load('latest/' + str(how_many-1)
+    max_q_val_tiled = np.load('latest_big_ghavamzade/' + str(how_many-1)
                               + '/max_q_val_tiled_file.npy')
-    plot_arrows(act_max_q_val_tiled)
+    max_q_val_tiled_tiled = np.reshape(max_q_val_tiled, (20, 20))
+    act_max_q_val_tiled_tiled = np.reshape(act_max_q_val_tiled, (20, 20))
+    plot_arrows(act_max_q_val_tiled_tiled)
     fig, axis = plt.subplots()
-    heatmap = axis.pcolor(max_q_val_tiled, cmap=plt.cm.Blues)
+    heatmap = axis.pcolor(max_q_val_tiled_tiled, cmap=plt.cm.Blues)
     plt.colorbar(heatmap)
 
     x = np.arange(20)
@@ -199,15 +201,17 @@ def ghavamzade_plot(epochs):
 
 
 
-    low_level_dataset1 = np.load('latest/' + str(how_many - 1) +
+    low_level_dataset1 = np.load('latest_big_ghavamzade/' + str(how_many - 1) +
                                  '/low_level_dataset1_file.npy')
-    low_level_dataset2 = np.load('latest/' + str(how_many - 1) +
+    low_level_dataset2 = np.load('latest_big_ghavamzade/' + str(how_many - 1) +
                                  '/low_level_dataset2_file.npy')
 
     eps_step_avg1 = list()
     eps_step_avg2 = list()
     J_avg1 = np.zeros(n_epochs)
     J_avg2 = np.zeros(n_epochs)
+    print(len(low_level_dataset1))
+    print(len(low_level_dataset2))
 
     for run in range(n_epochs):
         low_level_dataset1_run = low_level_dataset1[run]
@@ -228,7 +232,7 @@ def ghavamzade_plot(epochs):
 
     plt.show()
 
-    dataset_eval = np.load('latest/' + str(how_many - 1) + '/dataset_eval_file.npy')
+    dataset_eval = np.load('latest_big_ghavamzade/' + str(how_many - 1) + '/dataset_eval_file.npy')
 
     for run in epochs:
         dataset_eval_vis = list()
@@ -242,7 +246,7 @@ def ghavamzade_plot(epochs):
         low_level_dataset1_eps = parse_eps(low_level_dataset1_run)
         low_level_dataset2_eps = parse_eps(low_level_dataset2_run)
 
-        traj_nos = random.sample(range(0, ep_per_run), 10)
+        traj_nos = random.sample(range(0, 30), 10)
         for traj_no in traj_nos:
             dataset_eval_vis.append(dataset_eval_epoch[traj_no])
             low_level_dataset1_vis.append(low_level_dataset1_eps[traj_no])
@@ -272,7 +276,7 @@ if __name__ == '__main__':
     output_dir = './small'
     mk_dir_recursive(output_dir)
 
-    ghavamzade_plot(epochs=[0, 1, 2, 4])
+    ghavamzade_plot(epochs=[0, 6, 12, 19])
 
 
 

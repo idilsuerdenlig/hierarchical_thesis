@@ -8,14 +8,14 @@ from mushroom.approximators.parametric import LinearApproximator
 from mushroom.features.features import *
 from mushroom.features.tiles import Tiles
 from mushroom.policy.gaussian_policy import *
-from mushroom.policy import Boltzmann
+from mushroom.policy import EpsGreedy
 from mushroom.utils import spaces
 from mushroom.utils.parameters import *
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.folder import *
+from mushroom.environments import ShipSteering
 
 from library.core.hierarchical_core import HierarchicalCore
-from library.environments.idilshipsteering import ShipSteering
 from library.blocks.computational_graph import ComputationalGraph
 from library.blocks.control_block import ControlBlock
 from library.blocks.functions.pick_state import pick_state
@@ -27,6 +27,7 @@ from library.blocks.basic_operation_block import *
 from library.blocks.model_placeholder import PlaceHolder
 from library.blocks.mux_block import MuxBlock
 from library.blocks.hold_state import hold_state
+from library.blocks.discretization_block import DiscretizationBlock
 
 class TerminationCondition(object):
 
@@ -70,41 +71,34 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     #Last action Placeholder
     lastaction_ph = PlaceHolder(name='lastaction_ph')
 
-    #FeaturesH
-    lim = 1000
+    # FeaturesH
+    low_hi = 0
+    lim_hi = 1000+1e-8
     n_tiles_high = [20, 20]
     n_tilings = 1
+    # Discretization Block
 
-    tilingsH= Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles_high,
-                             low=[0,0], high=[lim, lim])
-    featuresH = Features(tilings=tilingsH)
+    discretization_block = DiscretizationBlock(low=low_hi, high=lim_hi, n_tiles=n_tiles_high)
 
     # PolicyH
-    #epsilon = Parameter(value=0.1)
-    #piH = EpsGreedy(epsilon=epsilon)
-    beta = Parameter(value=1.0)
-    piH = Boltzmann(beta=beta)
+    epsilon = Parameter(value=0.1)
+    piH = EpsGreedy(epsilon=epsilon)
+    #beta = Parameter(value=1.0)
+    #piH = Boltzmann(beta=beta)
 
     # AgentH
     learning_rate = params.get('learning_rate_high')
 
 
     mdp_info_agentH = MDPInfo(
-        observation_space=spaces.Box(low=np.array([0, 0]),
-                                     high=np.array([lim, lim]),
-                                     shape=(2,)),
+        observation_space=spaces.Discrete(n_tiles_high[0]*n_tiles_high[1]),
         action_space=spaces.Discrete(8), gamma=1, horizon=10000)
-    approximator_paramsH = dict(input_shape=(featuresH.size,),
-                               output_shape=mdp_info_agentH.action_space.size,
-                               n_actions=mdp_info_agentH.action_space.n)
+
 
     agentH = alg_high(policy=piH,
-                      approximator=LinearApproximator,
                       mdp_info=mdp_info_agentH,
                       learning_rate=learning_rate,
-                      lambda_coeff=0.9,
-                      approximator_params=approximator_paramsH,
-                      features=featuresH)
+                      lambda_coeff=0.9)
 
     # Control Block H
     control_blockH = ControlBlock(name='control block H',
@@ -195,6 +189,8 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     # Function Block 7: ext rew of low lev ctrl
     function_block7 = fBlock(phi=G_low, name='f7 G_lo')
 
+
+
     #Reward Accumulator H:
     reward_acc_H = reward_accumulator_block(gamma=mdp_info_agentH.gamma,
                                             name='reward_acc_H')
@@ -212,13 +208,13 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
               function_block1, function_block2, function_block3,
               function_block4, function_block5,
               function_block6, function_block7, function_block8,
-              reward_acc_H]
+              reward_acc_H, discretization_block]
 
     reward_acc_H.add_input(reward_ph)
     reward_acc_H.add_alarm_connection(control_block_plus)
     reward_acc_H.add_alarm_connection(control_block_cross)
 
-    control_blockH.add_input(function_block1)
+    control_blockH.add_input(discretization_block)
     control_blockH.add_reward(function_block4)
     control_blockH.add_alarm_connection(control_block_plus)
     control_blockH.add_alarm_connection(control_block_cross)
@@ -251,6 +247,8 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     function_block7.add_input(function_block2)
 
     function_block8.add_input(control_blockH)
+
+    discretization_block.add_input(function_block1)
 
 
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
@@ -288,23 +286,22 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
         print('J ll CROSS at iteration ' + str(n) + ': ' + str(np.mean(J_cross)))
 
     # Tile data
-    hi_lev_params = agentH.Q.get_weights()
-    hi_lev_params = np.reshape(hi_lev_params, (8, n_tiles_high[0]**2))
+    hi_lev_params = agentH.Q.table
     max_q_val = np.zeros(n_tiles_high[0]**2)
     act_max_q_val = np.zeros(n_tiles_high[0]**2)
     for n in range(n_tiles_high[0]**2):
-        max_q_val[n] = np.amax(hi_lev_params[:,n])
-        act_max_q_val[n] = np.argmax(hi_lev_params[:,n])
-    max_q_val_tiled = np.reshape(max_q_val, (n_tiles_high[0], n_tiles_high[1]))
-    act_max_q_val_tiled = np.reshape(act_max_q_val, (n_tiles_high[0],
-                                                     n_tiles_high[1]))
+        max_q_val[n] = np.amax(hi_lev_params[n])
+        act_max_q_val[n] = np.argmax(hi_lev_params[n])
+    #max_q_val_tiled = np.reshape(max_q_val, (n_tiles_high[0], n_tiles_high[1]))
+    #act_max_q_val_tiled = np.reshape(act_max_q_val, (n_tiles_high[0],
+    #                                                 n_tiles_high[1]))
 
     mk_dir_recursive('./' + subdir + str(i))
 
     np.save(subdir+str(i)+'/low_level_dataset1_file', low_level_dataset_eval1)
     np.save(subdir+str(i)+'/low_level_dataset2_file', low_level_dataset_eval2)
-    np.save(subdir+str(i)+'/max_q_val_tiled_file', max_q_val_tiled)
-    np.save(subdir+str(i)+'/act_max_q_val_tiled_file', act_max_q_val_tiled)
+    np.save(subdir+str(i)+'/max_q_val_tiled_file', max_q_val)
+    np.save(subdir+str(i)+'/act_max_q_val_tiled_file', act_max_q_val)
     np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval)
 
     return
@@ -314,18 +311,18 @@ if __name__ == '__main__':
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') \
              + '_big_ghavamzade/'
-    alg_high = SARSALambdaContinuous
+    alg_high = SARSALambdaDiscrete
     alg_low = GPOMDP
     learning_rate_high = Parameter(value=8e-2)
     learning_rate_low = AdaptiveParameter(value=1e-2)
     n_jobs=1
     how_many = 1
-    n_runs = 50
+    n_runs = 20
     n_iterations = 20
     ep_per_run = 40
     low_ep_per_fit = 50
     mk_dir_recursive('./' + subdir)
-    force_symlink('./' + subdir, './latest')
+    force_symlink('./' + subdir, './latest_big_ghavamzade')
 
     params = {'learning_rate_high': learning_rate_high,
               'learning_rate_low': learning_rate_low,
