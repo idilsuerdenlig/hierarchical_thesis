@@ -246,7 +246,7 @@ def ghavamzade_plot(epochs):
         low_level_dataset1_eps = parse_eps(low_level_dataset1_run)
         low_level_dataset2_eps = parse_eps(low_level_dataset2_run)
 
-        traj_nos = random.sample(range(0, 30), 10)
+        traj_nos = random.sample(range(0, 28), 10)
         for traj_no in traj_nos:
             dataset_eval_vis.append(dataset_eval_epoch[traj_no])
             low_level_dataset1_vis.append(low_level_dataset1_eps[traj_no])

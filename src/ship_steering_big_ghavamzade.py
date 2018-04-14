@@ -28,6 +28,7 @@ from library.blocks.model_placeholder import PlaceHolder
 from library.blocks.mux_block import MuxBlock
 from library.blocks.hold_state import hold_state
 from library.blocks.discretization_block import DiscretizationBlock
+from library.agents.Q_lambda_discrete import QLambdaDiscrete
 
 class TerminationCondition(object):
 
@@ -238,7 +239,7 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     function_block4.add_input(function_block6)
     function_block4.add_input(reward_acc_H)
 
-    #function_block5.add_input(reward_ph)
+    function_block5.add_input(reward_ph)
     function_block5.add_input(function_block7)
 
     function_block6.add_input(reward_ph)
@@ -264,13 +265,12 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
     dataset_eval += dataset_eval_run
     print('J at start : ' + str(np.mean(J)))
-
     for n in range(n_runs):
         print('ITERATION', n)
+
         core.learn(n_episodes=n_iterations*ep_per_run, skip=True)
         dataset_eval_run = core.evaluate(n_episodes=ep_per_run)
         J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
-
         print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
         dataset_eval += dataset_eval_run
 
@@ -284,6 +284,10 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
 
         print('J ll PLUS at iteration  ' + str(n) + ': ' + str(np.mean(J_plus)))
         print('J ll CROSS at iteration ' + str(n) + ': ' + str(np.mean(J_cross)))
+        if n == 0:
+            epsilon = ExponentialDecayParameter(value=0.1, decay_exp=0.5)
+            piH.set_epsilon(epsilon)
+
 
     # Tile data
     hi_lev_params = agentH.Q.table
@@ -311,7 +315,7 @@ if __name__ == '__main__':
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') \
              + '_big_ghavamzade/'
-    alg_high = SARSALambdaDiscrete
+    alg_high = QLambdaDiscrete
     alg_low = GPOMDP
     learning_rate_high = Parameter(value=8e-2)
     learning_rate_low = AdaptiveParameter(value=1e-2)

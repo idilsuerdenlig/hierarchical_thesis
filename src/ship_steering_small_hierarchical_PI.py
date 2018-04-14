@@ -22,7 +22,7 @@ from joblib import Parallel, delayed
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.folder import *
 from library.blocks.functions.cost_cosine import cost_cosine
-from mushroom.distributions import GaussianDiagonalDistribution
+from mushroom.distributions import GaussianDiagonalDistribution, GaussianDistribution
 from library.policy.deterministic_control_policy import DeterministicControlPolicy
 from library.utils.callbacks.collect_distribution_parameter import CollectDistributionParameter
 
@@ -68,7 +68,9 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     # Policy 2
     pi2 = DeterministicControlPolicy(weights=np.array([0, 0]))
     mu2 = np.zeros(pi2.weights_size)
-    sigma2 = 1e-3 * np.ones(pi2.weights_size)
+    sigma2 = np.zeros(pi2.weights_size)
+    sigma2[0] = 3e-1
+    sigma2[1] = 1
     distribution2 = GaussianDiagonalDistribution(mu2, sigma2)
 
     # Agent 1
@@ -79,11 +81,12 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     agent1 = alg_high(policy=pi1, mdp_info=mdp_info_agent1, learning_rate=learning_rate1, features=features)
 
     # Agent 2
-    learning_rate2 = params.get('learning_rate_low')
+    eps = params.get('eps')
+    learning_rate_low = params.get('learning_rate_low')
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi*2, np.pi*2, (2,)),
                               action_space=mdp.info.action_space, gamma=mdp.info.gamma, horizon=100)
     agent2 = alg_low(distribution=distribution2, policy=pi2,
-                     mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
+                     mdp_info=mdp_info_agent2, eps=eps)
 
     # Control Block 1
     parameter_callback1 = CollectPolicyParameter(pi1)
@@ -116,6 +119,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
     error_acc.add_input(function_block1)
+    error_acc.add_alarm_connection(control_block2)
     control_block2.add_input(function_block1)
     control_block2.add_input(error_acc)
     control_block2.add_reward(function_block2)
@@ -159,10 +163,12 @@ if __name__ == '__main__':
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_small_hierarchical_PI/'
     alg_high = GPOMDP
-    alg_low = PGPE
+    alg_low = REPS
     learning_rate_high = AdaptiveParameter(value=10)
     learning_rate_low = AdaptiveParameter(value=5e-4)
-    how_many = 100
+    eps = 1
+
+    how_many = 1
     n_runs = 25
     n_iterations = 10
     ep_per_run = 20
@@ -170,10 +176,10 @@ if __name__ == '__main__':
     force_symlink('./' + subdir, 'latest')
 
 
-    params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low}
+    params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low, 'eps': eps}
     np.save(subdir + '/algorithm_params_dictionary', params)
     experiment_params = {'how_many': how_many, 'n_runs': n_runs,
                          'n_iterations': n_iterations, 'ep_per_run': ep_per_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
-    Js = Parallel(n_jobs=-1)(delayed(server_experiment_small)(alg_high, alg_low, params,
+    Js = Parallel(n_jobs=1)(delayed(server_experiment_small)(alg_high, alg_low, params,
                                                 subdir, i) for i in range(how_many))
