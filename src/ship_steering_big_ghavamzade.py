@@ -16,6 +16,7 @@ from mushroom.utils.folder import *
 from mushroom.environments import ShipSteering
 
 from library.core.hierarchical_core import HierarchicalCore
+from library.utils.callbacks.epsilon_update import EpsilonUpdate
 from library.blocks.computational_graph import ComputationalGraph
 from library.blocks.control_block import ControlBlock
 from library.blocks.functions.pick_state import pick_state
@@ -100,6 +101,8 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
                       mdp_info=mdp_info_agentH,
                       learning_rate=learning_rate,
                       lambda_coeff=0.9)
+
+    epsilon_update = EpsilonUpdate(piH)
 
     # Control Block H
     control_blockH = ControlBlock(name='control block H',
@@ -240,7 +243,7 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     function_block4.add_input(reward_acc_H)
 
     function_block5.add_input(reward_ph)
-    function_block5.add_input(function_block7)
+    #function_block5.add_input(function_block7)
 
     function_block6.add_input(reward_ph)
 
@@ -284,9 +287,10 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
 
         print('J ll PLUS at iteration  ' + str(n) + ': ' + str(np.mean(J_plus)))
         print('J ll CROSS at iteration ' + str(n) + ': ' + str(np.mean(J_cross)))
-        if n == 0:
-            epsilon = ExponentialDecayParameter(value=0.1, decay_exp=0.5)
-            piH.set_epsilon(epsilon)
+        if n == 4:
+            control_blockH.callbacks = [epsilon_update]
+
+
 
 
     # Tile data
@@ -319,9 +323,9 @@ if __name__ == '__main__':
     alg_low = GPOMDP
     learning_rate_high = Parameter(value=8e-2)
     learning_rate_low = AdaptiveParameter(value=1e-2)
-    n_jobs=1
-    how_many = 1
-    n_runs = 20
+    n_jobs = -1
+    how_many = 100
+    n_runs = 25
     n_iterations = 20
     ep_per_run = 40
     low_ep_per_fit = 50
