@@ -242,8 +242,8 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     function_block4.add_input(function_block6)
     function_block4.add_input(reward_acc_H)
 
-    function_block5.add_input(reward_ph)
-    #function_block5.add_input(function_block7)
+    #function_block5.add_input(reward_ph)
+    function_block5.add_input(function_block7)
 
     function_block6.add_input(reward_ph)
 
