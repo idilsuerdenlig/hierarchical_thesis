@@ -88,6 +88,9 @@ class ShipSteeringMultiGate(Environment):
 
         if state is None:
             self._state = np.zeros(5)
+            self._state[0] = 500
+            self._state[1] = 500
+
         else:
             self._state = state
 
@@ -135,7 +138,7 @@ class ShipSteeringMultiGate(Environment):
                     new_state[4] = 4
                     absorbing = True
             else:
-                reward = -1
+                reward = 0
                 absorbing = False
 
         self._state = new_state
