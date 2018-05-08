@@ -120,10 +120,12 @@ class Segway(Environment):
 
         #angular acceleration[rad / s ^ 2]
 
-        dOmegaP = -(h2*self.l*self.Mp*self.r*np.sin(alpha)*omegaP**2 - self.g*h1*self.l*self.Mp*np.sin(alpha)
-                    +(h2+h1)*u)/(h1*h3-h2**2)
-        dOmegaR = (h3*self.l*self.Mp*self.r*np.sin(alpha)*omegaP**2 - self.g*h2*self.l*self.Mp*np.sin(alpha)
-                    +(h3+h2)*u)/(h1*h3-h2**2)
+        dOmegaP = -(h2*self.l*self.Mp*self.r*np.sin(alpha)*omegaP**2 -
+                    self.g*h1*self.l*self.Mp*np.sin(alpha) + (h2+h1)*u)\
+                  / (h1*h3-h2**2)
+        dOmegaR = (h3*self.l*self.Mp*self.r*np.sin(alpha)*omegaP**2 -
+                   self.g*h2*self.l*self.Mp*np.sin(alpha) + (h3+h2)*u)\
+                  / (h1*h3-h2**2)
 
         dx = list()
         dx.append(omegaP)
