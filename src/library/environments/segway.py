@@ -23,16 +23,7 @@ class Segway(Environment):
         """
         # MDP parameters
 
-        self.gamma = 0.99
-        self.stateDimensionality = 3
-        self.actionDimensionality = 1
-        self.rewardDimensionality = 1
-        self.statesNumber = 0
-        self.actionsNumber = 0
-        self.isFiniteHorizon = False
-        self.isAverageReward = False
-        self.isEpisodic = True
-        self.horizon = 300
+        gamma = 0.99
 
         self.Mr = 0.3 * 2
         self.Mp = 2.55
@@ -42,25 +33,23 @@ class Segway(Environment):
         self.r = 5.5e-2
         self.dt = 1e-2
         self.g = 9.81
-        self.mup = 1e-4
-        self.mur = 6.5e-3
-        self._max_omega = np.pi*25/180
-        self.max_u = np.pi*5/180
+        #self._max_omega = np.pi*25/180
+        #self.max_u = np.pi*5/180
 
         self._random = random_start
 
-        high = np.array([np.pi, self._max_omega, self._max_omega])
+        high = np.array([np.pi, 100, 100])
 
         # MDP properties
         observation_space = spaces.Box(low=-high, high=high)
-        action_space = spaces.Box(low=np.array([-self.max_u]),
-                                  high=np.array([self.max_u]))
-        horizon = 5000
-        mdp_info = MDPInfo(observation_space, action_space, self.gamma, horizon)
+        action_space = spaces.Box(low=np.array([-np.inf]),
+                                  high=np.array([np.inf]))
+        horizon = 300
+        mdp_info = MDPInfo(observation_space, action_space, gamma, horizon)
 
         # Visualization
         self._viewer = Viewer(2.5*self.l, 2.5*self.l)
-        self._last_u = None
+        self._last_x = 0
 
         super(Segway, self).__init__(mdp_info)
 
@@ -75,46 +64,41 @@ class Segway(Environment):
         else:
             self._state = state
             self._state[0] = normalize_angle(self._state[0])
-            self._state[1] = np.maximum(-self._max_omega,
-                                        np.minimum(self._state[1],
-                                                   self._max_omega))
-            self._state[2] = np.maximum(-self._max_omega,
-                                        np.minimum(self._state[2],
-                                                   self._max_omega))
+
+        self._last_x = 0
 
         return self._state
 
     def step(self, action):
 
-        u = np.maximum(-self.max_u, np.minimum(self.max_u, action[0]))
+        u = action[0] #np.maximum(-self.max_u, np.minimum(self.max_u, action[0]))
         new_state = odeint(self._dynamics, self._state, [0, self.dt],
                            (u,))
 
         self._state = np.array(new_state[-1])
         self._state[0] = normalize_angle(self._state[0])
-        self._state[1] = np.maximum(-self._max_omega,
-                                    np.minimum(self._state[1],
-                                               self._max_omega))
-        self._state[2] = np.maximum(-self._max_omega,
-                                    np.minimum(self._state[1],
-                                               self._max_omega))
 
-        Q = np.diag([3.0, 0.1, 0.1])
-        R = np.array([0.01])
+        if abs(self._state[0]) > np.pi / 2:
+            absorbing = True
+            reward = -10000
+        else:
+            absorbing = False
+            Q = np.diag([3.0, 0.1, 0.1])
+            R = np.array([0.01])
 
-        x = self._state
+            x = self._state
 
-        J = x.dot(Q).dot(x) + u**2*R
+            J = x.dot(Q).dot(x) + u**2*R
 
-        reward = -J[0];
+            reward = -J[0]
 
-        return self._state, reward, False, {}
+        return self._state, reward, absorbing, {}
 
     def _dynamics(self, state, t, u):
 
         alpha = state[0]
-        d_alpha = np.maximum(-self._max_omega,
-                             np.minimum(state[1], self._max_omega))
+        d_alpha = state[1] #np.maximum(-self._max_omega,
+                           #  np.minimum(state[1], self._max_omega))
 
         h1 = (self.Mr+self.Mp)*(self.r**2)+self.Ir
         h2 = self.Mp*self.r*self.l*np.cos(alpha)
@@ -143,11 +127,13 @@ class Segway(Environment):
         start = 1.25*self.l*np.ones(2)
         end = 1.25*self.l*np.ones(2)
 
-        dx = self._state[0] * self.r
+        dx = self._state[2] * self.r * self.dt
 
-        start[0] += dx
+        self._last_x += dx
 
-        end[0] += self.l*np.sin(-self._state[0]) + dx
+        start[0] += self._last_x
+
+        end[0] += self.l*np.sin(-self._state[0]) + self._last_x
         end[1] += self.l*np.cos(-self._state[0])
 
         self._viewer.line(start, end)

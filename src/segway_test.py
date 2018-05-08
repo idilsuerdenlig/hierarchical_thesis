@@ -1,15 +1,14 @@
 import numpy as np
 
-from mushroom.algorithms.actor_critic import SAC_AVG
 from mushroom.core import Core
-from mushroom.features import Features
-from mushroom.features.tiles import Tiles
+from mushroom.algorithms.policy_search import *
+from mushroom.policy import DeterministicPolicy
+from mushroom.distributions import GaussianDiagonalDistribution
 from mushroom.approximators import Regressor
 from mushroom.approximators.parametric import LinearApproximator
-from mushroom.policy import StateLogStdGaussianPolicy, StateStdGaussianPolicy
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.callbacks import CollectDataset
-from mushroom.utils.parameters import Parameter
+from mushroom.utils.parameters import AdaptiveParameter
 from library.environments.segway import Segway
 
 from tqdm import tqdm
@@ -23,33 +22,18 @@ def experiment(n_epochs, n_episodes):
     mdp = Segway()
 
     # Agent
-    n_tilings = 11
-    alpha_r = Parameter(.0001)
-    alpha_theta = Parameter(0.001/n_tilings)
-    alpha_v = Parameter(.1/n_tilings)
-
-    tilings_v = Tiles.generate(10, [5, 5, 5],
-                               mdp.info.observation_space.low,
-                               mdp.info.observation_space.high+1e-3)
-    psi = Features(tilings=tilings_v)
-
-    mu = Regressor(LinearApproximator,
+    approximator = Regressor(LinearApproximator,
                    input_shape=mdp.info.observation_space.shape,
                    output_shape=mdp.info.action_space.shape)
 
-    std = Regressor(LinearApproximator,
-                    input_shape=mdp.info.observation_space.shape,
-                    output_shape=mdp.info.action_space.shape)
+    policy = DeterministicPolicy(approximator)
 
-    std_0 = np.sqrt(1.0)
-    std.set_weights(np.log(std_0)/n_tilings*np.ones(std.weights_size))
+    mu = -0.3*np.ones(3)
+    sigma = 1e-0*np.ones(3)
+    dist = GaussianDiagonalDistribution(mu, sigma)
 
-    policy = StateLogStdGaussianPolicy(mu, std)
+    agent = REPS(dist, policy, mdp.info, 1.0)
 
-    agent = SAC_AVG(policy, mdp.info,
-                    alpha_theta, alpha_v, alpha_r,
-                    lambda_par=0.5,
-                    value_function_features=psi)
 
     # Train
     dataset_callback = CollectDataset()
@@ -57,7 +41,7 @@ def experiment(n_epochs, n_episodes):
 
     for i in range(n_epochs):
         core.learn(n_episodes=n_episodes,
-                   n_steps_per_fit=1, render=False)
+                   n_episodes_per_fit=n_episodes, render=True)
         J = compute_J(dataset_callback.get(), gamma=1.0)
         dataset_callback.clean()
         print('Reward at iteration ' + str(i) + ': ' +
@@ -69,6 +53,6 @@ def experiment(n_epochs, n_episodes):
 
 if __name__ == '__main__':
     n_epochs = 24
-    n_episodes = 5
+    n_episodes = 10
 
     experiment(n_epochs, n_episodes)
