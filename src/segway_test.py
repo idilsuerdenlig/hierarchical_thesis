@@ -28,11 +28,12 @@ def experiment(n_epochs, n_episodes):
 
     policy = DeterministicPolicy(approximator)
 
-    mu = -0.3*np.ones(3)
+    mu = np.zeros(3)
     sigma = 1e-0*np.ones(3)
     dist = GaussianDiagonalDistribution(mu, sigma)
 
-    agent = REPS(dist, policy, mdp.info, 1.0)
+    lr = AdaptiveParameter(1e-1)
+    agent = PGPE(dist, policy, mdp.info, lr)
 
 
     # Train
@@ -41,7 +42,7 @@ def experiment(n_epochs, n_episodes):
 
     for i in range(n_epochs):
         core.learn(n_episodes=n_episodes,
-                   n_episodes_per_fit=n_episodes, render=True)
+                   n_episodes_per_fit=n_episodes, render=False)
         J = compute_J(dataset_callback.get(), gamma=1.0)
         dataset_callback.clean()
         print('Reward at iteration ' + str(i) + ': ' +
@@ -53,6 +54,6 @@ def experiment(n_epochs, n_episodes):
 
 if __name__ == '__main__':
     n_epochs = 24
-    n_episodes = 10
+    n_episodes = 100
 
     experiment(n_epochs, n_episodes)
