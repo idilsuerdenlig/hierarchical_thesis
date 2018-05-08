@@ -4,6 +4,7 @@ from scipy.integrate import odeint
 from mushroom.environments import Environment, MDPInfo
 from mushroom.utils import spaces
 from mushroom.utils.angles_utils import normalize_angle
+from mushroom.utils.viewer import Viewer
 
 
 class Segway(Environment):
@@ -37,7 +38,7 @@ class Segway(Environment):
         self.Mp = 2.55
         self.Ip = 2.6e-2
         self.Ir = 4.54e-4 * 2
-        self.l = 13.8e-2
+        self.l = 2*13.8e-2
         self.r = 5.5e-2
         self.dt = 1e-2
         self.g = 9.81
@@ -56,6 +57,10 @@ class Segway(Environment):
                                   high=np.array([self.max_u]))
         horizon = 5000
         mdp_info = MDPInfo(observation_space, action_space, self.gamma, horizon)
+
+        # Visualization
+        self._viewer = Viewer(2.5*self.l, 2.5*self.l)
+        self._last_u = None
 
         super(Segway, self).__init__(mdp_info)
 
@@ -99,7 +104,7 @@ class Segway(Environment):
 
         x = self._state
 
-        J = np.transpose(x) * Q * x + np.transpose(u) * R * u;
+        J = x.dot(Q).dot(x) + u**2*R
 
         reward = -J[0];
 
@@ -133,6 +138,22 @@ class Segway(Environment):
         dx.append(dOmegaR)
 
         return dx
+
+    def render(self, mode='human'):
+        start = 1.25*self.l*np.ones(2)
+        end = 1.25*self.l*np.ones(2)
+
+        dx = self._state[0] * self.r
+
+        start[0] += dx
+
+        end[0] += self.l*np.sin(-self._state[0]) + dx
+        end[1] += self.l*np.cos(-self._state[0])
+
+        self._viewer.line(start, end)
+        self._viewer.circle(start, self.r)
+
+        self._viewer.display(self.dt)
 
 
 
