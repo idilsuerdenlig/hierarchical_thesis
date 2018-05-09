@@ -23,18 +23,17 @@ class Segway(Environment):
         """
         # MDP parameters
 
-        gamma = 0.99
+        gamma = 0.97
 
         self.Mr = 0.3 * 2
         self.Mp = 2.55
         self.Ip = 2.6e-2
         self.Ir = 4.54e-4 * 2
-        self.l = 2*13.8e-2
+        self.l = 13.8e-2
         self.r = 5.5e-2
         self.dt = 1e-2
         self.g = 9.81
-        #self._max_omega = np.pi*25/180
-        #self.max_u = np.pi*5/180
+        self.max_u = 5
 
         self._random = random_start
 
@@ -42,13 +41,13 @@ class Segway(Environment):
 
         # MDP properties
         observation_space = spaces.Box(low=-high, high=high)
-        action_space = spaces.Box(low=np.array([-np.inf]),
-                                  high=np.array([np.inf]))
+        action_space = spaces.Box(low=np.array([-self.max_u]),
+                                  high=np.array([self.max_u]))
         horizon = 300
         mdp_info = MDPInfo(observation_space, action_space, gamma, horizon)
 
         # Visualization
-        self._viewer = Viewer(2.5*self.l, 2.5*self.l)
+        self._viewer = Viewer(5*self.l, 5*self.l)
         self._last_x = 0
 
         super(Segway, self).__init__(mdp_info)
@@ -71,7 +70,7 @@ class Segway(Environment):
 
     def step(self, action):
 
-        u = action[0] #np.maximum(-self.max_u, np.minimum(self.max_u, action[0]))
+        u = np.maximum(-self.max_u, np.minimum(self.max_u, action[0]))
         new_state = odeint(self._dynamics, self._state, [0, self.dt],
                            (u,))
 
@@ -124,17 +123,24 @@ class Segway(Environment):
         return dx
 
     def render(self, mode='human'):
-        start = 1.25*self.l*np.ones(2)
-        end = 1.25*self.l*np.ones(2)
+        start = 2.5*self.l*np.ones(2)
+        end = 2.5*self.l*np.ones(2)
 
-        dx = self._state[2] * self.r * self.dt
+        dx = -self._state[2] * self.r * self.dt
 
         self._last_x += dx
 
-        start[0] += self._last_x
+        if self._last_x > 2.5*self.l or self._last_x < -2.5*self.l:
+            self._last_x = (2.5*self.l+self._last_x)%(5*self.l) - 2.5*self.l
 
-        end[0] += self.l*np.sin(-self._state[0]) + self._last_x
-        end[1] += self.l*np.cos(-self._state[0])
+        start[0] += self._last_x
+        end[0] += -2*self.l*np.sin(self._state[0]) + self._last_x
+        end[1] += 2*self.l*np.cos(self._state[0])
+
+        if (start[0] > 5*self.l and end[0] > 5*self.l) \
+                or (start[0] < 0 and end[0] < 0):
+            start[0] = start[0] % 5*self.l
+            end[0] = end[0] % 5*self.l
 
         self._viewer.line(start, end)
         self._viewer.circle(start, self.r)
