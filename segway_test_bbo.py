@@ -27,37 +27,17 @@ def experiment(n_epochs, n_episodes, n_ep_per_fit):
 
 
     # Features
-    n_tilings = 10
-
-    tilings = Tiles.generate(n_tilings - 1, [15, 15, 15],
-                             mdp.info.observation_space.low,
-                             mdp.info.observation_space.high + 1e-3)
-
-    phi = Features(tilings=tilings)
-    phi = None
-
-
-    tilings_v = tilings + Tiles.generate(1, [1, 1, 1],
-                                         mdp.info.observation_space.low,
-                                         mdp.info.observation_space.high + 1e-3)
-
-    psi = Features(tilings=tilings_v)
-
-    mu = Regressor(LinearApproximator,
-                   #input_shape=(phi.size,),
+    approximator = Regressor(LinearApproximator,
                    input_shape=mdp.info.observation_space.shape,
                    output_shape=mdp.info.action_space.shape)
 
-    sigma = 2e-1*np.eye(1)
-    policy = GaussianPolicy(mu, sigma)
 
-    alpha_theta = Parameter(5e-7)
-    alpha_omega = Parameter(5e-1/n_tilings)
-    alpha_v = Parameter(5e-1/n_tilings)
-    agent = COPDAC_Q(policy, mu, mdp.info,
-                 alpha_theta, alpha_omega, alpha_v,
-                 value_function_features=psi,
-                 policy_features=phi)
+    mu = np.zeros(3)
+    sigma = 2e-0*np.ones(3)
+    policy = DeterministicPolicy(approximator)
+    dist = GaussianDiagonalDistribution(mu, sigma)
+
+    agent = REPS(dist, policy, mdp.info, 0.1)
 
 
     # Train

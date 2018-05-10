@@ -37,7 +37,7 @@ class Segway(Environment):
 
         self._random = random_start
 
-        high = np.array([np.pi, 100, 100])
+        high = np.array([np.pi, 15, 75])
 
         # MDP properties
         observation_space = spaces.Box(low=-high, high=high)
@@ -91,13 +91,14 @@ class Segway(Environment):
 
             reward = -J[0]
 
+            reward = np.sin(self._state[0])
+
         return self._state, reward, absorbing, {}
 
     def _dynamics(self, state, t, u):
 
         alpha = state[0]
-        d_alpha = state[1] #np.maximum(-self._max_omega,
-                           #  np.minimum(state[1], self._max_omega))
+        d_alpha = state[1]
 
         h1 = (self.Mr+self.Mp)*(self.r**2)+self.Ir
         h2 = self.Mp*self.r*self.l*np.cos(alpha)
@@ -105,8 +106,6 @@ class Segway(Environment):
 
 
         omegaP = d_alpha
-
-        #angular acceleration[rad / s ^ 2]
 
         dOmegaP = -(h2*self.l*self.Mp*self.r*np.sin(alpha)*omegaP**2 -
                     self.g*h1*self.l*self.Mp*np.sin(alpha) + (h2+h1)*u)\
