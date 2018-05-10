@@ -25,19 +25,22 @@ def experiment(n_epochs, n_episodes, n_ep_per_fit):
     # MDP
     mdp = Segway()
 
+    basis = PolynomialBasis.generate(1, 3)
+    phi = Features(basis_list=basis[1:])
+
 
     # Features
     approximator = Regressor(LinearApproximator,
-                   input_shape=mdp.info.observation_space.shape,
+                   input_shape=(phi.size,),
                    output_shape=mdp.info.action_space.shape)
 
-
-    mu = np.zeros(3)
-    sigma = 2e-0*np.ones(3)
+    n_weights = approximator.weights_size
+    mu = np.zeros(n_weights)
+    sigma = 2e-0*np.ones(n_weights)
     policy = DeterministicPolicy(approximator)
     dist = GaussianDiagonalDistribution(mu, sigma)
 
-    agent = REPS(dist, policy, mdp.info, 0.1)
+    agent = REPS(dist, policy, mdp.info, 0.1, phi)
 
 
     # Train
@@ -46,9 +49,14 @@ def experiment(n_epochs, n_episodes, n_ep_per_fit):
 
     for i in range(n_epochs):
         core.learn(n_episodes=n_episodes,
-                   n_steps_per_fit=1, render=False)
+                   n_episodes_per_fit=n_ep_per_fit, render=False)
         J = compute_J(dataset_callback.get(), gamma=mdp.info.gamma)
         dataset_callback.clean()
+
+        p = dist.get_parameters()
+
+        print('mu:    ', p[:n_weights])
+        print('sigma: ', p[n_weights:])
         print('Reward at iteration ' + str(i) + ': ' +
               str(np.sum(J)/n_episodes))
 
@@ -57,7 +65,7 @@ def experiment(n_epochs, n_episodes, n_ep_per_fit):
     core.evaluate(n_episodes=3, render=True)
 
 if __name__ == '__main__':
-    n_epochs = 24
+    n_epochs = 10
     n_episodes = 100
     n_ep_per_fit = 10
 

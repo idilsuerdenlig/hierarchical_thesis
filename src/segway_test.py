@@ -34,7 +34,6 @@ def experiment(n_epochs, n_episodes, n_ep_per_fit):
                              mdp.info.observation_space.high + 1e-3)
 
     phi = Features(tilings=tilings)
-    phi = None
 
 
     tilings_v = tilings + Tiles.generate(1, [1, 1, 1],
@@ -44,8 +43,8 @@ def experiment(n_epochs, n_episodes, n_ep_per_fit):
     psi = Features(tilings=tilings_v)
 
     mu = Regressor(LinearApproximator,
-                   #input_shape=(phi.size,),
-                   input_shape=mdp.info.observation_space.shape,
+                   input_shape=(phi.size,),
+                   #input_shape=mdp.info.observation_space.shape,
                    output_shape=mdp.info.action_space.shape)
 
     sigma = 2e-1*np.eye(1)
