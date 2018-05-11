@@ -2,16 +2,13 @@ import numpy as np
 
 from mushroom.core import Core
 from mushroom.algorithms.policy_search import *
-from mushroom.algorithms.actor_critic import COPDAC_Q
-from mushroom.policy import DeterministicPolicy, GaussianPolicy
-from mushroom.distributions import GaussianDiagonalDistribution, GaussianDistribution
+from mushroom.policy import DeterministicPolicy
+from mushroom.distributions import GaussianDiagonalDistribution
 from mushroom.approximators import Regressor
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.callbacks import CollectDataset
-from mushroom.utils.parameters import AdaptiveParameter, Parameter
 from mushroom.features.basis import PolynomialBasis
-from mushroom.features.tiles import Tiles
 from mushroom.features import Features
 from library.environments.segway import Segway
 

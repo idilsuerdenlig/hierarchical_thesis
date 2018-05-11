@@ -1,16 +1,13 @@
 import numpy as np
 
 from mushroom.core import Core
-from mushroom.algorithms.policy_search import *
 from mushroom.algorithms.actor_critic import COPDAC_Q
-from mushroom.policy import DeterministicPolicy, GaussianPolicy
-from mushroom.distributions import GaussianDiagonalDistribution, GaussianDistribution
+from mushroom.policy import GaussianPolicy
 from mushroom.approximators import Regressor
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.callbacks import CollectDataset
-from mushroom.utils.parameters import AdaptiveParameter, Parameter
-from mushroom.features.basis import PolynomialBasis
+from mushroom.utils.parameters import Parameter
 from mushroom.features.tiles import Tiles
 from mushroom.features import Features
 from library.environments.segway import Segway
@@ -19,12 +16,11 @@ from tqdm import tqdm
 tqdm.monitor_interval = 0
 
 
-def experiment(n_epochs, n_episodes, n_ep_per_fit):
+def experiment(n_epochs, n_episodes):
     np.random.seed()
 
     # MDP
     mdp = Segway()
-
 
     # Features
     n_tilings = 10
@@ -44,7 +40,6 @@ def experiment(n_epochs, n_episodes, n_ep_per_fit):
 
     mu = Regressor(LinearApproximator,
                    input_shape=(phi.size,),
-                   #input_shape=mdp.info.observation_space.shape,
                    output_shape=mdp.info.action_space.shape)
 
     sigma = 2e-1*np.eye(1)
@@ -78,6 +73,5 @@ def experiment(n_epochs, n_episodes, n_ep_per_fit):
 if __name__ == '__main__':
     n_epochs = 24
     n_episodes = 100
-    n_ep_per_fit = 10
 
-    experiment(n_epochs, n_episodes, n_ep_per_fit)
+    experiment(n_epochs, n_episodes)
