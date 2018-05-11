@@ -132,7 +132,7 @@ class SegwayLinearMotion(Environment):
         start = 1.25*self._goal_pos*np.ones(2)
         end = 1.25*self._goal_pos*np.ones(2)
 
-        goal = start + np.array([0, -self.r])
+        goal = start + np.array([self._goal_pos, -self.r])
         position = self._goal_pos - self._state[0]
         start[0] += position
         end[0] += -2*self.l*np.sin(self._state[1]) + position
