@@ -60,22 +60,23 @@ class SegwayLinearMotion(Environment):
             else:
                 angle = -np.pi/8
 
-            self._state = np.array([0., angle, 0., 0.])
+            self._state = np.array([-self._goal_pos, angle, 0., 0.])
         else:
             self._state = state
             self._state[1] = normalize_angle(self._state[1])
 
-        self._last_x = 0
 
         return self._state
 
     def step(self, action):
 
         u = np.maximum(-self.max_u, np.minimum(self.max_u, action[0]))
-        new_state = odeint(self._dynamics, self._state, [0, self.dt],
+        new_state = odeint(self._dynamics,
+                           np.array([self._state[0]+self._goal_pos, self._state[1], self._state[2], self._state[3]]),
+                           [0, self.dt],
                            (u,))
-
         self._state = np.array(new_state[-1])
+        self._state[0] = self._state[0] - self._goal_pos
         self._state[1] = normalize_angle(self._state[1])
 
         if abs(self._state[1]) > np.pi / 2:
@@ -83,9 +84,9 @@ class SegwayLinearMotion(Environment):
             reward = -10000
         else:
             absorbing = False
-            Q = np.diag([3.0, 1.0, 0.1, 0.1])
+            Q = np.diag([1.0, 1.0, 0.1, 0.1])
 
-            x = self._state - [self._goal_pos, 0.0, 0.0, 0.0]
+            x = self._state
 
             J = x.dot(Q).dot(x)
 
@@ -128,11 +129,11 @@ class SegwayLinearMotion(Environment):
         start = 1.25*self._goal_pos*np.ones(2)
         end = 1.25*self._goal_pos*np.ones(2)
 
-        goal = start + np.array([self._goal_pos, -self.r])
+        goal = start + np.array([0, -self.r])
 
-
-        start[0] += self._state[0]
-        end[0] += -2*self.l*np.sin(self._state[1]) + self._state[0]
+        position = self._state[0] + self._goal_pos
+        start[0] += position
+        end[0] += -2*self.l*np.sin(self._state[1]) + position
         end[1] += 2*self.l*np.cos(self._state[1])
 
         if start[0] > 2.5*self._goal_pos or start[0] < 0:
