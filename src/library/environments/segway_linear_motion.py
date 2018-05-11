@@ -60,7 +60,7 @@ class SegwayLinearMotion(Environment):
             else:
                 angle = -np.pi/8
 
-            self._state = np.array([-self._goal_pos, angle, 0., 0.])
+            self._state = np.array([self._goal_pos, angle, 0., 0.])
         else:
             self._state = state
             self._state[1] = normalize_angle(self._state[1])
@@ -72,31 +72,34 @@ class SegwayLinearMotion(Environment):
 
         u = np.maximum(-self.max_u, np.minimum(self.max_u, action[0]))
         new_state = odeint(self._dynamics,
-                           np.array([self._state[0]+self._goal_pos, self._state[1], self._state[2], self._state[3]]),
+                           np.array([self._goal_pos - self._state[0], self._state[1], self._state[2], self._state[3]]),
                            [0, self.dt],
                            (u,))
         self._state = np.array(new_state[-1])
-        self._state[0] = self._state[0] - self._goal_pos
-        self._state[1] = normalize_angle(self._state[1])
+        #print('actual pos   :', self._state[0])
 
+        self._state[0] = self._goal_pos - self._state[0]
+        #print('error    :', self._state[0])
+        self._state[1] = normalize_angle(self._state[1])
         if abs(self._state[1]) > np.pi / 2:
             absorbing = True
             reward = -10000
         else:
             absorbing = False
-            Q = np.diag([1.0, 1.0, 0.1, 0.1])
+            Q = np.diag([3.0, 1.0, 0.1, 0.01])
 
             x = self._state
 
             J = x.dot(Q).dot(x)
-
+            #print('x    :', x)
             reward = -J
-
+            #print('reward   :', reward)
         return self._state, reward, absorbing, {}
 
     def _dynamics(self, state, t, u):
 
         position = state[0]
+
         alpha = state[1]
         d_alpha = state[2]
         d_beta = state[3]
@@ -130,8 +133,7 @@ class SegwayLinearMotion(Environment):
         end = 1.25*self._goal_pos*np.ones(2)
 
         goal = start + np.array([0, -self.r])
-
-        position = self._state[0] + self._goal_pos
+        position = self._goal_pos - self._state[0]
         start[0] += position
         end[0] += -2*self.l*np.sin(self._state[1]) + position
         end[1] += 2*self.l*np.cos(self._state[1])
@@ -144,6 +146,7 @@ class SegwayLinearMotion(Environment):
 
         self._viewer.line(start, end)
         self._viewer.circle(start, self.r)
+        print('goal circle  :', goal)
         self._viewer.circle(goal, radius=0.01, color=(255, 0, 0))
 
         self._viewer.display(self.dt)
