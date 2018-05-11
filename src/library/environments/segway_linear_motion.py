@@ -12,7 +12,7 @@ class SegwayLinearMotion(Environment):
     The Segway environment (continuous version) as presented in:
     "Deep Learning for Actor-Critic Reinforcement Learning". Xueli Jia. 2015.
     """
-    def __init__(self, random_start=False, goal_pos=5.0):
+    def __init__(self, random_start=False, goal_pos=1.0):
         """
         Constructor.
 
@@ -49,8 +49,7 @@ class SegwayLinearMotion(Environment):
         mdp_info = MDPInfo(observation_space, action_space, gamma, horizon)
 
         # Visualization
-        self._viewer = Viewer(5*self.l, 5*self.l)
-        self._last_x = 0
+        self._viewer = Viewer(2.5*goal_pos, 2.5*goal_pos)
 
         super(SegwayLinearMotion, self).__init__(mdp_info)
 
@@ -126,22 +125,23 @@ class SegwayLinearMotion(Environment):
         return dx
 
     def render(self, mode='human'):
-        start = 2.5*self.l*np.ones(2)
-        end = 2.5*self.l*np.ones(2)
+        start = 1.25*self._goal_pos*np.ones(2)
+        end = 1.25*self._goal_pos*np.ones(2)
+
+        goal = start + np.array([self._goal_pos, -self.r])
 
 
         start[0] += self._state[0]
         end[0] += -2*self.l*np.sin(self._state[1]) + self._state[0]
         end[1] += 2*self.l*np.cos(self._state[1])
 
-        if (start[0] > 5*self.l and end[0] > 5*self.l) \
-                or (start[0] < 0 and end[0] < 0):
-            start[0] = start[0] % 5*self.l
-            end[0] = end[0] % 5*self.l
+        if start[0] > 2.5*self._goal_pos or start[0] < 0:
+            start[0] = (start[0] + 2.5*self.l) % 5*self.l - 2.5*self.l
+            end[0] = (end[0] + 2.5*self.l) % 5*self.l - 2.5*self.l
 
         self._viewer.line(start, end)
         self._viewer.circle(start, self.r)
-        self._viewer.circle(center=np.array([5.0, 1.0]), radius=1, color=(255, 0, 0))
+        self._viewer.circle(goal, radius=0.01, color=(255, 0, 0))
 
         self._viewer.display(self.dt)
 
