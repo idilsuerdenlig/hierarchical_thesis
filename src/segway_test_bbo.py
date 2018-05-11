@@ -40,7 +40,7 @@ def experiment(n_epochs, n_episodes, n_ep_per_fit):
     policy = DeterministicPolicy(approximator)
     dist = GaussianDiagonalDistribution(mu, sigma)
 
-    agent = REPS(dist, policy, mdp.info, 0.1, phi)
+    agent = REPS(dist, policy, mdp.info, 0.05, phi)
 
 
     # Train
@@ -65,8 +65,8 @@ def experiment(n_epochs, n_episodes, n_ep_per_fit):
     core.evaluate(n_episodes=3, render=True)
 
 if __name__ == '__main__':
-    n_epochs = 10
+    n_epochs = 20
     n_episodes = 100
-    n_ep_per_fit = 10
+    n_ep_per_fit = 25
 
     experiment(n_epochs, n_episodes, n_ep_per_fit)

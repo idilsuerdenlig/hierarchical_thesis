@@ -83,15 +83,12 @@ class Segway(Environment):
         else:
             absorbing = False
             Q = np.diag([3.0, 0.1, 0.1])
-            R = np.array([0.01])
 
             x = self._state
 
-            J = x.dot(Q).dot(x) + u**2*R
+            J = x.dot(Q).dot(x)
 
-            reward = -J[0]
-
-            reward = np.sin(self._state[0])
+            reward = -J
 
         return self._state, reward, absorbing, {}
 
