@@ -84,7 +84,7 @@ class SegwayLinearMotion(Environment):
             reward = -10000
         else:
             absorbing = False
-            Q = np.diag([3.0, 3.0, 0.1, 0.1])
+            Q = np.diag([3.0, 1.0, 0.1, 0.1])
 
             x = self._state - [self._goal_pos, 0.0, 0.0, 0.0]
 
@@ -129,15 +129,9 @@ class SegwayLinearMotion(Environment):
         start = 2.5*self.l*np.ones(2)
         end = 2.5*self.l*np.ones(2)
 
-        dx = -self._state[3] * self.r * self.dt
 
-        self._last_x += dx
-
-        if self._last_x > 2.5*self.l or self._last_x < -2.5*self.l:
-            self._last_x = (2.5*self.l+self._last_x)%(5*self.l) - 2.5*self.l
-
-        start[0] += self._last_x
-        end[0] += -2*self.l*np.sin(self._state[1]) + self._last_x
+        start[0] += self._state[0]
+        end[0] += -2*self.l*np.sin(self._state[1]) + self._state[0]
         end[1] += 2*self.l*np.cos(self._state[1])
 
         if (start[0] > 5*self.l and end[0] > 5*self.l) \
@@ -147,6 +141,7 @@ class SegwayLinearMotion(Environment):
 
         self._viewer.line(start, end)
         self._viewer.circle(start, self.r)
+        self._viewer.circle(center=np.array([5.0, 1.0]), radius=1, color=(255, 0, 0))
 
         self._viewer.display(self.dt)
 
