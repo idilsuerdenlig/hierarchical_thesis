@@ -1,0 +1,199 @@
+import numpy as np
+
+from mushroom.environments import Environment, MDPInfo
+from mushroom.utils import spaces
+from mushroom.utils.angles_utils import normalize_angle,\
+    shortest_angular_distance
+from mushroom.utils.viewer import Viewer
+
+
+class PreyPredator(Environment):
+    """
+    A prey-predator environment environment. A Predator must catch a faster prey
+    in an environment with obstacles.
+    """
+    def __init__(self):
+        self._rotation_radius = 0.6
+        self._catch_radius = 0.4
+
+        self._v_prey = 0.11
+        self._v_predator = 0.1
+        self._dt = 0.1
+
+        self._omega_prey = self._v_prey / self._rotation_radius
+        self._omega_predator = self._v_predator / self._rotation_radius
+
+        self._max_x = 5.0
+        self._max_y = 5.0
+
+        self._obstacles = [
+            (np.array([self._max_x/5,
+                       self._max_y - 3.5*self._catch_radius]),
+             np.array([self._max_x,
+                       self._max_y - 3.5*self._catch_radius])),
+
+            (np.array([-3/5*self._max_x,
+                       self._max_y/4]),
+             np.array([-3/5*self._max_x,
+                       -2/5*self._max_y])),
+
+            (np.array([-3/5*self._max_x + 3.5*self._catch_radius,
+                       self._max_y / 4]),
+             np.array([-3/5*self._max_x + 3.5*self._catch_radius,
+                       -2/5*self._max_y])),
+
+            (np.array([-3/5*self._max_x,
+                       self._max_y/4]),
+             np.array([-3/5*self._max_x + 3.5*self._catch_radius,
+                       self._max_y/4]))
+            ]
+
+        high = np.array([self._max_x, self._max_y, np.pi,
+                         self._max_x, self._max_y, np.pi])
+
+
+        # MDP properties
+        horizon = 2000
+        gamma = 0.99
+
+        observation_space = spaces.Box(low=-high, high=high)
+        action_space = spaces.Box(low=np.array([0,
+                                                -self._omega_predator]),
+                                  high=np.array([self._v_predator,
+                                                 self._omega_predator]))
+        mdp_info = MDPInfo(observation_space, action_space, gamma, horizon)
+
+        # Visualization
+        width = 500
+        height = int(width * self._max_y / self._max_x)
+        self._viewer = Viewer(2*self._max_x, 2*self._max_y, width, height)
+
+        super(PreyPredator, self).__init__(mdp_info)
+
+
+    def reset(self, state=None):
+        if state is None:
+            self._state = np.array([0., 0., 0.,
+                                    #self._max_x/2, self._max_y/2, np.pi/2])
+                                    1.0, 0.0, np.pi / 2])
+        else:
+            self._state = state
+            self._state[2] = normalize_angle(self._state[2])
+            self._state[5] = normalize_angle(self._state[5])
+
+        return self._state
+
+    def step(self, action):
+
+        # compute new predator state
+        u = self._bound(action,
+                        self.info.action_space.low,
+                        self.info.action_space.high)
+
+        state_predator = self._state[:3]
+        state_predator = self._differential_drive_dynamics(state_predator, u)
+
+        # Compute new prey state
+        u_prey = self._prey_controller(self._state)
+        state_prey = self._state[3:]
+        state_prey = self._differential_drive_dynamics(state_prey, u_prey)
+
+        # Update state
+        self._state = np.concatenate([state_predator, state_prey], 0)
+
+        delta_norm_new = np.linalg.norm(self._state[:2]-self._state[3:5])
+
+        if delta_norm_new < self._catch_radius:
+            absorbing = True
+            reward = 100
+        else:
+            absorbing = False
+            reward = -1
+
+
+        return self._state, reward, absorbing, {}
+
+    def _prey_controller(self, state):
+        u_prey = np.empty(2)
+
+        delta = state[:2] - state[3:5]
+
+        delta_norm = np.linalg.norm(delta)
+
+        if delta_norm > 3.0:
+            u_prey[0] = 0
+        elif delta_norm > 1.5:
+            u_prey[0] = self._v_prey / 2
+        else:
+            u_prey[0] = self._v_prey
+
+        attack_angle = normalize_angle(np.arctan2(state[4] - state[1],
+                                                  state[3] - state[0]))
+
+
+        angle_current = shortest_angular_distance(attack_angle, state[5])
+
+        if angle_current < 0:
+            escape_angle = normalize_angle(attack_angle - np.pi/4)
+        else:
+            escape_angle = normalize_angle(attack_angle + np.pi/4)
+
+        delta_angle = shortest_angular_distance(state[5], escape_angle)
+
+
+        omega_prey = delta_angle*(2/np.pi)
+
+        u_prey[1] = self._bound(omega_prey,
+                                -self._omega_prey,
+                                self._omega_prey)
+
+        return u_prey
+
+
+    def _differential_drive_dynamics(self, state, u):
+        delta = np.empty(3)
+
+        delta[0] = np.cos(state[2]) * u[0]
+        delta[1] = np.sin(state[2]) * u[0]
+        delta[2] = u[1]
+
+        new_state = state + delta
+
+        new_state[0] = self._bound(new_state[0], -self._max_x, self._max_x)
+        new_state[1] = self._bound(new_state[1], -self._max_y, self._max_y)
+        new_state[2] = normalize_angle(new_state[2])
+
+        return new_state
+
+    def render(self, mode='human'):
+        center = np.array([self._max_x, self._max_y])
+
+        predator_pos = self._state[:2]
+        predator_theta = self._state[2]
+
+        prey_pos = self._state[3:5]
+        prey_theta = self._state[5]
+
+
+        # Predator
+        self._viewer.circle(center + predator_pos, self._catch_radius,
+                            (255, 255, 255))
+        self._viewer.arrow_head(center + predator_pos, self._catch_radius,
+                                predator_theta, (255, 0, 0))
+
+        # Prey
+        self._viewer.arrow_head(center + prey_pos, self._catch_radius,
+                                prey_theta, (0, 0, 255))
+
+        # Obstacles
+        for obstacle in self._obstacles:
+            start = obstacle[0]
+            end = obstacle[1]
+            self._viewer.line(center + start, center + end)
+
+
+
+        self._viewer.display(self._dt)
+
+
+
