@@ -150,6 +150,29 @@ class PreyPredator(Environment):
         return u_prey
 
 
+    @staticmethod
+    def _cross_2d(vecr, vecs):
+        return vecr[0] * vecs[1] - vecr[1] * vecs[0]
+
+    def _check_collision(self, start, end):
+
+        collisions = list()
+
+        for obstacle in self._obstacles:
+            r = obstacle[1] - obstacle[0]
+            s = end - start
+            den = self._cross_2d(vecr=r, vecs=s)
+
+            if den != 0:
+                t = self._cross_2d((start - obstacle[0]), s) / den
+                u = self._cross_2d((start - obstacle[0]), r) / den
+
+                if 1 >= u >= 0 and 1 >= t >= 0:
+                    collisions.append(start + u*s)
+
+        return collisions
+
+
     def _differential_drive_dynamics(self, state, u):
         delta = np.empty(3)
 
@@ -162,6 +185,16 @@ class PreyPredator(Environment):
         new_state[0] = self._bound(new_state[0], -self._max_x, self._max_x)
         new_state[1] = self._bound(new_state[1], -self._max_y, self._max_y)
         new_state[2] = normalize_angle(new_state[2])
+
+        collisions = self._check_collision(state[:2], new_state[:2])
+
+        if len(collisions) > 0:
+            min = np.inf
+            for collision in collisions:
+                distance = np.linalg.norm(collision - state[:2])
+
+                if distance < min:
+                    new_state[:2] = collision
 
         return new_state
 
