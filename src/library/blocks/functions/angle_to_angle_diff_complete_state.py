@@ -8,8 +8,8 @@ def angle_to_angle_diff_complete_state(inputs):
     alpha = states[0]
     alpha_dot = states[1]
     beta_dot = states[2]
-    delta_alpha = alpha_ref - alpha
-    return np.array([delta_alpha[0], alpha_dot, beta_dot])
+    delta_alpha = alpha_ref[0] - alpha
+    return np.array([delta_alpha, alpha_dot, beta_dot])
 
 
 
