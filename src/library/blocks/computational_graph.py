@@ -54,6 +54,9 @@ class ComputationalGraph(object):
             else:
                 reward = block.reward_connection.last_output[0]
             block(inputs=inputs, reward=reward, absorbing=self.absorbing, last=self.last, learn_flag=learn_flag, alarms=alarms)
+
+        if not learn_flag:
+            self.model.render()
         return self.absorbing, self.last
 
     def reset(self):

@@ -45,7 +45,7 @@ class SegwayLinearMotion(Environment):
         observation_space = spaces.Box(low=-high, high=high)
         action_space = spaces.Box(low=np.array([-self.max_u]),
                                   high=np.array([self.max_u]))
-        horizon = 1000
+        horizon = 3000
         mdp_info = MDPInfo(observation_space, action_space, gamma, horizon)
 
         # Visualization
@@ -86,7 +86,7 @@ class SegwayLinearMotion(Environment):
             reward = -10000
         else:
             absorbing = False
-            Q = np.diag([4.0, 1.0, 0.1, 0.02])
+            Q = np.diag([4.0, 1.0, 0.25, 0.005])
 
             x = self._state
 
@@ -146,7 +146,7 @@ class SegwayLinearMotion(Environment):
 
         self._viewer.line(start, end)
         self._viewer.circle(start, self.r)
-        print('goal circle  :', goal)
+        #print('goal circle  :', goal)
         self._viewer.circle(goal, radius=0.01, color=(255, 0, 0))
 
         self._viewer.display(self.dt)
