@@ -16,7 +16,6 @@ class HierarchicalCore(object):
         self._n_steps = None
         self._n_episodes = None
 
-
     def learn(self, n_steps=None, n_episodes=None, render=False, quiet=False, skip=False):
         return self._run(True, n_steps, n_episodes, render, quiet, skip)
 
@@ -34,7 +33,7 @@ class HierarchicalCore(object):
                 if last:
                     self.computational_graph.reset()
                     dataset_manager.add_first_sample(self.computational_graph.get_sample(), skip)
-                absorbing, last = self.computational_graph.call_blocks(learn_flag=learn_flag)
+                absorbing, last = self.computational_graph.call_blocks(learn_flag=learn_flag, render=render)
                 dataset_manager.add_sample(self.computational_graph.get_sample(), skip)
 
         else:
@@ -44,7 +43,7 @@ class HierarchicalCore(object):
                 dataset_manager.add_first_sample(self.computational_graph.get_sample(), skip)
                 last = False
                 while not last:
-                    absorbing, last = self.computational_graph.call_blocks(learn_flag=learn_flag)
+                    absorbing, last = self.computational_graph.call_blocks(learn_flag=learn_flag, render=render)
                     dataset_manager.add_sample(self.computational_graph.get_sample(), skip)
         self.computational_graph.stop()
         return dataset_manager.dataset
