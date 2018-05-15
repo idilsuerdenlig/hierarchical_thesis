@@ -23,6 +23,7 @@ from library.blocks.control_block import ControlBlock
 from library.blocks.functions.feature_angle_diff_ship_steering import *
 from library.blocks.basic_operation_block import *
 from library.blocks.model_placeholder import PlaceHolder
+from library.blocks.error_accumulator import ErrorAccumulatorBlock
 from library.blocks.reward_accumulator import reward_accumulator_block
 from library.blocks.functions.pick_first_state import pick_first_state
 from library.blocks.functions.angle_to_angle_diff_complete_state import angle_to_angle_diff_complete_state
@@ -60,9 +61,13 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     function_block2 = fBlock(name='f2 (build state)', phi=angle_to_angle_diff_complete_state)
 
     # Function Block 3
-    function_block3 = fBlock(name='f3 (reward low level', phi=lqr_cost_segway)
+    function_block3 = fBlock(name='f3 (reward low level)', phi=lqr_cost_segway)
 
+    # Function Block 4
+    function_block4 = addBlock(name='f4 (add block)')
 
+    # Integrator Block
+    error_acc = ErrorAccumulatorBlock(name='error acc')
 
 
     # Features
@@ -106,7 +111,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low=np.array([-np.pi, -np.pi, -np.pi]),
                                                            high=np.array([np.pi, np.pi, np.pi]), shape=(3,)),
                               action_space=mdp.info.action_space,
-                              gamma=mdp.info.gamma, horizon=20)
+                              gamma=mdp.info.gamma, horizon=30)
 
     agent2 = alg_low(distribution=dist2, policy=pi2, features=features2,
                      mdp_info=mdp_info_agent2, eps=eps1)
@@ -120,7 +125,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     # Control Block 2
     parameter_callback2 = CollectDistributionParameter(dist2)
     control_block2 = ControlBlock(name='Control Block 2', agent=agent2,
-                                  n_eps_per_fit=10,
+                                  n_eps_per_fit=20,
                                   callbacks=[parameter_callback2])
 
 
@@ -132,7 +137,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     # Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_block1,
               control_block2, function_block1, function_block2,
-              function_block3, reward_acc]
+              function_block3, function_block4, error_acc, reward_acc]
 
     state_ph.add_input(control_block2)
     reward_ph.add_input(control_block2)
@@ -143,11 +148,15 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     control_block1.add_reward(reward_acc)
     control_block1.add_alarm_connection(control_block2)
     control_block2.add_input(function_block2)
-    control_block2.add_reward(function_block3)
+    control_block2.add_reward(function_block4)
     function_block1.add_input(state_ph)
     function_block2.add_input(control_block1)
     function_block2.add_input(state_ph)
     function_block3.add_input(function_block2)
+    error_acc.add_input(function_block3)
+    error_acc.add_alarm_connection(control_block2)
+    function_block4.add_input(function_block3)
+    function_block4.add_input(error_acc)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
     core = HierarchicalCore(computational_graph)
 
@@ -188,7 +197,7 @@ if __name__ == '__main__':
     alg_low = REPS
     learning_rate_high = AdaptiveParameter(value=50)
     learning_rate_low = AdaptiveParameter(value=5e-4)
-    eps = 0.05
+    eps = 0.01
     n_jobs = 1
     how_many = 1
     n_runs = 10
