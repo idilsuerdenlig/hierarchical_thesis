@@ -12,6 +12,8 @@ from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.folder import *
+from mushroom.policy import DeterministicPolicy
+
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 
 from library.core.hierarchical_core import HierarchicalCore
@@ -61,51 +63,62 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     function_block3 = fBlock(name='f3 (reward low level', phi=lqr_cost_segway)
 
 
-    #Features
-    features = Features(basis_list=[PolynomialBasis()])
+
+
+    # Features
+    features1 = Features(basis_list=[PolynomialBasis()])
+    approximator1 = Regressor(LinearApproximator,
+                             input_shape=(features1.size,),
+                             output_shape=(1,))
 
     # Policy 1
-    sigma1 = np.array([2*np.pi])
-    approximator1 = Regressor(LinearApproximator, input_shape=(features.size,),
-                              output_shape=(1,))
+    n_weights = approximator1.weights_size
+    mu1 = np.zeros(n_weights)
+    sigma1 = 2e-0 * np.ones(n_weights)
+    pi1 = DeterministicPolicy(approximator1)
+    dist1 = GaussianDiagonalDistribution(mu1, sigma1)
 
-    pi1 = DiagonalGaussianPolicy(mu=approximator1,std=sigma1)
-
-
-    # Policy 2
-    pi2 = DeterministicControlPolicy(weights=np.array([0, 0, 0]))
-    mu2 = np.zeros(pi2.weights_size)
-    sigma2 = 1e-3 * np.ones(pi2.weights_size)
-    distribution2 = GaussianDiagonalDistribution(mu2, sigma2)
 
     # Agent 1
-    learning_rate1 = params.get('learning_rate_high')
-    lim = 2*np.pi
+    eps1 = params.get('eps')
+    lim = 2 * np.pi
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(0, lim, (1,)),
                               gamma=mdp.info.gamma,
-                              horizon=100)
-    agent1 = alg_high(policy=pi1, mdp_info=mdp_info_agent1,
-                      learning_rate=learning_rate1,
-                      features=features)
+                              horizon=20)
+
+    agent1 = alg_low(distribution=dist1, policy=pi1, features=features1,
+                     mdp_info=mdp_info_agent1, eps=eps1)
+
+    # Policy 2
+    basis = PolynomialBasis.generate(1, 3)
+    features2 = Features(basis_list=basis)
+    approximator2 = Regressor(LinearApproximator,
+                              input_shape=(features2.size,),
+                              output_shape=(1,))
+    n_weights2 = approximator2.weights_size
+    mu2 = np.zeros(n_weights2)
+    sigma2 = 2e-0 * np.ones(n_weights2)
+    pi2 = DeterministicPolicy(approximator2)
+    dist2 = GaussianDiagonalDistribution(mu2, sigma2)
 
     # Agent 2
-    learning_rate2 = params.get('learning_rate_low')
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low=np.array([-np.pi, -np.pi, -np.pi]),
                                                            high=np.array([np.pi, np.pi, np.pi]), shape=(3,)),
                               action_space=mdp.info.action_space,
-                              gamma=mdp.info.gamma, horizon=100)
-    agent2 = alg_low(distribution=distribution2, policy=pi2,
-                     mdp_info=mdp_info_agent2, learning_rate=learning_rate2)
+                              gamma=mdp.info.gamma, horizon=20)
+
+    agent2 = alg_low(distribution=dist2, policy=pi2, features=features2,
+                     mdp_info=mdp_info_agent2, eps=eps1)
 
     # Control Block 1
-    parameter_callback1 = CollectPolicyParameter(pi1)
+    parameter_callback1 = CollectDistributionParameter(dist1)
     control_block1 = ControlBlock(name='Control Block 1', agent=agent1,
                                   n_eps_per_fit=ep_per_run,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
-    parameter_callback2 = CollectDistributionParameter(distribution2)
+    parameter_callback2 = CollectDistributionParameter(dist2)
     control_block2 = ControlBlock(name='Control Block 2', agent=agent2,
                                   n_eps_per_fit=10,
                                   callbacks=[parameter_callback2])
@@ -171,10 +184,11 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 if __name__ == '__main__':
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_big_hierarchical/'
-    alg_high = GPOMDP
-    alg_low = PGPE
+    alg_high = REPS
+    alg_low = REPS
     learning_rate_high = AdaptiveParameter(value=50)
     learning_rate_low = AdaptiveParameter(value=5e-4)
+    eps = 0.05
     n_jobs = 1
     how_many = 1
     n_runs = 10
@@ -185,7 +199,7 @@ if __name__ == '__main__':
     force_symlink('./' + subdir, 'latest')
 
 
-    params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low}
+    params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low, 'eps':eps}
     np.save(subdir + '/algorithm_params_dictionary', params)
     experiment_params = {'how_many': how_many, 'n_runs': n_runs,
                          'n_iterations': n_iterations, 'ep_per_run': ep_per_run,
