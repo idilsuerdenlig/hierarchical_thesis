@@ -48,6 +48,20 @@ class PreyPredator(Environment):
                        self._max_y/4]))
             ]
 
+        # Add bounds of the map
+        self._obstacles += [(np.array([-self._max_x, -self._max_y]),
+                             np.array([-self._max_x, self._max_y])),
+
+                            (np.array([-self._max_x, -self._max_y]),
+                            np.array([self._max_x, -self._max_y])),
+
+                            (np.array([self._max_x, self._max_y]),
+                             np.array([-self._max_x, self._max_y])),
+
+                            (np.array([self._max_x, self._max_y]),
+                             np.array([self._max_x, -self._max_y]))
+                            ]
+
         high = np.array([self._max_x, self._max_y, np.pi,
                          self._max_x, self._max_y, np.pi])
 
@@ -70,12 +84,12 @@ class PreyPredator(Environment):
 
         super(PreyPredator, self).__init__(mdp_info)
 
-
     def reset(self, state=None):
         if state is None:
             self._state = np.array([0., 0., 0.,
-                                    #self._max_x/2, self._max_y/2, np.pi/2])
-                                    1.0, 0.0, np.pi / 2])
+                                    self._max_x/2, self._max_y/2, np.pi/2])
+            self._state = np.array([-3., 0., 0.,
+                                    -4., -1., 0.])
         else:
             self._state = state
             self._state[2] = normalize_angle(self._state[2])
@@ -84,7 +98,6 @@ class PreyPredator(Environment):
         return self._state
 
     def step(self, action):
-
         # compute new predator state
         u = self._bound(action,
                         self.info.action_space.low,
@@ -114,51 +127,93 @@ class PreyPredator(Environment):
         return self._state, reward, absorbing, {}
 
     def _prey_controller(self, state):
-        u_prey = np.empty(2)
-
-        delta = state[:2] - state[3:5]
-
-        delta_norm = np.linalg.norm(delta)
+        delta_norm = np.linalg.norm(state[:2] - state[3:5])
 
         if delta_norm > 3.0:
-            u_prey[0] = 0
+            velocity_prey = 0
         elif delta_norm > 1.5:
-            u_prey[0] = self._v_prey / 2
+            velocity_prey = self._v_prey / 2
         else:
-            u_prey[0] = self._v_prey
+            velocity_prey = self._v_prey
 
+        if velocity_prey > 0:
+            cos_theta = np.cos(state[5])
+            sin_theta = np.sin(state[5])
+            increment = self._rotation_radius*np.array([cos_theta, sin_theta])
+
+            collision, i = self._check_collision(state[3:5],
+                                                 state[3:5]+increment)
+
+            if collision is None:
+                omega_prey = self._avoid_predator(state)
+            else:
+                obstacle = self._obstacles[i]
+                velocity_prey, omega_prey = self._avoid_obstacle(obstacle,
+                                                                 collision,
+                                                                 state,
+                                                                 velocity_prey)
+        else:
+            omega_prey = self._avoid_predator(state)
+
+        u_prey = np.empty(2)
+        u_prey[0] = velocity_prey
+        u_prey[1] = self._bound(omega_prey, -self._omega_prey, self._omega_prey)
+
+        return u_prey
+
+    def _avoid_obstacle(self, obstacle, collision, state, velocity_prey):
+        dir1 = collision - state[3:5]
+        dir2 = obstacle[1] - obstacle[0]
+        alpha = self._vector_angle(dir1, dir2)
+
+        # Avoid near obstacles.
+        if abs(alpha) < np.pi/4:
+            omega_prey = -self._omega_prey
+        else:
+            omega_prey = self._omega_prey
+
+        collision_distance = np.linalg.norm(state[3:5] - collision)
+
+        if collision_distance < self._rotation_radius:
+            velocity_prey = collision_distance * np.abs(omega_prey)
+
+        return velocity_prey, omega_prey
+
+    def _avoid_predator(self, state):
         attack_angle = normalize_angle(np.arctan2(state[4] - state[1],
                                                   state[3] - state[0]))
-
 
         angle_current = shortest_angular_distance(attack_angle, state[5])
 
         if angle_current < 0:
-            escape_angle = normalize_angle(attack_angle - np.pi/4)
+            escape_angle = normalize_angle(attack_angle - np.pi / 4)
         else:
-            escape_angle = normalize_angle(attack_angle + np.pi/4)
+            escape_angle = normalize_angle(attack_angle + np.pi / 4)
 
         delta_angle = shortest_angular_distance(state[5], escape_angle)
 
+        omega_prey = delta_angle * (2 / np.pi)
 
-        omega_prey = delta_angle*(2/np.pi)
-
-        u_prey[1] = self._bound(omega_prey,
-                                -self._omega_prey,
-                                self._omega_prey)
-
-        return u_prey
-
+        return omega_prey
 
     @staticmethod
     def _cross_2d(vecr, vecs):
         return vecr[0] * vecs[1] - vecr[1] * vecs[0]
 
+    @staticmethod
+    def _vector_angle(x, y):
+        x_norm = np.linalg.norm(x)
+        y_norm = np.linalg.norm(y)
+        cos_alpha = x.dot(y)/x_norm/y_norm
+
+        return np.arccos(cos_alpha)
+
     def _check_collision(self, start, end):
+        collision = None
 
-        collisions = list()
+        min_u = np.inf
 
-        for obstacle in self._obstacles:
+        for i, obstacle in enumerate(self._obstacles):
             r = obstacle[1] - obstacle[0]
             s = end - start
             den = self._cross_2d(vecr=r, vecs=s)
@@ -168,10 +223,12 @@ class PreyPredator(Environment):
                 u = self._cross_2d((start - obstacle[0]), r) / den
 
                 if 1 >= u >= 0 and 1 >= t >= 0:
-                    collisions.append(start + u*s)
 
-        return collisions
+                    if u < min_u:
+                        collision = start + (u-1e-3)*s
+                        min_u = u
 
+        return collision, i
 
     def _differential_drive_dynamics(self, state, u):
         delta = np.empty(3)
@@ -186,15 +243,10 @@ class PreyPredator(Environment):
         new_state[1] = self._bound(new_state[1], -self._max_y, self._max_y)
         new_state[2] = normalize_angle(new_state[2])
 
-        collisions = self._check_collision(state[:2], new_state[:2])
+        collision, _ = self._check_collision(state[:2], new_state[:2])
 
-        if len(collisions) > 0:
-            min = np.inf
-            for collision in collisions:
-                distance = np.linalg.norm(collision - state[:2])
-
-                if distance < min:
-                    new_state[:2] = collision
+        if collision is not None:
+            new_state[:2] = collision
 
         return new_state
 
