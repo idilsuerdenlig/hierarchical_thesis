@@ -4,7 +4,7 @@ import numpy as np
 def lqr_cost_segway(ins):
 
     x = np.concatenate(ins)
-    Q = np.diag([3.0, 3.0, 0.1])
+    Q = np.diag([1.0, 0.0, 0.0])
     J = x.dot(Q).dot(x)
     reward = -J
 
