@@ -49,7 +49,13 @@ class SegwayLinearMotion(Environment):
         mdp_info = MDPInfo(observation_space, action_space, gamma, horizon)
 
         # Visualization
-        self._viewer = Viewer(2.5*goal_pos, 2.5*goal_pos)
+        env_width = 2.5*goal_pos
+        env_height = 2.5*2*self.l
+        width = 800
+        height = int(width*env_height/env_width)
+
+        self._viewer = Viewer(env_width, env_height,
+                              width, height)
 
         super(SegwayLinearMotion, self).__init__(mdp_info)
 
@@ -129,8 +135,8 @@ class SegwayLinearMotion(Environment):
         return dx
 
     def render(self, mode='human'):
-        start = 1.25*self._goal_pos*np.ones(2)
-        end = 1.25*self._goal_pos*np.ones(2)
+        start = 1.25*np.array([self._goal_pos, 2*self.l])
+        end = np.array(start)
 
         goal = start + np.array([self._goal_pos, -self.r])
         position = self._goal_pos - self._state[0]
