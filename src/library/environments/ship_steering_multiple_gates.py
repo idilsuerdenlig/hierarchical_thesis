@@ -4,6 +4,7 @@ from mushroom.utils.angles_utils import normalize_angle
 from mushroom.utils import spaces
 
 from mushroom.environments import Environment, MDPInfo
+from mushroom.utils.viewer import Viewer
 
 
 class ShipSteeringMultiGate(Environment):
@@ -29,43 +30,23 @@ class ShipSteeringMultiGate(Environment):
         self._T = 5.
         self._dt = .2
 
-        self._gate1_sx = 800
-        self._gate1_sy = 350
-        self._gate1_ex = 900
-        self._gate1_ey = 350
-
-        gate_1s = np.array([self._gate1_sx, self._gate1_sy])
-        gate_1e = np.array([self._gate1_ex, self._gate1_ey])
+        gate_1s = np.array([800, 350])
+        gate_1e = np.array([900, 350])
 
         gate_1 = np.array([gate_1s, gate_1e])
 
-        self._gate2_sx = 300
-        self._gate2_sy = 600
-        self._gate2_ex = 400
-        self._gate2_ey = 600
-
-        gate_2s = np.array([self._gate2_sx, self._gate2_sy])
-        gate_2e = np.array([self._gate2_ex, self._gate2_ey])
+        gate_2s = np.array([300, 600])
+        gate_2e = np.array([400, 600])
 
         gate_2 = np.array([gate_2s, gate_2e])
 
-        self._gate3_sx = 500
-        self._gate3_sy = 700
-        self._gate3_ex = 600
-        self._gate3_ey = 700
-
-        gate_3s = np.array([self._gate3_sx, self._gate3_sy])
-        gate_3e = np.array([self._gate3_ex, self._gate3_ey])
+        gate_3s = np.array([500, 700])
+        gate_3e = np.array([600, 700])
 
         gate_3 = np.array([gate_3s, gate_3e])
 
-        self._gate4_sx = 300
-        self._gate4_sy = 1000
-        self._gate4_ex = 400
-        self._gate4_ey = 1000
-
-        gate_4s = np.array([self._gate4_sx, self._gate4_sy])
-        gate_4e = np.array([self._gate4_ex, self._gate4_ey])
+        gate_4s = np.array([300, 999])
+        gate_4e = np.array([400, 999])
 
         gate_4 = np.array([gate_4s, gate_4e])
 
@@ -81,6 +62,10 @@ class ShipSteeringMultiGate(Environment):
         self._out_reward = -100
 
         mdp_info = MDPInfo(observation_space, action_space, gamma, horizon)
+
+        # Visualization
+        self._viewer = Viewer(self.field_size, self.field_size,
+                              background=(66, 131, 237))
 
         super(ShipSteeringMultiGate, self).__init__(mdp_info)
 
@@ -167,3 +152,22 @@ class ShipSteeringMultiGate(Environment):
     @staticmethod
     def _cross_2d(vecr, vecs):
         return vecr[0] * vecs[1] - vecr[1] * vecs[0]
+
+    def render(self, mode='human'):
+
+        for gate in self._gate_list:
+            gate_s = gate[0]
+            gate_e = gate[1]
+            self._viewer.line(gate_s, gate_e, width=3)
+
+        boat = [
+            [-4, -4],
+            [-4, 4],
+            [4, 4],
+            [8, 0.0],
+            [4, -4]
+        ]
+        self._viewer.polygon(self._state[:2], self._state[2], boat,
+                             color=(32, 193, 54))
+
+        self._viewer.display(self._dt)

@@ -159,6 +159,8 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
         print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
         low_level_dataset_eval += control_block2.dataset.get()
 
+    core.evaluate(n_episodes=eval_run, render=True)
+
     # Save
     parameter_dataset1 = parameter_callback1.get_values()
     parameter_dataset2 = parameter_callback2.get_values()

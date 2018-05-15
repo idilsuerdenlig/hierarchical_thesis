@@ -17,7 +17,7 @@ class ComputationalGraph(object):
         self.last = False
         self.step_counter = 0
 
-    def call_blocks(self, learn_flag):
+    def call_blocks(self, learn_flag, render):
         """
         executes the blocks in the diagram in the provided order. Always starts from the model.
 
@@ -55,7 +55,7 @@ class ComputationalGraph(object):
                 reward = block.reward_connection.last_output[0]
             block(inputs=inputs, reward=reward, absorbing=self.absorbing, last=self.last, learn_flag=learn_flag, alarms=alarms)
 
-        if not learn_flag:
+        if render:
             self.model.render()
         return self.absorbing, self.last
 
