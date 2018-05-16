@@ -117,7 +117,7 @@ class SegwayLinearMotion(Environment):
         omegaP = d_alpha
         omegaR = d_beta
 
-        velocity = omegaR*self.r
+        velocity = -omegaR*self.r
 
         dOmegaP = -(h2*self.l*self.Mp*self.r*np.sin(alpha)*omegaP**2 -
                     self.g*h1*self.l*self.Mp*np.sin(alpha) + (h2+h1)*u)\
