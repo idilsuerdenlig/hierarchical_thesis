@@ -115,7 +115,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i, viz):
 
     # Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_block1,
-              control_block2, function_block1, function_block2, reward_acc]
+              control_block2, function_block1, function_block2, function_block3, reward_acc]
 
     state_ph.add_input(control_block2)
     reward_ph.add_input(control_block2)
