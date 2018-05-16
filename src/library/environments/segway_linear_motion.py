@@ -12,7 +12,7 @@ class SegwayLinearMotion(Environment):
     The Segway environment (continuous version) as presented in:
     "Deep Learning for Actor-Critic Reinforcement Learning". Xueli Jia. 2015.
     """
-    def __init__(self, random_start=False, goal_pos=1.0):
+    def __init__(self, random_start=False, goal_distance=1.0):
         """
         Constructor.
 
@@ -36,7 +36,7 @@ class SegwayLinearMotion(Environment):
         self.max_u = 5
 
         self._random = random_start
-        self._goal_pos = goal_pos
+        self._goal_distance = goal_distance
 
 
         high = np.array([1e5, np.pi, 15, 75])
@@ -49,7 +49,7 @@ class SegwayLinearMotion(Environment):
         mdp_info = MDPInfo(observation_space, action_space, gamma, horizon)
 
         # Visualization
-        env_width = 2.5*goal_pos
+        env_width = 2.5*goal_distance
         env_height = 2.5*2*self.l
         width = 800
         height = int(width*env_height/env_width)
@@ -66,7 +66,7 @@ class SegwayLinearMotion(Environment):
             else:
                 angle = -np.pi/8
 
-            self._state = np.array([self._goal_pos, angle, 0., 0.])
+            self._state = np.array([-self._goal_distance, angle, 0., 0.])
         else:
             self._state = state
             self._state[1] = normalize_angle(self._state[1])
@@ -78,15 +78,12 @@ class SegwayLinearMotion(Environment):
 
         u = np.maximum(-self.max_u, np.minimum(self.max_u, action[0]))
         new_state = odeint(self._dynamics,
-                           np.array([self._goal_pos - self._state[0], self._state[1], self._state[2], self._state[3]]),
+                           self._state,
                            [0, self.dt],
                            (u,))
         self._state = np.array(new_state[-1])
-        #print('actual pos   :', self._state[0])
-
-        self._state[0] = self._goal_pos - self._state[0]
-        #print('error    :', self._state[0])
         self._state[1] = normalize_angle(self._state[1])
+
         if abs(self._state[1]) > np.pi / 2:
             absorbing = True
             reward = -10000
@@ -95,11 +92,9 @@ class SegwayLinearMotion(Environment):
             Q = np.diag([4.0, 1.0, 0.4, 0.01])
 
             x = self._state
-
             J = x.dot(Q).dot(x)
-            #print('x    :', x)
             reward = -J
-            #print('reward   :', reward)
+
         return self._state, reward, absorbing, {}
 
     def _dynamics(self, state, t, u):
@@ -135,24 +130,23 @@ class SegwayLinearMotion(Environment):
         return dx
 
     def render(self, mode='human'):
-        start = 1.25*np.array([self._goal_pos, 2*self.l])
+        start = 1.25*np.array([self._goal_distance, 2*self.l])
         end = np.array(start)
 
-        goal = start + np.array([self._goal_pos, -self.r])
-        position = self._goal_pos - self._state[0]
+        goal = start + np.array([self._goal_distance, -self.r])
+        position = self._goal_distance + self._state[0]
         start[0] += position
         end[0] += -2*self.l*np.sin(self._state[1]) + position
         end[1] += 2*self.l*np.cos(self._state[1])
 
-        if start[0] > 2.5*self._goal_pos or start[0] < 0:
-            start[0] = (start[0] + 1.25*self._goal_pos) % 5*self.l \
-                       - 1.25*self._goal_pos
-            end[0] = (end[0] + 1.25*self._goal_pos) % 5*self.l \
-                     - 1.25*self._goal_pos
+        if start[0] > 2.5*self._goal_distance or start[0] < 0:
+            start[0] = (start[0] + 1.25 * self._goal_distance)%5*self.l \
+                       - 1.25*self._goal_distance
+            end[0] = (end[0] + 1.25 * self._goal_distance)%5*self.l \
+                     - 1.25*self._goal_distance
 
         self._viewer.line(start, end)
         self._viewer.circle(start, self.r)
-        #print('goal circle  :', goal)
         self._viewer.circle(goal, radius=0.01, color=(255, 0, 0))
 
         self._viewer.display(self.dt)

@@ -39,7 +39,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     np.random.seed()
 
     # Model Block
-    mdp = SegwayLinearMotion(goal_pos=1.0)
+    mdp = SegwayLinearMotion(goal_distance=1.0)
 
     #State Placeholder
     state_ph = PlaceHolder(name='state_ph')
