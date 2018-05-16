@@ -32,7 +32,7 @@ from library.utils.callbacks.collect_distribution_parameter import\
     CollectDistributionParameter
 
 
-def server_experiment_small(alg_high, alg_low, params, subdir, i):
+def server_experiment_small(alg_high, alg_low, params, subdir, i, viz):
 
     np.random.seed()
 
@@ -159,8 +159,6 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
         print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
         low_level_dataset_eval += control_block2.dataset.get()
 
-    core.evaluate(n_episodes=eval_run, render=True)
-
     # Save
     parameter_dataset1 = parameter_callback1.get_values()
     parameter_dataset2 = parameter_callback2.get_values()
@@ -171,6 +169,11 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     np.save(subdir+str(i)+'/parameter_dataset1_file', parameter_dataset1)
     np.save(subdir+str(i)+'/parameter_dataset2_file', parameter_dataset2)
     np.save(subdir+str(i)+'/dataset_eval_file', dataset_eval)
+
+    if viz:
+        print('press a button to visualize the policy')
+        input()
+        core.evaluate(n_episodes=1, render=True)
 
 
 if __name__ == '__main__':
@@ -189,6 +192,8 @@ if __name__ == '__main__':
     mk_dir_recursive('./' + subdir)
     force_symlink('./' + subdir, 'latest_big_multigate_hierarchical')
 
+    viz = how_many == 1
+
 
     params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low}
     np.save(subdir + '/algorithm_params_dictionary', params)
@@ -197,4 +202,4 @@ if __name__ == '__main__':
                          'eval_run': eval_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
     Js = Parallel(n_jobs=n_jobs)(delayed(server_experiment_small)(alg_high, alg_low, params,
-                                                subdir, i) for i in range(how_many))
+                                                subdir, i, viz) for i in range(how_many))
