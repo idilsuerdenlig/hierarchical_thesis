@@ -92,7 +92,7 @@ class SegwayLinearMotion(Environment):
             reward = -10000
         else:
             absorbing = False
-            Q = np.diag([4.0, 1.0, 0.25, 0.005])
+            Q = np.diag([4.0, 1.0, 0.4, 0.01])
 
             x = self._state
 

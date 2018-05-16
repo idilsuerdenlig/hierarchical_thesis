@@ -163,7 +163,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     low_level_dataset_eval = list()
     dataset_eval = list()
 
-    dataset_eval_run = core.evaluate(n_episodes=eval_run)
+    dataset_eval_run = core.evaluate(n_episodes=eval_run, render=True)
     J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
     print('J at start : ' + str(np.mean(J)))
     dataset_eval += dataset_eval_run
@@ -171,7 +171,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     for n in range(n_runs):
         print('ITERATION', n)
         core.learn(n_episodes=n_iterations*ep_per_run, skip=True)
-        dataset_eval_run = core.evaluate(n_episodes=eval_run)
+        dataset_eval_run = core.evaluate(n_episodes=eval_run, render=True)
         dataset_eval += dataset_eval_run
         J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
         print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
@@ -192,12 +192,12 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 if __name__ == '__main__':
 
     subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + \
-             '_big_hierarchical/'
+             '_segway_hierarchical/'
     alg_high = REPS
     alg_low = REPS
     learning_rate_high = AdaptiveParameter(value=50)
     learning_rate_low = AdaptiveParameter(value=5e-4)
-    eps = 0.01
+    eps = 0.05
     n_jobs = 1
     how_many = 1
     n_runs = 10
