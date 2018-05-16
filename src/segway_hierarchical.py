@@ -119,13 +119,13 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     # Control Block 1
     parameter_callback1 = CollectDistributionParameter(dist1)
     control_block1 = ControlBlock(name='Control Block 1', agent=agent1,
-                                  n_eps_per_fit=ep_per_run,
+                                  n_eps_per_fit=n_ep_per_fit,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
     parameter_callback2 = CollectDistributionParameter(dist2)
     control_block2 = ControlBlock(name='Control Block 2', agent=agent2,
-                                  n_eps_per_fit=20,
+                                  n_eps_per_fit=10,
                                   callbacks=[parameter_callback2])
 
 
@@ -168,9 +168,9 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     print('J at start : ' + str(np.mean(J)))
     dataset_eval += dataset_eval_run
 
-    for n in range(n_runs):
+    for n in range(n_epochs):
         print('ITERATION', n)
-        core.learn(n_episodes=n_iterations*ep_per_run, skip=True)
+        core.learn(n_episodes=n_iterations*n_ep_per_fit, skip=True)
         dataset_eval_run = core.evaluate(n_episodes=eval_run, render=True)
         dataset_eval += dataset_eval_run
         J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
@@ -200,10 +200,11 @@ if __name__ == '__main__':
     eps = 0.05
     n_jobs = 1
     how_many = 1
-    n_runs = 10
-    n_iterations = 10
-    ep_per_run = 20
+    n_epochs = 20
+    n_iterations = 4
+    n_ep_per_fit = 25
     eval_run = 10
+
     mk_dir_recursive('./' + subdir)
     force_symlink('./' + subdir, 'latest')
 
@@ -213,9 +214,9 @@ if __name__ == '__main__':
               'eps':eps}
     np.save(subdir + '/algorithm_params_dictionary', params)
     experiment_params = {'how_many': how_many,
-                         'n_runs': n_runs,
+                         'n_epochs': n_epochs,
                          'n_iterations': n_iterations,
-                         'ep_per_run': ep_per_run,
+                         'n_ep_per_fit': n_ep_per_fit,
                          'eval_run': eval_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
     Js = Parallel(n_jobs=n_jobs)(delayed(server_experiment_small)
