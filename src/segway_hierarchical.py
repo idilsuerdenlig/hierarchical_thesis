@@ -26,7 +26,7 @@ from library.blocks.error_accumulator import ErrorAccumulatorBlock
 from library.blocks.reward_accumulator import reward_accumulator_block
 from library.blocks.functions.pick_first_state import pick_first_state
 from library.blocks.functions.fall_reward import fall_reward
-
+from library.blocks.functions.saturation import saturation
 from library.blocks.functions.angle_to_angle_diff_complete_state \
     import angle_to_angle_diff_complete_state
 from library.blocks.functions.lqr_cost_segway import lqr_cost_segway
@@ -67,6 +67,10 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
     # Function Block 5
     function_block5 = fBlock(name='f5 (fall punish low level)', phi=fall_reward)
+
+    # Function Block 6
+    function_block6 = fBlock(name='f6 (saturation)', phi=saturation)
+
 
     # Features
     features1 = Features(basis_list=[PolynomialBasis()])
@@ -137,7 +141,8 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     # Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_block1,
               control_block2, function_block1, function_block2,
-              function_block3, function_block4, function_block5, reward_acc]
+              function_block3, function_block4, function_block5,
+              function_block6, reward_acc]
 
     state_ph.add_input(control_block2)
     reward_ph.add_input(control_block2)
@@ -150,12 +155,13 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     control_block2.add_input(function_block2)
     control_block2.add_reward(function_block4)
     function_block1.add_input(state_ph)
-    function_block2.add_input(control_block1)
+    function_block2.add_input(function_block6)
     function_block2.add_input(state_ph)
     function_block3.add_input(function_block2)
     function_block5.add_input(state_ph)
     function_block4.add_input(function_block3)
     function_block4.add_input(function_block5)
+    function_block6.add_input(control_block1)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
     core = HierarchicalCore(computational_graph)
 
