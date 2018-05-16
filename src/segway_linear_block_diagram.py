@@ -14,25 +14,20 @@ from mushroom.utils.dataset import compute_J
 from mushroom.utils.folder import *
 from mushroom.policy import DeterministicPolicy
 
-from mushroom.utils.parameters import Parameter, AdaptiveParameter
+from mushroom.utils.parameters import AdaptiveParameter
 
 from library.core.hierarchical_core import HierarchicalCore
 from library.environments.segway_linear_motion import SegwayLinearMotion
 from library.blocks.computational_graph import ComputationalGraph
 from library.blocks.control_block import ControlBlock
-from library.blocks.functions.feature_angle_diff_ship_steering import *
 from library.blocks.basic_operation_block import *
 from library.blocks.model_placeholder import PlaceHolder
 from library.blocks.error_accumulator import ErrorAccumulatorBlock
 from library.blocks.reward_accumulator import reward_accumulator_block
 from library.blocks.functions.pick_first_state import pick_first_state
-from library.blocks.functions.angle_to_angle_diff_complete_state import angle_to_angle_diff_complete_state
+from library.blocks.functions.angle_to_angle_diff_complete_state \
+    import angle_to_angle_diff_complete_state
 from library.blocks.functions.lqr_cost_segway import lqr_cost_segway
-
-from library.policy.deterministic_control_policy import \
-    DeterministicControlPolicy
-from library.utils.callbacks.collect_policy_parameter import \
-    CollectPolicyParameter
 from library.utils.callbacks.collect_distribution_parameter import\
     CollectDistributionParameter
 
@@ -58,10 +53,12 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
                              phi=pick_first_state)
 
     # Function Block 2
-    function_block2 = fBlock(name='f2 (build state)', phi=angle_to_angle_diff_complete_state)
+    function_block2 = fBlock(name='f2 (build state)',
+                             phi=angle_to_angle_diff_complete_state)
 
     # Function Block 3
-    function_block3 = fBlock(name='f3 (reward low level)', phi=lqr_cost_segway)
+    function_block3 = fBlock(name='f3 (reward low level)',
+                             phi=lqr_cost_segway)
 
     # Function Block 4
     function_block4 = addBlock(name='f4 (add block)')
@@ -108,10 +105,12 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     dist2 = GaussianDiagonalDistribution(mu2, sigma2)
 
     # Agent 2
-    mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(low=np.array([-np.pi, -np.pi, -np.pi]),
-                                                           high=np.array([np.pi, np.pi, np.pi]), shape=(3,)),
-                              action_space=mdp.info.action_space,
-                              gamma=mdp.info.gamma, horizon=30)
+    mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(
+        low=np.array([-np.pi, -np.pi, -np.pi]),
+        high=np.array([np.pi, np.pi, np.pi]),
+        shape=(3,)),
+        action_space=mdp.info.action_space,
+        gamma=mdp.info.gamma, horizon=30)
 
     agent2 = alg_low(distribution=dist2, policy=pi2, features=features2,
                      mdp_info=mdp_info_agent2, eps=eps1)
@@ -192,7 +191,8 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
 if __name__ == '__main__':
 
-    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_big_hierarchical/'
+    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + \
+             '_big_hierarchical/'
     alg_high = REPS
     alg_low = REPS
     learning_rate_high = AdaptiveParameter(value=50)
@@ -208,11 +208,16 @@ if __name__ == '__main__':
     force_symlink('./' + subdir, 'latest')
 
 
-    params = {'learning_rate_high': learning_rate_high, 'learning_rate_low': learning_rate_low, 'eps':eps}
+    params = {'learning_rate_high': learning_rate_high,
+              'learning_rate_low': learning_rate_low,
+              'eps':eps}
     np.save(subdir + '/algorithm_params_dictionary', params)
-    experiment_params = {'how_many': how_many, 'n_runs': n_runs,
-                         'n_iterations': n_iterations, 'ep_per_run': ep_per_run,
+    experiment_params = {'how_many': how_many,
+                         'n_runs': n_runs,
+                         'n_iterations': n_iterations,
+                         'ep_per_run': ep_per_run,
                          'eval_run': eval_run}
     np.save(subdir + '/experiment_params_dictionary', experiment_params)
-    Js = Parallel(n_jobs=n_jobs)(delayed(server_experiment_small)(alg_high, alg_low, params,
-                                                subdir, i) for i in range(how_many))
+    Js = Parallel(n_jobs=n_jobs)(delayed(server_experiment_small)
+                                 (alg_high, alg_low, params, subdir, i)
+                                 for i in range(how_many))
