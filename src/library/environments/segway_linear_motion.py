@@ -143,8 +143,12 @@ class SegwayLinearMotion(Environment):
         if (start[0] > 2.5*self._goal_distance and
             end[0] > 2.5*self._goal_distance) or\
                 (start[0] < 0 and end[0] < 0):
-            start[0] = start[0]%(2.5*self._goal_distance)
-            end[0] = end[0]%(2.5*self._goal_distance)
+            new_start = start[0]%(2.5*self._goal_distance)
+            new_end = end[0]%(2.5*self._goal_distance)
+
+            if np.allclose(new_start-new_end, start[0]-end[0]):
+                start[0] = new_start
+                end[0] = new_end
 
         self._viewer.line(start, end)
         self._viewer.circle(start, self.r)
