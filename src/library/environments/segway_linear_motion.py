@@ -139,15 +139,18 @@ class SegwayLinearMotion(Environment):
         end[0] += -2*self.l*np.sin(self._state[1]) + position
         end[1] += 2*self.l*np.cos(self._state[1])
 
-        if start[0] > 2.5*self._goal_distance or start[0] < 0:
-            start[0] = (start[0] + 1.25 * self._goal_distance)%5*self.l \
-                       - 1.25*self._goal_distance
-            end[0] = (end[0] + 1.25 * self._goal_distance)%5*self.l \
-                     - 1.25*self._goal_distance
+        old_start = start[0]
+        if (start[0] > 2.5*self._goal_distance and
+            end[0] > 2.5*self._goal_distance) or\
+                (start[0] < 0 and end[0] < 0):
+            start[0] = start[0]%(2.5*self._goal_distance)
+            end[0] = end[0]%(2.5*self._goal_distance)
 
         self._viewer.line(start, end)
         self._viewer.circle(start, self.r)
-        self._viewer.circle(goal, radius=0.01, color=(255, 0, 0))
+
+        if old_start == start[0]:
+            self._viewer.circle(goal, radius=0.01, color=(255, 0, 0))
 
         self._viewer.display(self.dt)
 
