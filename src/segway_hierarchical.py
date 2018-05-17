@@ -22,7 +22,6 @@ from library.blocks.computational_graph import ComputationalGraph
 from library.blocks.control_block import ControlBlock
 from library.blocks.basic_operation_block import *
 from library.blocks.model_placeholder import PlaceHolder
-from library.blocks.error_accumulator import ErrorAccumulatorBlock
 from library.blocks.reward_accumulator import reward_accumulator_block
 from library.blocks.functions.pick_first_state import pick_first_state
 from library.blocks.functions.fall_reward import fall_reward
@@ -73,33 +72,33 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
 
     # Features
-    features1 = Features(basis_list=[PolynomialBasis()])
+    features1 = Features(basis_list=PolynomialBasis.generate(3,1)[1:])
     approximator1 = Regressor(LinearApproximator,
-                             input_shape=(features1.size,),
+                             input_shape=(1,),
                              output_shape=(1,))
 
     # Policy 1
     n_weights = approximator1.weights_size
     mu1 = np.zeros(n_weights)
-    sigma1 = 2e-0 * np.ones(n_weights)
+    sigma1 = 1e-2*np.ones(n_weights)
     pi1 = DeterministicPolicy(approximator1)
     dist1 = GaussianDiagonalDistribution(mu1, sigma1)
 
 
     # Agent 1
-    eps1 = params.get('eps')
-    lim = 2 * np.pi
+    eps1 = 5e-2#params.get('eps')
+    lim = np.pi/2
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
-                              action_space=spaces.Box(0, lim, (1,)),
+                              action_space=spaces.Box(-lim, lim, (1,)),
                               gamma=mdp.info.gamma,
-                              horizon=20)
+                              horizon=mdp.info.horizon)
 
-    agent1 = alg_low(distribution=dist1, policy=pi1, features=features1,
+    agent1 = alg_high(distribution=dist1, policy=pi1, features=None,
                      mdp_info=mdp_info_agent1, eps=eps1)
 
     # Policy 2
     basis = PolynomialBasis.generate(1, 3)
-    features2 = Features(basis_list=basis)
+    features2 = Features(basis_list=basis[1:])
     approximator2 = Regressor(LinearApproximator,
                               input_shape=(features2.size,),
                               output_shape=(1,))
@@ -111,47 +110,48 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
     # Agent 2
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(
-        low=np.array([-np.pi, -np.pi, -np.pi]),
-        high=np.array([np.pi, np.pi, np.pi]),
+        low=mdp.info.observation_space.low[1:], #FIXME FALSE
+        high=mdp.info.observation_space.high[1:], #FIXME FALSE
         shape=(3,)),
         action_space=mdp.info.action_space,
-        gamma=mdp.info.gamma, horizon=30)
+        gamma=mdp.info.gamma, horizon=300)
 
     agent2 = alg_low(distribution=dist2, policy=pi2, features=features2,
                      mdp_info=mdp_info_agent2, eps=eps1)
 
     # Control Block 1
     parameter_callback1 = CollectDistributionParameter(dist1)
-    control_block1 = ControlBlock(name='Control Block 1', agent=agent1,
+    control_block1 = ControlBlock(name='Control Block High', agent=agent1,
                                   n_eps_per_fit=n_ep_per_fit,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
     parameter_callback2 = CollectDistributionParameter(dist2)
-    control_block2 = ControlBlock(name='Control Block 2', agent=agent2,
-                                  n_eps_per_fit=10,
+    control_block2 = ControlBlock(name='Control Block Low', agent=agent2,
+                                  n_eps_per_fit=n_ep_per_fit,
                                   callbacks=[parameter_callback2])
 
 
     #Reward Accumulator
-    reward_acc = reward_accumulator_block(gamma=mdp_info_agent1.gamma,
-                                          name='reward_acc')
+    #reward_acc = reward_accumulator_block(gamma=mdp_info_agent1.gamma,
+    #                                      name='reward_acc')
 
 
     # Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_block1,
               control_block2, function_block1, function_block2,
               function_block3, function_block4, function_block5,
-              function_block6, reward_acc]
+              function_block6]#, reward_acc]
 
     state_ph.add_input(control_block2)
     reward_ph.add_input(control_block2)
     lastaction_ph.add_input(control_block2)
-    reward_acc.add_input(reward_ph)
-    reward_acc.add_alarm_connection(control_block2)
+    #reward_acc.add_input(reward_ph)
+    #reward_acc.add_alarm_connection(control_block2)
     control_block1.add_input(function_block1)
-    control_block1.add_reward(reward_acc)
-    control_block1.add_alarm_connection(control_block2)
+    #control_block1.add_reward(reward_acc)
+    control_block1.add_reward(reward_ph)
+    #control_block1.add_alarm_connection(control_block2)
     control_block2.add_input(function_block2)
     control_block2.add_reward(function_block4)
     function_block1.add_input(state_ph)
@@ -181,6 +181,9 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
         dataset_eval += dataset_eval_run
         J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
         print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
+        print('dist H:', dist1.get_parameters())
+        print('dist L mu:', dist2.get_parameters()[:3])
+        print('dist L sigma:', dist2.get_parameters()[3:])
         #low_level_dataset_eval += control_block2.dataset.get()
 
     # Save
