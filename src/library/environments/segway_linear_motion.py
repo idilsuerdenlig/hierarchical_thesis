@@ -62,7 +62,7 @@ class SegwayLinearMotion(Environment):
     def reset(self, state=None):
         if state is None:
             if self._random:
-                angle = np.random.uniform(-np.pi, np.pi)
+                angle = np.random.uniform(-np.pi/4, np.pi/4)
             else:
                 angle = -np.pi/8
 
@@ -89,7 +89,7 @@ class SegwayLinearMotion(Environment):
             reward = -10000
         else:
             absorbing = False
-            Q = np.diag([4.0, 1.0, 0.4, 0.01])
+            Q = np.diag([10.0, 3.0, 0.1, 0.1])
 
             x = self._state
             J = x.dot(Q).dot(x)
@@ -133,16 +133,17 @@ class SegwayLinearMotion(Environment):
         start = 1.25*np.array([self._goal_distance, 2*self.l])
         end = np.array(start)
 
-        goal = start + np.array([self._goal_distance, -self.r])
-        position = self._goal_distance + self._state[0]
+        goal = start + np.array([0, -self.r])
+        position = self._state[0]
         start[0] += position
         end[0] += -2*self.l*np.sin(self._state[1]) + position
         end[1] += 2*self.l*np.cos(self._state[1])
 
-        old_start = start[0]
+        near_goal = True
         if (start[0] > 2.5*self._goal_distance and
             end[0] > 2.5*self._goal_distance) or\
                 (start[0] < 0 and end[0] < 0):
+            near_goal = False
             new_start = start[0]%(2.5*self._goal_distance)
             new_end = end[0]%(2.5*self._goal_distance)
 
@@ -153,7 +154,7 @@ class SegwayLinearMotion(Environment):
         self._viewer.line(start, end)
         self._viewer.circle(start, self.r)
 
-        if old_start == start[0]:
+        if near_goal:
             self._viewer.circle(goal, radius=0.01, color=(255, 0, 0))
 
         self._viewer.display(self.dt)
