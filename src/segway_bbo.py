@@ -52,7 +52,8 @@ def experiment(n_epochs, n_iteration, n_ep_per_fit, n_eval_run):
         core.learn(n_episodes=n_iteration*n_ep_per_fit,
                    n_episodes_per_fit=n_ep_per_fit, render=False)
 
-        dataset_eval = core.evaluate(n_episodes=n_eval_run, render=True)
+        dataset_eval = core.evaluate(n_episodes=n_eval_run, render=False)
+        dataset_eval = core.evaluate(n_episodes=n_eval_run, render=False)
         J = compute_J(dataset_eval, gamma=mdp.info.gamma)
 
         p = dist.get_parameters()
