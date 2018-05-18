@@ -44,7 +44,7 @@ def experiment(n_epochs, n_iteration, n_ep_per_fit, n_eval_run):
     # Train
     core = Core(agent, mdp)
 
-    dataset_eval = core.evaluate(n_episodes=n_eval_run, render=True)
+    dataset_eval = core.evaluate(n_episodes=n_eval_run, render=False)
     J = compute_J(dataset_eval, gamma=mdp.info.gamma)
     print('J at start ', np.mean(J))
 

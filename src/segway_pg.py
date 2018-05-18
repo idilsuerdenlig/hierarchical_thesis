@@ -2,7 +2,7 @@ import numpy as np
 
 from mushroom.core import Core
 from mushroom.algorithms.policy_search import *
-from mushroom.policy import GaussianPolicy
+from mushroom.policy import DiagonalGaussianPolicy
 from mushroom.approximators import Regressor
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.utils.dataset import compute_J
@@ -26,38 +26,44 @@ def experiment(n_epochs, n_iteration, n_ep_per_fit, n_eval_run):
 
     #basis = PolynomialBasis.generate(mdp.info.observation_space.shape[0], 1)
 
-    low = mdp.info.observation_space.low
+    '''low = mdp.info.observation_space.low
     high = mdp.info.observation_space.high
 
     tiles = Tiles.generate(1, [10, 10, 10, 10], low, high, uniform=True)
     phi = Features(tilings=tiles)
 
-    '''basis = gaussian_tensor.generate(4*[5],
+    basis = gaussian_tensor.generate(4*[5],
                                      [
                                          [-2.0, 2.0],
                                          [-np.pi/2, np.pi/2],
                                          [-15, 15],
                                          [-75, 75]
                                      ])
-    phi = Features(tensor_list=basis, name='rbf', input_dim=4)'''
+    phi = Features(tensor_list=basis, name='rbf', input_dim=4)
+    
+    input_shape=(phi.size,1)
+    '''
+
+    phi = None
+    input_shape = mdp.info.observation_space.shape
 
 
     # Features
     mu = Regressor(LinearApproximator,
-                   input_shape=(phi.size,),
+                   input_shape=input_shape,
                    output_shape=mdp.info.action_space.shape)
 
-    sigma = 1e-2*np.eye(1)
-    policy = GaussianPolicy(mu, sigma)
+    sigma = 1e-0*np.ones(1)
+    policy = DiagonalGaussianPolicy(mu, sigma)
 
-    lr = AdaptiveParameter(1e-2)
+    lr =  Parameter(1e-5)
     agent = GPOMDP(policy, mdp.info, lr, phi)
 
 
     # Train
     core = Core(agent, mdp)
 
-    dataset_eval = core.evaluate(n_episodes=n_eval_run, render=True)
+    dataset_eval = core.evaluate(n_episodes=n_eval_run, render=False)
     J = compute_J(dataset_eval, gamma=mdp.info.gamma)
     print('J at start ', np.mean(J))
 
@@ -71,7 +77,7 @@ def experiment(n_epochs, n_iteration, n_ep_per_fit, n_eval_run):
         J = compute_J(dataset_eval, gamma=mdp.info.gamma)
 
         print('mu:    ', p[:mu.weights_size])
-        #print('sigma: ', p[mu.weights_size:])
+        print('sigma: ', p[mu.weights_size:])
         print('J at iteration ', i, ': ', np.mean(J))
 
     print('Press a button to visualize the segway...')
