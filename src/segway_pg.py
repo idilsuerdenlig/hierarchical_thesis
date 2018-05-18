@@ -11,6 +11,7 @@ from mushroom.utils.parameters import *
 from mushroom.features.basis import PolynomialBasis
 from mushroom.features import Features
 from mushroom.features.tiles import Tiles
+from mushroom.features.tensors import gaussian_tensor
 from library.environments.segway_linear_motion import SegwayLinearMotion
 
 from tqdm import tqdm
@@ -27,8 +28,18 @@ def experiment(n_epochs, n_iteration, n_ep_per_fit, n_eval_run):
 
     low = mdp.info.observation_space.low
     high = mdp.info.observation_space.high
-    tiles = Tiles.generate(1, [10, 10, 10, 10], low, high)
+
+    tiles = Tiles.generate(1, [10, 10, 10, 10], low, high, uniform=True)
     phi = Features(tilings=tiles)
+
+    '''basis = gaussian_tensor.generate(4*[5],
+                                     [
+                                         [-2.0, 2.0],
+                                         [-np.pi/2, np.pi/2],
+                                         [-15, 15],
+                                         [-75, 75]
+                                     ])
+    phi = Features(tensor_list=basis, name='rbf', input_dim=4)'''
 
 
     # Features
@@ -39,13 +50,16 @@ def experiment(n_epochs, n_iteration, n_ep_per_fit, n_eval_run):
     sigma = 1e-2*np.eye(1)
     policy = GaussianPolicy(mu, sigma)
 
-    lr = AdaptiveParameter(1e-1)
+    lr = AdaptiveParameter(1e-2)
     agent = GPOMDP(policy, mdp.info, lr, phi)
 
 
     # Train
-    dataset_callback = CollectDataset()
     core = Core(agent, mdp)
+
+    dataset_eval = core.evaluate(n_episodes=n_eval_run, render=True)
+    J = compute_J(dataset_eval, gamma=mdp.info.gamma)
+    print('J at start ', np.mean(J))
 
     for i in range(n_epochs):
         core.learn(n_episodes=n_iteration*n_ep_per_fit,
@@ -58,8 +72,7 @@ def experiment(n_epochs, n_iteration, n_ep_per_fit, n_eval_run):
 
         print('mu:    ', p[:mu.weights_size])
         #print('sigma: ', p[mu.weights_size:])
-        print('Reward at iteration ' + str(i) + ': ' +
-              str(np.mean(J)))
+        print('J at iteration ', i, ': ', np.mean(J))
 
     print('Press a button to visualize the segway...')
     input()
@@ -68,7 +81,7 @@ def experiment(n_epochs, n_iteration, n_ep_per_fit, n_eval_run):
 
 if __name__ == '__main__':
     experiment(n_epochs=20,
-               n_iteration=4,
-               n_ep_per_fit=25,
+               n_iteration=10,
+               n_ep_per_fit=10,
                n_eval_run=10)
 

@@ -44,18 +44,22 @@ def experiment(n_epochs, n_iteration, n_ep_per_fit, n_eval_run):
     # Train
     core = Core(agent, mdp)
 
+    dataset_eval = core.evaluate(n_episodes=n_eval_run, render=True)
+    J = compute_J(dataset_eval, gamma=mdp.info.gamma)
+    print('J at start ', np.mean(J))
+
     for i in range(n_epochs):
         core.learn(n_episodes=n_iteration*n_ep_per_fit,
                    n_episodes_per_fit=n_ep_per_fit, render=False)
 
-        dataset_eval = core.evaluate(n_episodes=n_eval_run)
+        dataset_eval = core.evaluate(n_episodes=n_eval_run, render=True)
         J = compute_J(dataset_eval, gamma=mdp.info.gamma)
 
         p = dist.get_parameters()
 
         print('mu:    ', p[:n_weights])
         print('sigma: ', p[n_weights:])
-        print('Reward at iteration ' + str(i) + ': ' +
+        print('J at iteration ' + str(i) + ': ' +
               str(np.mean(J)))
 
     print('Press a button to visualize the segway...')

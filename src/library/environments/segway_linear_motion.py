@@ -49,7 +49,7 @@ class SegwayLinearMotion(Environment):
         mdp_info = MDPInfo(observation_space, action_space, gamma, horizon)
 
         # Visualization
-        env_width = 2.5*goal_distance
+        env_width = 4*goal_distance
         env_height = 2.5*2*self.l
         width = 800
         height = int(width*env_height/env_width)
@@ -131,7 +131,7 @@ class SegwayLinearMotion(Environment):
         return dx
 
     def render(self, mode='human'):
-        start = 1.25*np.array([self._goal_distance, 2*self.l])
+        start = np.array([2*self._goal_distance, 1.25*2*self.l])
         end = np.array(start)
 
         goal = start + np.array([0, -self.r])
@@ -140,23 +140,10 @@ class SegwayLinearMotion(Environment):
         end[0] += -2*self.l*np.sin(self._state[1]) + position
         end[1] += 2*self.l*np.cos(self._state[1])
 
-        near_goal = True
-        if (start[0] > 2.5*self._goal_distance and
-            end[0] > 2.5*self._goal_distance) or\
-                (start[0] < 0 and end[0] < 0):
-            near_goal = False
-            new_start = start[0]%(2.5*self._goal_distance)
-            new_end = end[0]%(2.5*self._goal_distance)
-
-            if np.allclose(new_start-new_end, start[0]-end[0]):
-                start[0] = new_start
-                end[0] = new_end
-
         self._viewer.line(start, end)
         self._viewer.circle(start, self.r)
 
-        if near_goal:
-            self._viewer.circle(goal, radius=0.01, color=(255, 0, 0))
+        self._viewer.circle(goal, radius=0.01, color=(255, 0, 0))
 
         self._viewer.display(self.dt)
 
