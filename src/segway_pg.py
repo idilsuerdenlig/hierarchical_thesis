@@ -2,15 +2,15 @@ import numpy as np
 
 from mushroom.core import Core
 from mushroom.algorithms.policy_search import *
-from mushroom.policy import DeterministicPolicy
-from mushroom.features import Features
-from mushroom.distributions import GaussianDiagonalDistribution
+from mushroom.policy import GaussianPolicy
 from mushroom.approximators import Regressor
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.callbacks import CollectDataset
+from mushroom.utils.parameters import *
 from mushroom.features.basis import PolynomialBasis
 from mushroom.features import Features
+from mushroom.features.tiles import Tiles
 from library.environments.segway_linear_motion import SegwayLinearMotion
 
 from tqdm import tqdm
@@ -23,38 +23,41 @@ def experiment(n_epochs, n_iteration, n_ep_per_fit, n_eval_run):
     # MDP
     mdp = SegwayLinearMotion()
 
-    basis = PolynomialBasis.generate(1, mdp.info.observation_space.shape[0])
-    phi = Features(basis_list=basis[1:])
+    #basis = PolynomialBasis.generate(mdp.info.observation_space.shape[0], 1)
+
+    low = mdp.info.observation_space.low
+    high = mdp.info.observation_space.high
+    tiles = Tiles.generate(1, [10, 10, 10, 10], low, high)
+    phi = Features(tilings=tiles)
 
 
     # Features
-    approximator = Regressor(LinearApproximator,
+    mu = Regressor(LinearApproximator,
                    input_shape=(phi.size,),
                    output_shape=mdp.info.action_space.shape)
 
-    n_weights = approximator.weights_size
-    mu = np.zeros(n_weights)
-    sigma = 2e-0*np.ones(n_weights)
-    policy = DeterministicPolicy(approximator)
-    dist = GaussianDiagonalDistribution(mu, sigma)
+    sigma = 1e-2*np.eye(1)
+    policy = GaussianPolicy(mu, sigma)
 
-    agent = RWR(dist, policy, mdp.info, 0.01, phi)
+    lr = AdaptiveParameter(1e-1)
+    agent = GPOMDP(policy, mdp.info, lr, phi)
 
 
     # Train
+    dataset_callback = CollectDataset()
     core = Core(agent, mdp)
 
     for i in range(n_epochs):
         core.learn(n_episodes=n_iteration*n_ep_per_fit,
                    n_episodes_per_fit=n_ep_per_fit, render=False)
 
+        p = policy.get_weights()
+
         dataset_eval = core.evaluate(n_episodes=n_eval_run)
         J = compute_J(dataset_eval, gamma=mdp.info.gamma)
 
-        p = dist.get_parameters()
-
-        print('mu:    ', p[:n_weights])
-        print('sigma: ', p[n_weights:])
+        print('mu:    ', p[:mu.weights_size])
+        #print('sigma: ', p[mu.weights_size:])
         print('Reward at iteration ' + str(i) + ': ' +
               str(np.mean(J)))
 
