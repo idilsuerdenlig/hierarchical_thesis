@@ -84,7 +84,7 @@ class SegwayLinearMotion(Environment):
         self._state = np.array(new_state[-1])
         self._state[1] = normalize_angle(self._state[1])
 
-        if abs(self._state[1]) > np.pi / 2:
+        if abs(self._state[1]) > np.pi / 2 or abs(self._state[0]) > 2 * self._goal_distance:
             absorbing = True
             reward = -10000
         else:
