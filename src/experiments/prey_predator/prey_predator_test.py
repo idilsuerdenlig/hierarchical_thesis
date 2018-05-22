@@ -2,12 +2,13 @@ import numpy as np
 
 from mushroom.core import Core
 from mushroom.algorithms.policy_search import *
-from mushroom.policy import DeterministicPolicy
+from mushroom.policy import GaussianPolicy
 from mushroom.distributions import GaussianDiagonalDistribution
 from mushroom.approximators import Regressor
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.callbacks import CollectDataset
+from mushroom.utils.parameters import Parameter
 from mushroom.features.basis import PolynomialBasis
 from mushroom.features import Features
 from library.environments.prey_predator import PreyPredator
@@ -31,13 +32,11 @@ def experiment(n_epochs, n_episodes, n_ep_per_fit):
                    input_shape=(phi.size,),
                    output_shape=mdp.info.action_space.shape)
 
-    n_weights = approximator.weights_size
-    mu = np.zeros(n_weights)
-    sigma = 2e-0*np.ones(n_weights)
-    policy = DeterministicPolicy(approximator)
-    dist = GaussianDiagonalDistribution(mu, sigma)
+    sigma = 1e-2*np.eye(mdp.info.action_space.shape[0])
+    policy = GaussianPolicy(approximator, sigma)
 
-    agent = REPS(dist, policy, mdp.info, 0.05, phi)
+    lr = Parameter(1e-5)
+    agent = GPOMDP(policy, mdp.info, lr, phi)
 
 
     # Train

@@ -78,15 +78,13 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     lim_hi = 1000+1e-8
     n_tiles_high = [20, 20]
     n_tilings = 1
-    # Discretization Block
 
+    # Discretization Block
     discretization_block = DiscretizationBlock(low=low_hi, high=lim_hi, n_tiles=n_tiles_high)
 
     # PolicyH
     epsilon = Parameter(value=0.1)
     piH = EpsGreedy(epsilon=epsilon)
-    #beta = Parameter(value=1.0)
-    #piH = Boltzmann(beta=beta)
 
     # AgentH
     learning_rate = params.get('learning_rate_high')
@@ -193,8 +191,6 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     # Function Block 7: ext rew of low lev ctrl
     function_block7 = fBlock(phi=G_low, name='f7 G_lo')
 
-
-
     #Reward Accumulator H:
     reward_acc_H = reward_accumulator_block(gamma=mdp_info_agentH.gamma,
                                             name='reward_acc_H')
@@ -242,7 +238,6 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     function_block4.add_input(function_block6)
     function_block4.add_input(reward_acc_H)
 
-    #function_block5.add_input(reward_ph)
     function_block5.add_input(function_block7)
 
     function_block6.add_input(reward_ph)
@@ -253,7 +248,6 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     function_block8.add_input(control_blockH)
 
     discretization_block.add_input(function_block1)
-
 
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
     core = HierarchicalCore(computational_graph)
@@ -291,8 +285,6 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
             control_blockH.callbacks = [epsilon_update]
 
 
-
-
     # Tile data
     hi_lev_params = agentH.Q.table
     max_q_val = np.zeros(n_tiles_high[0]**2)
@@ -300,9 +292,6 @@ def experiment_ghavamzade(alg_high, alg_low, params, subdir, i):
     for n in range(n_tiles_high[0]**2):
         max_q_val[n] = np.amax(hi_lev_params[n])
         act_max_q_val[n] = np.argmax(hi_lev_params[n])
-    #max_q_val_tiled = np.reshape(max_q_val, (n_tiles_high[0], n_tiles_high[1]))
-    #act_max_q_val_tiled = np.reshape(act_max_q_val, (n_tiles_high[0],
-    #                                                 n_tiles_high[1]))
 
     mk_dir_recursive('./' + subdir + str(i))
 
