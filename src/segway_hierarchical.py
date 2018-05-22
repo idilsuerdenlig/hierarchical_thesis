@@ -95,7 +95,7 @@ def segway_experiment(alg_high, alg_low, params_high, params_low, subdir, i):
                               output_shape=(1,))
     n_weights2 = approximator2.weights_size
     mu2 = np.zeros(n_weights2)
-    sigma2 = 2e-0 * np.ones(n_weights2)
+    sigma2 = 1e-0 * np.ones(n_weights2)
     pi2 = DeterministicPolicy(approximator2)
     dist2 = GaussianDiagonalDistribution(mu2, sigma2)
 
@@ -180,13 +180,13 @@ if __name__ == '__main__':
     learning_rate_high = AdaptiveParameter(value=50)
     learning_rate_low = AdaptiveParameter(value=5e-4)
     eps_high = 0.04
-    eps_low = 0.04
+    eps_low = 0.05
     beta_high = 0.01
     beta_low = 0.01
 
     algs_params = [
             (REPS, REPS, {'eps': eps_high}, {'eps': eps_low}),
-            (RWR, REPS, {'beta': beta_high}, {'beta': beta_low}),
+            (RWR, RWR, {'beta': beta_high}, {'beta': beta_low}),
             (PGPE, PGPE, {'learning_rate': learning_rate_high},
              {'learning_rate': learning_rate_low}),
         ]
