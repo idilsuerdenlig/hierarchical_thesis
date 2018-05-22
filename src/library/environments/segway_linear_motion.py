@@ -23,7 +23,7 @@ class SegwayLinearMotion(Environment):
         """
         # MDP parameters
 
-        gamma = 0.97
+        gamma = 0.99
 
         self.Mr = 0.3 * 2
         self.Mp = 2.55
@@ -94,7 +94,7 @@ class SegwayLinearMotion(Environment):
 
             x = self._state
             J = x.dot(Q).dot(x)
-            reward = -J
+            reward = np.exp(-J)
 
         return self._state, reward, absorbing, {}
 

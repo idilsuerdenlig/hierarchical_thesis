@@ -33,7 +33,7 @@ from library.utils.callbacks.collect_distribution_parameter import\
     CollectDistributionParameter
 
 
-def server_experiment_small(alg_high, alg_low, params, subdir, i):
+def segway_experiment(alg_high, alg_low, params_high, params_low, subdir, i):
 
     np.random.seed()
 
@@ -68,7 +68,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     function_block5 = fBlock(name='f5 (fall punish low level)', phi=fall_reward)
 
     # Function Block 6
-    function_block6 = fBlock(name='f6 (saturation)', phi=saturation)
+    #function_block6 = fBlock(name='f6 (saturation)', phi=saturation)
 
 
     # Features
@@ -86,15 +86,14 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
 
     # Agent 1
-    eps1 = 5e-2#params.get('eps')
+    eps1 = 5e-2    #params.get('eps')
     lim = np.pi/2
     mdp_info_agent1 = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(-lim, lim, (1,)),
                               gamma=mdp.info.gamma,
                               horizon=mdp.info.horizon)
 
-    agent1 = alg_high(distribution=dist1, policy=pi1, features=None,
-                     mdp_info=mdp_info_agent1, eps=eps1)
+    agent1 = alg_high(dist1, pi1, mdp_info_agent1, **params_high)
 
     # Policy 2
     basis = PolynomialBasis.generate(1, 3)
@@ -116,8 +115,8 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
         action_space=mdp.info.action_space,
         gamma=mdp.info.gamma, horizon=300)
 
-    agent2 = alg_low(distribution=dist2, policy=pi2, features=features2,
-                     mdp_info=mdp_info_agent2, eps=eps1)
+    agent2 = alg_low(dist2, pi2, features2,
+                     mdp_info_agent2, **params_low)
 
     # Control Block 1
     parameter_callback1 = CollectDistributionParameter(dist1)
@@ -130,6 +129,7 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     control_block2 = ControlBlock(name='Control Block Low', agent=agent2,
                                   n_eps_per_fit=n_ep_per_fit,
                                   callbacks=[parameter_callback2])
+    control_block1.set_mask(n_eps=24)
 
 
     #Reward Accumulator
@@ -140,8 +140,8 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     # Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_block1,
               control_block2, function_block1, function_block2,
-              function_block3, function_block4, function_block5,
-              function_block6]#, reward_acc]
+              function_block3, function_block4, function_block5]
+              #, function_block6#, reward_acc]
 
     state_ph.add_input(control_block2)
     reward_ph.add_input(control_block2)
@@ -155,13 +155,15 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
     control_block2.add_input(function_block2)
     control_block2.add_reward(function_block4)
     function_block1.add_input(state_ph)
-    function_block2.add_input(function_block6)
+    #function_block2.add_input(function_block6)
+    function_block2.add_input(control_block1)
+
     function_block2.add_input(state_ph)
     function_block3.add_input(function_block2)
     function_block5.add_input(state_ph)
     function_block4.add_input(function_block3)
     function_block4.add_input(function_block5)
-    function_block6.add_input(control_block1)
+    #function_block6.add_input(control_block1)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
     core = HierarchicalCore(computational_graph)
 
@@ -200,13 +202,22 @@ def server_experiment_small(alg_high, alg_low, params, subdir, i):
 
 if __name__ == '__main__':
 
-    subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + \
-             '_segway_hierarchical/'
+    #subdir = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + \
+    #         '_segway_hierarchical/'
     alg_high = REPS
     alg_low = REPS
     learning_rate_high = AdaptiveParameter(value=50)
     learning_rate_low = AdaptiveParameter(value=5e-4)
-    eps = 0.05
+    eps_high = 0.04
+    eps_low = 0.04
+    beta_high = 0.01
+    beta_low = 0.01
+
+    algs_params = [
+            (REPS, REPS, {'eps high': eps_high}, {'eps low':eps_low}),
+            (RWR, REPS, {'beta_high': beta_high}, {'beta_low' : beta_low}),
+            (PGPE, PGPE, {'learning_rate high': learning_rate_high}, {'learning_rate_low': learning_rate_low}),
+        ]
     n_jobs = 1
     how_many = 1
     n_epochs = 20
@@ -214,20 +225,16 @@ if __name__ == '__main__':
     n_ep_per_fit = 25
     eval_run = 10
 
-    mk_dir_recursive('./' + subdir)
-    force_symlink('./' + subdir, 'latest')
-
-
-    params = {'learning_rate_high': learning_rate_high,
-              'learning_rate_low': learning_rate_low,
-              'eps':eps}
-    np.save(subdir + '/algorithm_params_dictionary', params)
+    #mk_dir_recursive('./' + subdir)
+    #force_symlink('./' + subdir, 'latest')
+    #np.save(subdir + '/algorithm_params_dictionary', params)
     experiment_params = {'how_many': how_many,
                          'n_epochs': n_epochs,
                          'n_iterations': n_iterations,
                          'n_ep_per_fit': n_ep_per_fit,
                          'eval_run': eval_run}
-    np.save(subdir + '/experiment_params_dictionary', experiment_params)
-    Js = Parallel(n_jobs=n_jobs)(delayed(server_experiment_small)
-                                 (alg_high, alg_low, params, subdir, i)
+    #np.save(subdir + '/experiment_params_dictionary', experiment_params)
+    for alg_high, alg_low, params_high, params_low in algs_params:
+        Js = Parallel(n_jobs=n_jobs)(delayed(segway_experiment)
+                                 (alg_high, alg_low, params_high, params_low, None, i)
                                  for i in range(how_many))
