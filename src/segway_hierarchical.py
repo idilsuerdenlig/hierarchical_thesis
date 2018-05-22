@@ -176,8 +176,21 @@ def segway_experiment(alg_high, alg_low, params_high, params_low, subdir, i):
     print('J at start : ' + str(np.mean(J)))
     dataset_eval += dataset_eval_run
 
+    mask_done = False
     for n in range(n_epochs):
         print('ITERATION', n)
+        if n == 0:
+            control_block1.set_mask()
+            n_weights_h = alg_high.policy._approximator.weights_size
+            dist1._mu = np.zeros(n_weights_h)
+            dist1._sigma = 1e-8 * np.ones(n_weights_h)
+
+        if n > 0 and not mask_done:
+            control_block1.unset_mask()
+            dist1._mu = np.zeros(n_weights_h)
+            dist1._sigma = 1 * np.ones(n_weights_h)
+            mask_done = True
+
         core.learn(n_episodes=n_iterations*n_ep_per_fit, skip=True)
         dataset_eval_run = core.evaluate(n_episodes=eval_run, render=True)
         dataset_eval += dataset_eval_run
@@ -187,6 +200,7 @@ def segway_experiment(alg_high, alg_low, params_high, params_low, subdir, i):
         print('dist L mu:', dist2.get_parameters()[:3])
         print('dist L sigma:', dist2.get_parameters()[3:])
         #low_level_dataset_eval += control_block2.dataset.get()
+
 
     # Save
     #parameter_dataset1 = parameter_callback1.get_values()
@@ -214,9 +228,9 @@ if __name__ == '__main__':
     beta_low = 0.01
 
     algs_params = [
-            (REPS, REPS, {'eps high': eps_high}, {'eps low':eps_low}),
-            (RWR, REPS, {'beta_high': beta_high}, {'beta_low' : beta_low}),
-            (PGPE, PGPE, {'learning_rate high': learning_rate_high}, {'learning_rate_low': learning_rate_low}),
+            (REPS, REPS, {'eps': eps_high}, {'eps': eps_low}),
+            (RWR, REPS, {'beta': beta_high}, {'beta': beta_low}),
+            (PGPE, PGPE, {'learning_rate': learning_rate_high}, {'learning_rate': learning_rate_low}),
         ]
     n_jobs = 1
     how_many = 1

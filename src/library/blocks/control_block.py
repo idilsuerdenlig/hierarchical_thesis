@@ -47,7 +47,6 @@ class ControlBlock(Block):
         self.ep_step_counter = 0
         self.need_reset = False
         self.mask = False
-        self.n_eps_skip = 0
 
         if termination_condition is None:
             self.termination_condition = lambda x : False
@@ -58,19 +57,8 @@ class ControlBlock(Block):
 
     def _call(self, inputs, reward, absorbing, last, learn_flag):
 
-        if self.mask and self.n_eps_skip >= self.curr_episode_counter \
-                and learn_flag:
-
+        if self.mask:
             learn_flag = False
-
-            n_weights = self.agent.policy._approximator.weights_size
-            self.agent.distribution._mu = np.zeros(n_weights)
-            self.agent.distribution._sigma = 1e-8 * np.ones(n_weights)
-
-            if self.n_eps_skip == self.curr_episode_counter:
-                self.mask = False
-                self.agent.distribution._mu = np.zeros(n_weights)
-                self.agent.distribution._sigma = 1 * np.ones(n_weights)
 
         state = np.concatenate(inputs, axis=0)
         self.ep_step_counter += 1
@@ -131,13 +119,13 @@ class ControlBlock(Block):
         self.last_output = None
         self.need_reset = False
         self.alarm_output = False
+        self.mask = False
 
     def stop(self):
         self.agent.stop()
 
-    def set_mask(self, n_eps):
+    def set_mask(self):
         self.mask = True
-        self.n_eps_skip = n_eps
 
-
-
+    def unset_mask(self):
+        self.mask = False
