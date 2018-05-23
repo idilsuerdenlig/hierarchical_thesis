@@ -65,13 +65,13 @@ def flat_experiment(mdp, agent, n_epochs, n_iterations,
 
     dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
     J = compute_J(dataset, gamma=mdp.info.gamma)
-    J_list.append(J)
+    J_list.append(np.mean(J))
 
     for n in range(n_epochs):
         core.learn(n_episodes=n_iterations * ep_per_iteration,
                    n_episodes_per_fit=ep_per_iteration, quiet=True)
         dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
         J = compute_J(dataset, gamma=mdp.info.gamma)
-        J_list.append(J)
+        J_list.append(np.mean(J))
 
     return J_list

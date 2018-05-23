@@ -29,13 +29,13 @@ if __name__ == '__main__':
     mdp = ShipSteering(small=True, n_steps_action=3)
 
     # directory
-    name = 'ship_steering'
+    name = 'ship_steering_small'
     subdir = name + '_' + datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')\
              + '/'
 
     mk_dir_recursive('./' + subdir)
     force_symlink('./' + subdir, name + '_latest')
-    '''
+
     # FLAT PG
     algs_and_params_pg = [
         (GPOMDP, {'learning_rate': AdaptiveParameter(value=1e-5)})
@@ -75,7 +75,7 @@ if __name__ == '__main__':
                                                              ep_per_eval)
                                     for _ in range(how_many))
         np.save(subdir + '/' + alg.__name__, J)
-    '''
+
     # HIERARCHICAL
     algs_and_params_hier = [
         (GPOMDP, {'learning_rate': AdaptiveParameter(value=10)},
@@ -98,4 +98,4 @@ if __name__ == '__main__':
                                      ep_per_run_hier, ep_per_eval,
                                      ep_per_run_low)
                                     for _ in range(how_many))
-        np.save(subdir + '/H_' + alg_h.__name__, '_', alg_l.__name__, J)
+        np.save(subdir + '/H_' + alg_h.__name__ + '_' + alg_l.__name__, J)

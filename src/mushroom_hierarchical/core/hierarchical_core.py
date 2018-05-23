@@ -1,7 +1,5 @@
 from tqdm import tqdm
-from mushroom_hierarchical.blocks.computational_graph import ComputationalGraph
 from mushroom_hierarchical.utils.dataset_manager import DatasetManager
-import numpy as np
 
 
 class HierarchicalCore(object):

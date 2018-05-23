@@ -95,7 +95,6 @@ class ComputationalGraph(object):
             block.init()
         self.step_counter = 0
 
-
     def stop(self):
         self.model.stop()
         for block in self.ordered:

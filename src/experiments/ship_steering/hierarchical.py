@@ -120,13 +120,13 @@ def hierarchical_experiment(mdp, agent_low, agent_high,
 
     dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
     J = compute_J(dataset, gamma=mdp.info.gamma)
-    J_list.append(J)
+    J_list.append(np.mean(J))
 
     for n in range(n_epochs):
         core.learn(n_episodes=n_iterations * ep_per_iteration, skip=True,
                    quiet=True)
         dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
         J = compute_J(dataset, gamma=mdp.info.gamma)
-        J_list.append(J)
+        J_list.append(np.mean(J))
 
     return J_list
