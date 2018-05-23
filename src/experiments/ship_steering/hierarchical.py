@@ -21,17 +21,15 @@ from mushroom_hierarchical.policy.deterministic_control_policy \
     import DeterministicControlPolicy
 
 
-def build_high_level_agent(alg, params, mdp):
+def build_high_level_agent(alg, params, mdp, mu, sigma):
     features = Features(basis_list=[PolynomialBasis()])
-
-    sigma = np.array([40, 40])
     approximator = Regressor(LinearApproximator, input_shape=(features.size,),
                               output_shape=(2,))
-    approximator.set_weights(np.array([75, 75]))
+    approximator.set_weights(mu)
 
     pi1 = DiagonalGaussianPolicy(mu=approximator, std=sigma)
 
-    lim = 150
+    lim = mdp.info.observation_space.high[0]
     mdp_info_agent = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(0, lim, (2,)),
                               gamma=mdp.info.gamma, horizon=100)
@@ -107,8 +105,10 @@ def build_computational_graph(mdp, agent_low, agent_high,
     return computational_graph
 
 
-def hierarchical_experiment(mdp, agent_low, agent_high, n_epochs, n_iterations,
-                            ep_per_iteration, ep_per_eval, ep_per_iteration_low):
+def hierarchical_experiment(mdp, agent_low, agent_high,
+                            n_epochs, n_iterations,
+                            ep_per_iteration, ep_per_eval,
+                            ep_per_iteration_low):
     np.random.seed()
 
     computational_graph = build_computational_graph(mdp, agent_low, agent_high,
