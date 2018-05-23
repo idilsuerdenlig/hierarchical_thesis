@@ -14,9 +14,9 @@ from hierarchical import *
 if __name__ == '__main__':
     n_jobs = 1
 
-    how_many = 1#00
+    how_many = 100
     ep_per_eval = 40
-    n_epochs = 2#5
+    n_epochs = 25
     ep_per_epoch = 200
     ep_per_eval = 20
 
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     mdp = ShipSteering(small=True, n_steps_action=3)
 
     # directory
-    name = 'ship_steering_small'
+    name = 'ship_steering'
     subdir = name + '_' + datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')\
              + '/'
 
