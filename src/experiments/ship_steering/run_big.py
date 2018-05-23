@@ -70,6 +70,7 @@ if __name__ == '__main__':
     agent_cross = build_low_level_ghavamzadeh(GPOMDP, params_low, mdp)
     agent_plus = build_low_level_ghavamzadeh(GPOMDP, params_low, mdp)
 
+    print('ghavamzadeh')
     J = Parallel(n_jobs=n_jobs)(delayed(ghavamzadeh_experiment)
                                 (mdp, agent_plus, agent_cross, agent_high,
                                  n_epochs, ep_per_epoch, ep_per_eval,
