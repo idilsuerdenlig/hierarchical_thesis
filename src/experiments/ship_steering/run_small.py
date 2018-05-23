@@ -12,7 +12,7 @@ from hierarchical import *
 
 
 if __name__ == '__main__':
-    n_jobs = 1
+    n_jobs = -1
 
     how_many = 100
     ep_per_eval = 40
