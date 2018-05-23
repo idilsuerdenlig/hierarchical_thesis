@@ -4,7 +4,7 @@ from mushroom.algorithms.policy_search import REINFORCE, GPOMDP, eNAC
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.core import Core
-from library.environments.idilshipsteering import ShipSteering
+from mushroom_hierarchical.environments.idilshipsteering import ShipSteering
 from mushroom.features.tiles import Tiles
 from mushroom.features.features import Features
 from mushroom.features.tensors import gaussian_tensor
@@ -12,8 +12,8 @@ from mushroom.policy import GaussianPolicy, DiagonalGaussianPolicy
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 from tqdm import tqdm
-from library.utils.pick_last_ep_dataset import pick_last_ep
-from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
+from mushroom_hierarchical.utils.pick_last_ep_dataset import pick_last_ep
+from mushroom_hierarchical.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
 from mushroom.utils.folder import *
 import datetime
 from joblib import Parallel, delayed

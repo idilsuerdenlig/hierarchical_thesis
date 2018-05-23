@@ -14,18 +14,18 @@ from mushroom.policy import DeterministicPolicy
 
 from mushroom.utils.parameters import AdaptiveParameter
 
-from library.core.hierarchical_core import HierarchicalCore
-from library.environments.segway_linear_motion import SegwayLinearMotion
-from library.blocks.computational_graph import ComputationalGraph
-from library.blocks.control_block import ControlBlock
-from library.blocks.basic_operation_block import *
-from library.blocks.model_placeholder import PlaceHolder
-from library.blocks.functions.pick_first_state import pick_first_state
-from library.blocks.functions.fall_reward import fall_reward
-from library.blocks.functions.angle_to_angle_diff_complete_state \
+from mushroom_hierarchical.core.hierarchical_core import HierarchicalCore
+from mushroom_hierarchical.environments.segway_linear_motion import SegwayLinearMotion
+from mushroom_hierarchical.blocks.computational_graph import ComputationalGraph
+from mushroom_hierarchical.blocks.control_block import ControlBlock
+from mushroom_hierarchical.blocks.basic_operation_block import *
+from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
+from mushroom_hierarchical.blocks.functions.pick_first_state import pick_first_state
+from mushroom_hierarchical.blocks.functions.fall_reward import fall_reward
+from mushroom_hierarchical.blocks.functions.angle_to_angle_diff_complete_state \
     import angle_to_angle_diff_complete_state
-from library.blocks.functions.lqr_cost_segway import lqr_cost_segway
-from library.utils.callbacks.collect_distribution_parameter import\
+from mushroom_hierarchical.blocks.functions.lqr_cost_segway import lqr_cost_segway
+from mushroom_hierarchical.utils.callbacks.collect_distribution_parameter import\
     CollectDistributionParameter
 
 

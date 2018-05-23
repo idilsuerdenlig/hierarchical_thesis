@@ -11,7 +11,7 @@ from mushroom.utils.callbacks import CollectDataset
 from mushroom.utils.parameters import Parameter
 from mushroom.features.basis import PolynomialBasis
 from mushroom.features import Features
-from library.environments.prey_predator import PreyPredator
+from mushroom_hierarchical.environments.prey_predator import PreyPredator
 
 from tqdm import tqdm
 tqdm.monitor_interval = 0

@@ -1,5 +1,5 @@
 import numpy as np
-from library.agents.ghavamzade_agent import GhavamzadeAgent
+from mushroom_hierarchical.agents.ghavamzade_agent import GhavamzadeAgent
 from mushroom.approximators.regressor import Regressor
 from mushroom.core import Core
 from mushroom.features.tiles import Tiles
@@ -7,8 +7,8 @@ from mushroom.policy import GaussianPolicy
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.parameters import *
 from tqdm import tqdm
-from library.approximator.CMAC import CMACApproximator
-from library.environments.ship_ghavamzade_diagonal import ShipGhavamzadeDiagonal
+from mushroom_hierarchical.approximator.CMAC import CMACApproximator
+from mushroom_hierarchical.environments.ship_ghavamzade_diagonal import ShipGhavamzadeDiagonal
 
 tqdm.monitor_interval = 0
 

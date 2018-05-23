@@ -11,7 +11,7 @@ from mushroom.utils.dataset import compute_J
 from mushroom.utils.callbacks import CollectDataset
 from mushroom.features.basis import PolynomialBasis
 from mushroom.features import Features
-from library.environments.segway_linear_motion import SegwayLinearMotion
+from mushroom_hierarchical.environments.segway_linear_motion import SegwayLinearMotion
 
 from tqdm import tqdm
 tqdm.monitor_interval = 0

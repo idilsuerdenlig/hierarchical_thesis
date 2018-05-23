@@ -15,21 +15,21 @@ from mushroom.utils.dataset import compute_J
 from mushroom.utils.folder import *
 from mushroom.environments import ShipSteering
 
-from library.core.hierarchical_core import HierarchicalCore
-from library.utils.callbacks.epsilon_update import EpsilonUpdate
-from library.blocks.computational_graph import ComputationalGraph
-from library.blocks.control_block import ControlBlock
-from library.blocks.functions.pick_state import pick_state
-from library.blocks.functions.rototranslate import rototranslate
-from library.blocks.functions.hi_lev_extr_rew_ghavamzade import G_high
-from library.blocks.functions.low_lev_extr_rew_ghavamzade import G_low
-from library.blocks.reward_accumulator import reward_accumulator_block
-from library.blocks.basic_operation_block import *
-from library.blocks.model_placeholder import PlaceHolder
-from library.blocks.mux_block import MuxBlock
-from library.blocks.hold_state import hold_state
-from library.blocks.discretization_block import DiscretizationBlock
-from library.agents.Q_lambda_discrete import QLambdaDiscrete
+from mushroom_hierarchical.core.hierarchical_core import HierarchicalCore
+from mushroom_hierarchical.utils.callbacks.epsilon_update import EpsilonUpdate
+from mushroom_hierarchical.blocks.computational_graph import ComputationalGraph
+from mushroom_hierarchical.blocks.control_block import ControlBlock
+from mushroom_hierarchical.blocks.functions.pick_state import pick_state
+from mushroom_hierarchical.blocks.functions.rototranslate import rototranslate
+from mushroom_hierarchical.blocks.functions.hi_lev_extr_rew_ghavamzade import G_high
+from mushroom_hierarchical.blocks.functions.low_lev_extr_rew_ghavamzade import G_low
+from mushroom_hierarchical.blocks.reward_accumulator import reward_accumulator_block
+from mushroom_hierarchical.blocks.basic_operation_block import *
+from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
+from mushroom_hierarchical.blocks.mux_block import MuxBlock
+from mushroom_hierarchical.blocks.hold_state import hold_state
+from mushroom_hierarchical.blocks.discretization_block import DiscretizationBlock
+from mushroom_hierarchical.agents.Q_lambda_discrete import QLambdaDiscrete
 
 class TerminationCondition(object):
 

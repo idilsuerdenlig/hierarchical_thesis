@@ -1,10 +1,10 @@
 import numpy as np
-from library.visualization_tools.visualize_ship_steering import visualize_ship_steering
+from mushroom_hierarchical.visualization_tools.visualize_ship_steering import visualize_ship_steering
 import matplotlib.pyplot as plt
-from library.visualization_tools.visualize_control_block_ghavamzade import visualize_control_block_ghavamzade
-from library.visualization_tools.arrows import plot_arrows
-from library.utils.pick_last_ep_dataset import pick_last_ep
-from library.utils.pick_eps import pick_eps
+from mushroom_hierarchical.visualization_tools.visualize_control_block_ghavamzade import visualize_control_block_ghavamzade
+from mushroom_hierarchical.visualization_tools.arrows import plot_arrows
+from mushroom_hierarchical.utils.pick_last_ep_dataset import pick_last_ep
+from mushroom_hierarchical.utils.pick_eps import pick_eps
 
 
 def visualize_big_ghavamzade(ep_count=10, gamma=1):

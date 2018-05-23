@@ -1,6 +1,6 @@
-from library.core.hierarchical_core import HierarchicalCore
-from library.blocks.computational_graph import ComputationalGraph
-from library.blocks.control_block import ControlBlock
+from mushroom_hierarchical.core.hierarchical_core import HierarchicalCore
+from mushroom_hierarchical.blocks.computational_graph import ComputationalGraph
+from mushroom_hierarchical.blocks.control_block import ControlBlock
 from mushroom.utils import spaces
 from mushroom.utils.parameters import *
 from mushroom.utils.callbacks import CollectDataset
@@ -8,28 +8,28 @@ from mushroom.features.features import *
 from mushroom.features.basis import PolynomialBasis
 from mushroom.policy.gaussian_policy import *
 from mushroom.algorithms.policy_search import *
-from library.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
-from library.blocks.basic_operation_block import *
-from library.blocks.model_placeholder import PlaceHolder
-from library.blocks.mux_block import MuxBlock
+from mushroom_hierarchical.utils.callbacks.collect_policy_parameter import CollectPolicyParameter
+from mushroom_hierarchical.blocks.basic_operation_block import *
+from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
+from mushroom_hierarchical.blocks.mux_block import MuxBlock
 from mushroom.algorithms.value.td import *
 from mushroom.policy import EpsGreedy
 from mushroom.features.tiles import Tiles
-from library.blocks.functions.pick_state import pick_state
-from library.blocks.functions.rototranslate import rototranslate
-from library.blocks.hold_state import hold_state
-from library.blocks.functions.hi_lev_extr_rew_ghavamzade import G_high
-from library.blocks.functions.low_lev_extr_rew_ghavamzade import G_low
-from library.blocks.reward_accumulator import reward_accumulator_block
+from mushroom_hierarchical.blocks.functions.pick_state import pick_state
+from mushroom_hierarchical.blocks.functions.rototranslate import rototranslate
+from mushroom_hierarchical.blocks.hold_state import hold_state
+from mushroom_hierarchical.blocks.functions.hi_lev_extr_rew_ghavamzade import G_high
+from mushroom_hierarchical.blocks.functions.low_lev_extr_rew_ghavamzade import G_low
+from mushroom_hierarchical.blocks.reward_accumulator import reward_accumulator_block
 import datetime
 import argparse
 from mushroom.utils.folder import mk_dir_recursive
-from library.approximator.CMAC import CMACApproximator
-from library.environments.idilshipsteering import ShipSteering
+from mushroom_hierarchical.approximator.CMAC import CMACApproximator
+from mushroom_hierarchical.environments.idilshipsteering import ShipSteering
 from mushroom.environments.environment import MDPInfo
-from library.agents.ghavamzade_agent import GhavamzadeAgent
-from library.utils.pick_last_ep_dataset import pick_last_ep
-from library.blocks.hold_state import hold_state
+from mushroom_hierarchical.agents.ghavamzade_agent import GhavamzadeAgent
+from mushroom_hierarchical.utils.pick_last_ep_dataset import pick_last_ep
+from mushroom_hierarchical.blocks.hold_state import hold_state
 
 class TerminationCondition(object):
 

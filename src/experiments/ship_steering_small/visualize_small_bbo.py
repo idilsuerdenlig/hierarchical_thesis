@@ -1,6 +1,6 @@
-from library.visualization_tools.visualize_ship_steering import visualize_ship_steering
+from mushroom_hierarchical.visualization_tools.visualize_ship_steering import visualize_ship_steering
 import matplotlib.pyplot as plt
-from library.utils.pick_eps import pick_eps
+from mushroom_hierarchical.utils.pick_eps import pick_eps
 from mushroom.utils.dataset import compute_J
 import numpy as np
 

@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mushroom.utils.dataset import compute_J
-from library.utils.pick_last_ep_dataset import pick_last_ep
-from library.utils.pick_eps import pick_eps
+from mushroom_hierarchical.utils.pick_last_ep_dataset import pick_last_ep
+from mushroom_hierarchical.utils.pick_eps import pick_eps
 
 
 

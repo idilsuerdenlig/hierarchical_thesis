@@ -1,7 +1,7 @@
 import networkx as nx
-from library.blocks.model_placeholder import PlaceHolder
-from library.blocks.mux_block import MuxBlock
-from library.blocks.block import Block
+from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
+from mushroom_hierarchical.blocks.mux_block import MuxBlock
+from mushroom_hierarchical.blocks.block import Block
 
 
 def topological_sort(blocks):

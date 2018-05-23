@@ -14,20 +14,20 @@ from mushroom.utils.dataset import compute_J
 from mushroom.utils.folder import *
 from mushroom.utils.parameters import Parameter, AdaptiveParameter
 
-from library.core.hierarchical_core import HierarchicalCore
-from library.environments.idilshipsteering import ShipSteering
-from library.blocks.computational_graph import ComputationalGraph
-from library.blocks.control_block import ControlBlock
-from library.blocks.functions.feature_angle_diff_ship_steering import *
-from library.blocks.basic_operation_block import *
-from library.blocks.model_placeholder import PlaceHolder
-from library.blocks.reward_accumulator import reward_accumulator_block
-from library.blocks.functions.cost_cosine import cost_cosine
-from library.policy.deterministic_control_policy import \
+from mushroom_hierarchical.core.hierarchical_core import HierarchicalCore
+from mushroom_hierarchical.environments.idilshipsteering import ShipSteering
+from mushroom_hierarchical.blocks.computational_graph import ComputationalGraph
+from mushroom_hierarchical.blocks.control_block import ControlBlock
+from mushroom_hierarchical.blocks.functions.feature_angle_diff_ship_steering import *
+from mushroom_hierarchical.blocks.basic_operation_block import *
+from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
+from mushroom_hierarchical.blocks.reward_accumulator import reward_accumulator_block
+from mushroom_hierarchical.blocks.functions.cost_cosine import cost_cosine
+from mushroom_hierarchical.policy.deterministic_control_policy import \
     DeterministicControlPolicy
-from library.utils.callbacks.collect_policy_parameter import \
+from mushroom_hierarchical.utils.callbacks.collect_policy_parameter import \
     CollectPolicyParameter
-from library.utils.callbacks.collect_distribution_parameter import\
+from mushroom_hierarchical.utils.callbacks.collect_distribution_parameter import\
     CollectDistributionParameter
 
 

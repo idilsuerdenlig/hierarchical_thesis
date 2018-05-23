@@ -10,7 +10,7 @@ from mushroom.features.features import Features
 from mushroom.policy import DeterministicPolicy
 from mushroom.utils.dataset import compute_J
 from mushroom.utils.parameters import AdaptiveParameter, Parameter
-from library.environments.idilshipsteering import ShipSteering
+from mushroom_hierarchical.environments.idilshipsteering import ShipSteering
 import datetime
 from joblib import Parallel, delayed
 from tqdm import tqdm
