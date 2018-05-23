@@ -18,7 +18,7 @@ if __name__ == '__main__':
     ep_per_eval = 40
     n_epochs = 25
     ep_per_epoch = 200
-    ep_per_eval = 20
+    ep_per_eval = 50
 
     n_iterations_hier = 10
     n_iterations_bbo = 10
