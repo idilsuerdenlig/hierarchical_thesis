@@ -157,22 +157,14 @@ class PreyPredator(Environment):
                 if collision_distance < 2*self._rotation_radius:
                     obstacle = self._obstacles[i]
 
-                    dx = obstacle[1][0] - obstacle[0][0]
-                    dy = obstacle[1][1] - obstacle[0][1]
+                    v_obst = self._segment_to_vector(*obstacle)
+                    v_attack = self._segment_to_vector(state[3:5], state[0:2])
 
-                    angle_obstacle = np.abs(normalize_angle(np.arctan2(dy, dx)))
+                    angle = self._vector_angle(v_obst, v_attack)
 
+                    print(angle)
 
-
-                    delta = shortest_angular_distance(attack_angle,
-                                                      np.abs(angle_obstacle))
-
-                    print('atk: ', attack_angle/np.pi,
-                          ' obst: ', angle_obstacle/np.pi,
-                          ' delta: ', delta/np.pi)
-
-                    if delta >= 0 and np.abs(attack_angle) or \
-                        delta < 0 and np.abs(attack_angle) > np.pi / 2:
+                    if angle <= np.pi/2:
                         omega_prey = self._omega_prey
                     else:
                         omega_prey = -self._omega_prey
@@ -186,6 +178,17 @@ class PreyPredator(Environment):
     @staticmethod
     def _cross_2d(vecr, vecs):
         return vecr[0] * vecs[1] - vecr[1] * vecs[0]
+
+    @staticmethod
+    def _segment_to_vector(*segment):
+        a = segment[0]
+        b = segment[1]
+
+        if (b[0] > a[0]) or (b[0] == a[0] and b[1] > a[1]):
+            return b - a
+        else:
+            return a - b
+
 
     @staticmethod
     def _vector_angle(x, y):
