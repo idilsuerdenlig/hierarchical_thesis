@@ -27,6 +27,7 @@ from mushroom_hierarchical.blocks.functions.angle_to_angle_diff_complete_state \
 from mushroom_hierarchical.blocks.functions.lqr_cost_segway import lqr_cost_segway
 from mushroom_hierarchical.utils.callbacks.collect_distribution_parameter import\
     CollectDistributionParameter
+from mushroom_hierarchical.policy.deterministic_control_policy import DeterministicControlPolicy
 
 
 def segway_experiment(alg_high, alg_low, params_high, params_low, subdir, i):
@@ -84,7 +85,7 @@ def segway_experiment(alg_high, alg_low, params_high, params_low, subdir, i):
                               action_space=spaces.Box(-lim, lim, (1,)),
                               gamma=mdp.info.gamma,
                               horizon=mdp.info.horizon)
-
+    print(params_high)
     agent_high = alg_high(dist1, pi1, mdp_info_agent1, **params_high)
 
     # Policy 2
@@ -95,8 +96,8 @@ def segway_experiment(alg_high, alg_low, params_high, params_low, subdir, i):
                               output_shape=(1,))
     n_weights2 = approximator2.weights_size
     mu2 = np.zeros(n_weights2)
-    sigma2 = 1e-0 * np.ones(n_weights2)
-    pi2 = DeterministicPolicy(approximator2)
+    sigma2 = 0.5 * np.ones(n_weights2)
+    pi2 = DeterministicControlPolicy(approximator2)
     dist2 = GaussianDiagonalDistribution(mu2, sigma2)
 
     # Agent 2
@@ -158,11 +159,11 @@ def segway_experiment(alg_high, alg_low, params_high, params_low, subdir, i):
         print('ITERATION', n)
         if n == 0:
             control_block1.set_mask()
-            dist1.set_parameters(np.array([0, 1e-8]))
+            dist1.set_parameters(np.array([0, 1e-9]))
 
-        if n > 20 and not mask_done:
+        if n > 30 and not mask_done:
             control_block1.unset_mask()
-            dist1.set_parameters(np.array([0, 1e0]))
+            dist1.set_parameters(np.array([0, 5e-1]))
             mask_done = True
 
         core.learn(n_episodes=n_iterations*n_ep_per_fit, skip=True)
@@ -175,27 +176,26 @@ def segway_experiment(alg_high, alg_low, params_high, params_low, subdir, i):
 
 
 if __name__ == '__main__':
-    alg_high = REPS
-    alg_low = REPS
-    learning_rate_high = AdaptiveParameter(value=50)
-    learning_rate_low = AdaptiveParameter(value=5e-4)
-    eps_high = 0.04
+    learning_rate_high = AdaptiveParameter(value=5e-2)
+    learning_rate_low = AdaptiveParameter(value=1e-1)
+    eps_high = 0.05
     eps_low = 0.05
     beta_high = 0.01
-    beta_low = 0.01
+    beta_low = 0.0075
 
     algs_params = [
-            (REPS, REPS, {'eps': eps_high}, {'eps': eps_low}),
-            (RWR, RWR, {'beta': beta_high}, {'beta': beta_low}),
-            (PGPE, PGPE, {'learning_rate': learning_rate_high},
-             {'learning_rate': learning_rate_low}),
+            #(REPS, REPS, {'eps': eps_high}, {'eps': eps_low}),
+            #(RWR, RWR, {'beta': beta_high}, {'beta': beta_low}),
+            #(PGPE, PGPE, {'learning_rate': learning_rate_high},
+             #{'learning_rate': learning_rate_low}),
+        (PGPE, RWR, {'learning_rate' : learning_rate_high}, {'beta' : beta_low})
         ]
 
     n_jobs = 1
     how_many = 1
     n_epochs = 20
-    n_iterations = 4
-    n_ep_per_fit = 25
+    n_iterations = 10
+    n_ep_per_fit = 50
     eval_run = 10
 
 
