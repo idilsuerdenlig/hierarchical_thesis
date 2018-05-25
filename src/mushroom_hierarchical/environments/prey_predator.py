@@ -15,7 +15,7 @@ class PreyPredator(Environment):
         self._rotation_radius = 0.6
         self._catch_radius = 0.4
 
-        self._v_prey = 0.11
+        self._v_prey = 0.13
         self._v_predator = 0.1
         self._dt = 0.1
 
@@ -27,23 +27,23 @@ class PreyPredator(Environment):
 
         self._obstacles = [
             (np.array([self._max_x/5,
-                       self._max_y - 3.5*self._catch_radius]),
+                       self._max_y - 3.8*self._catch_radius]),
              np.array([self._max_x,
-                       self._max_y - 3.5*self._catch_radius])),
+                       self._max_y - 3.8*self._catch_radius])),
 
             (np.array([-3/5*self._max_x,
                        self._max_y/4]),
              np.array([-3/5*self._max_x,
-                       -2/5*self._max_y])),
+                       -3/10*self._max_y])),
 
-            (np.array([-3/5*self._max_x + 3.5*self._catch_radius,
+            (np.array([-3/5*self._max_x + 3.8*self._catch_radius,
                        self._max_y / 4]),
-             np.array([-3/5*self._max_x + 3.5*self._catch_radius,
-                       -2/5*self._max_y])),
+             np.array([-3/5*self._max_x + 3.8*self._catch_radius,
+                       -3/10*self._max_y])),
 
             (np.array([-3/5*self._max_x,
                        self._max_y/4]),
-             np.array([-3/5*self._max_x + 3.5*self._catch_radius,
+             np.array([-3/5*self._max_x + 3.8*self._catch_radius,
                        self._max_y/4]))
             ]
 
@@ -139,13 +139,12 @@ class PreyPredator(Environment):
 
         angle_current = shortest_angular_distance(state[5], attack_angle)
 
-        omega_prey = angle_current / np.pi
-        #velocity_prey = 0
-
         if velocity_prey > 0:
+            # check attack angle collision
             cos_theta = np.cos(attack_angle)
             sin_theta = np.sin(attack_angle)
-            increment = 2*self._rotation_radius*np.array([cos_theta, sin_theta])
+            increment = 2.5*self._rotation_radius*np.array([cos_theta,
+                                                            sin_theta])
 
             collision, i = self._check_collision(state[3:5],
                                                  state[3:5]+increment)
@@ -159,9 +158,33 @@ class PreyPredator(Environment):
                 angle = self._vector_angle(v_obst, v_attack)
 
                 if 0 <= angle <= np.pi/2 or angle <= -np.pi/2:
-                    omega_prey = self._omega_prey
+                    rotation_sign = +1
                 else:
-                    omega_prey = -self._omega_prey
+                    rotation_sign = -1
+
+                evasion_angle = attack_angle + rotation_sign * np.pi/2
+                angle_current = shortest_angular_distance(state[5],
+                                                          evasion_angle)
+
+                alpha = normalize_angle(state[5] + rotation_sign*np.pi/2)
+
+                cos_alpha = np.cos(alpha)
+                sin_alpha = np.sin(alpha)
+                increment = 1.5*self._rotation_radius * np.array(
+                    [cos_alpha, sin_alpha])
+
+                lateral_collision, _ = self._check_collision(state[3:5],
+                                                             state[3:5] +
+                                                             increment)
+
+                if lateral_collision is not None:
+
+                    rotation_sign *= -1
+                    angle_current = rotation_sign * np.pi
+
+        omega_prey = angle_current / np.pi
+
+
 
         u_prey = np.empty(2)
         u_prey[0] = self._bound(velocity_prey, 0, self._v_prey)
