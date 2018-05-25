@@ -158,14 +158,6 @@ class PreyPredator(Environment):
 
                 angle = self._vector_angle(v_obst, v_attack)
 
-                print('obstacle ', obstacle)
-                print('collision', collision)
-                print('v_obst   ', v_obst)
-                print('v_attack ', v_attack)
-                print('prey     ', state[3:5])
-                print('predator ', state[0:2])
-                print('angle    ', angle/np.pi*180)
-                print('--------------------------------------------------')
                 if 0 <= angle <= np.pi/2 or angle <= -np.pi/2:
                     omega_prey = self._omega_prey
                 else:
