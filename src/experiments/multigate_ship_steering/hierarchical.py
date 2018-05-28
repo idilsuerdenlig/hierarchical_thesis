@@ -23,9 +23,18 @@ from mushroom_hierarchical.policy.deterministic_control_policy \
     import DeterministicControlPolicy
 
 
+def count_gates(dataset):
+    gates = list()
+
+    for i in range(len(dataset)):
+        if dataset[i][-1]:
+            gates.append(dataset[i][0][4])
+
+    return np.mean(gates)
+
+
 def build_high_level_agent(alg, params, mdp, mu, sigma):
     n = mdp.no_of_gates - 1
-    w = np.array([mu] * n)
 
     mu_approximator = Regressor(LinearApproximator, input_shape=(n,),
                               output_shape=(2,))
@@ -147,6 +156,8 @@ def hierarchical_experiment(mdp, agent_low, agent_high,
     dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
     J = compute_J(dataset, gamma=mdp.info.gamma)
     J_list.append(np.mean(J))
+    print('J at start: ', np.mean(J))
+    print('Mean gates passed: ', count_gates(dataset))
 
     for n in range(n_epochs):
         core.learn(n_episodes=n_iterations * ep_per_iteration, skip=True,
@@ -154,5 +165,7 @@ def hierarchical_experiment(mdp, agent_low, agent_high,
         dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
         J = compute_J(dataset, gamma=mdp.info.gamma)
         J_list.append(np.mean(J))
+        print('J at iteration ', n, ': ', np.mean(J))
+        print('Mean gates passed: ', count_gates(dataset))
 
     return J_list
