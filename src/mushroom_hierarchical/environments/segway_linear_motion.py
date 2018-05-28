@@ -45,7 +45,7 @@ class SegwayLinearMotion(Environment):
         observation_space = spaces.Box(low=-high, high=high)
         action_space = spaces.Box(low=np.array([-self.max_u]),
                                   high=np.array([self.max_u]))
-        horizon = 3000
+        horizon = 1500
         mdp_info = MDPInfo(observation_space, action_space, gamma, horizon)
 
         # Visualization
