@@ -12,7 +12,7 @@ from mushroom.approximators.regressor import Regressor
 from mushroom.utils.dataset import compute_J
 from mushroom.policy import DeterministicPolicy
 
-from mushroom.utils.parameters import AdaptiveParameter
+from mushroom.utils.parameters import Parameter, AdaptiveParameter
 
 from mushroom_hierarchical.core.hierarchical_core import HierarchicalCore
 from mushroom_hierarchical.environments.segway_linear_motion import SegwayLinearMotion
@@ -163,7 +163,7 @@ def segway_experiment(alg_high, alg_low, params_high, params_low, subdir, i):
 
         if n > 30 and not mask_done:
             control_block1.unset_mask()
-            dist1.set_parameters(np.array([0, 5e-1]))
+            dist1.set_parameters(np.array([0, 1e0]))
             mask_done = True
 
         core.learn(n_episodes=n_iterations*n_ep_per_fit, skip=True)
@@ -176,7 +176,7 @@ def segway_experiment(alg_high, alg_low, params_high, params_low, subdir, i):
 
 
 if __name__ == '__main__':
-    learning_rate_high = AdaptiveParameter(value=5e-2)
+    learning_rate_high = Parameter(value=5e-2)
     learning_rate_low = AdaptiveParameter(value=1e-1)
     eps_high = 0.05
     eps_low = 0.05
