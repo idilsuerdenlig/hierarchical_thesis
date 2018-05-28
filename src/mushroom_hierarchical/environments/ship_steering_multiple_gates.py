@@ -23,8 +23,9 @@ class ShipSteeringMultiGate(Environment):
         self.no_of_gates = 4
 
         self.field_size = 1000
-        low = np.array([0, 0, -np.pi, -np.pi / 12.])
-        high = np.array([self.field_size, self.field_size, np.pi, np.pi / 12.])
+        low = np.array([0, 0, -np.pi, -np.pi / 12., 0])
+        high = np.array([self.field_size, self.field_size, np.pi, np.pi / 12.,
+                         self.no_of_gates])
         self.omega_max = np.array([np.pi / 12.])
         self._v = 3.
         self._T = 5.
