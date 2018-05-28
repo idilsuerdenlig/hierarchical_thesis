@@ -157,9 +157,9 @@ def segway_experiment(alg_high, alg_low, params_high, params_low, subdir, i):
     mask_done = False
     for n in range(n_epochs):
         print('ITERATION', n)
-        if n == 0:
+        if n == 0 or n<30:
             control_block1.set_mask()
-            dist1.set_parameters(np.array([0, 1e-9]))
+            dist1.set_parameters(np.array([0.0, 1e-15]))
 
         if n > 30 and not mask_done:
             control_block1.unset_mask()
@@ -176,12 +176,12 @@ def segway_experiment(alg_high, alg_low, params_high, params_low, subdir, i):
 
 
 if __name__ == '__main__':
-    learning_rate_high = Parameter(value=5e-2)
+    learning_rate_high = Parameter(value=1e-20)
     learning_rate_low = AdaptiveParameter(value=1e-1)
     eps_high = 0.05
     eps_low = 0.05
-    beta_high = 0.01
-    beta_low = 0.0075
+    beta_high = 0.015
+    beta_low = 0.001
 
     algs_params = [
             #(REPS, REPS, {'eps': eps_high}, {'eps': eps_low}),

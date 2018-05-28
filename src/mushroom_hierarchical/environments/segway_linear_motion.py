@@ -94,7 +94,7 @@ class SegwayLinearMotion(Environment):
 
             x = self._state
             J = x.dot(Q).dot(x)
-            reward = np.exp(-J)
+            reward = -J
 
         return self._state, reward, absorbing, {}
 
