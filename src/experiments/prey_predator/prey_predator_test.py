@@ -13,6 +13,8 @@ from mushroom.features.basis import PolynomialBasis
 from mushroom.features import Features
 from mushroom_hierarchical.environments.prey_predator import PreyPredator
 
+from keyboard_agent import KeyboardAgent
+
 from tqdm import tqdm
 tqdm.monitor_interval = 0
 
@@ -36,7 +38,8 @@ def experiment(n_epochs, n_episodes, n_ep_per_fit):
     policy = GaussianPolicy(approximator, sigma)
 
     lr = Parameter(1e-5)
-    agent = GPOMDP(policy, mdp.info, lr, phi)
+    #agent = GPOMDP(policy, mdp.info, lr, phi)
+    agent = KeyboardAgent()
 
 
     # Train
