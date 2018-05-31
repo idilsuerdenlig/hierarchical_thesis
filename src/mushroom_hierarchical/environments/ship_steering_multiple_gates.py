@@ -53,14 +53,15 @@ class ShipSteeringMultiGate(Environment):
 
         self._gate_list = gate_1, gate_2, gate_3, gate_4
 
-
+        self.gate_to_pass = 0
 
         # MDP properties
         observation_space = spaces.Box(low=low, high=high)
         action_space = spaces.Box(low=-self.omega_max, high=self.omega_max)
         horizon = 5000
         gamma = .99
-        self._out_reward = -100
+        self._out_reward = -10000
+        self.correct_order = False
 
         mdp_info = MDPInfo(observation_space, action_space, gamma, horizon)
 
@@ -73,13 +74,14 @@ class ShipSteeringMultiGate(Environment):
     def reset(self, state=None):
 
         if state is None:
-            self._state = np.zeros(5)
+            self._state = np.zeros(8)
             self._state[0] = 500
             self._state[1] = 500
 
         else:
             self._state = state
-
+        #self.gate_to_pass = 0
+        #self.correct_order = False
         return self._state
 
     def step(self, action):
@@ -98,6 +100,9 @@ class ShipSteeringMultiGate(Environment):
             new_state[2] = normalize_angle(state[2] + state[3] * self._dt)
             new_state[3] = state[3] + (r - state[3]) * self._dt / self._T
             new_state[4] = state[4]
+            new_state[5] = state[5]
+            new_state[6] = state[6]
+            new_state[7] = state[7]
 
             if new_state[0] > self.field_size \
                or new_state[1] > self.field_size \
@@ -105,24 +110,34 @@ class ShipSteeringMultiGate(Environment):
                 reward = self._out_reward
                 absorbing = True
                 break
-            elif self._through_gate(self._state[:2], new_state[:2], int(state[4])):
-                gate_to_pass = int(state[4])
-                if gate_to_pass == 0:
+
+            elif self._through_gate(self._state[:2], new_state[:2], 0):
+                state[4] += 1
+                if state[4] == 1:
                     reward = 10
-                    new_state[4] = 1
-                    absorbing = False
-                elif gate_to_pass == 1:
-                    reward = 20
-                    new_state[4] = 2
-                    absorbing = False
-                elif gate_to_pass == 2:
-                    reward = 40
-                    new_state[4] = 3
-                    absorbing = False
-                elif gate_to_pass == 3:
-                    reward = 100
-                    new_state[4] = 4
-                    absorbing = True
+                else:
+                    reward = 0
+            elif self._through_gate(self._state[:2], new_state[:2], 1):
+                state[5] += 1
+                if state[5] == 1:
+                    reward = 10
+                else:
+                    reward = 0
+
+            elif self._through_gate(self._state[:2], new_state[:2], 2):
+                state[6] += 1
+                if state[6] == 1:
+                    reward = 10
+                else:
+                    reward = 0
+
+            elif self._through_gate(self._state[:2], new_state[:2], 3):
+                state[7] += 1
+                if state[7] == 1:
+                    reward = 10
+                else:
+                    reward = 0
+
             else:
                 reward = 0
                 absorbing = False

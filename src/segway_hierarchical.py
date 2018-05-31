@@ -162,11 +162,11 @@ def segway_experiment(alg_high, alg_low, params_high, params_low, subdir, i):
             dist1.set_parameters(np.array([0.0, 1e-15]))
             agent_high.learning_rate = AdaptiveParameter(value=1e-20)
 
-        elif n > 3 and not mask_done:
+        elif n >= 3 and not mask_done:
             control_block1.unset_mask()
             dist1.set_parameters(np.array([0, 1e0]))
             mask_done = True
-            agent_high.learning_rate = Parameter(value=1e-5)
+            agent_high.learning_rate = AdaptiveParameter(value=1e-2)
 
         core.learn(n_episodes=n_iterations*n_ep_per_fit, skip=True)
         dataset_eval_run = core.evaluate(n_episodes=eval_run, render=True)

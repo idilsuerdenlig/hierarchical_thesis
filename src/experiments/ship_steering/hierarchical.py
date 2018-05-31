@@ -52,6 +52,27 @@ def build_low_level_agent(alg, params, mdp):
     return agent
 
 
+class TerminationCondition(object):
+
+    def __init__(self, active_dir):
+        self.active_direction = active_dir
+
+    def __call__(self, state):
+        if self.active_direction == '+':
+            goal_pos = np.array([140, 75])
+        elif self.active_direction == 'x':
+            goal_pos = np.array([140, 140])
+
+        pos = np.array([state[0], state[1]])
+        if np.linalg.norm(pos-goal_pos) <= 10 \
+                or pos[0] > 150 or pos[0] < 0 \
+                or pos[1] > 150 or pos[1] < 0:
+            #if np.linalg.norm(pos-goal_pos) <= 10:
+            #    print('reached ', self.active_direction)
+            return True
+        else:
+            return False
+
 def build_computational_graph(mdp, agent_low, agent_high,
                               ep_per_fit_low, ep_per_fit_high):
     # State Placeholder
