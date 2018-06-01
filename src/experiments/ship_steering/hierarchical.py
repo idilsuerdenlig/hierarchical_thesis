@@ -39,6 +39,8 @@ def build_high_level_agent(alg, params, mdp, mu, sigma):
 
 
 def build_low_level_agent(alg, params, mdp):
+    features = Features(basis_list=[PolynomialBasis(dimensions=[6], degrees=[1])])
+
     pi = DeterministicControlPolicy(weights=np.array([0]))
     mu = np.zeros(pi.weights_size)
     sigma = 1e-3 * np.ones(pi.weights_size)
@@ -47,28 +49,26 @@ def build_low_level_agent(alg, params, mdp):
     mdp_info_agent = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
                               action_space=mdp.info.action_space,
                              gamma=mdp.info.gamma, horizon=100)
-    agent = alg(distribution, pi, mdp_info_agent, **params)
+    agent = alg(distribution, pi, mdp_info_agent, features=features, **params)
 
     return agent
 
 
 class TerminationCondition(object):
 
-    def __init__(self, active_dir):
-        self.active_direction = active_dir
+    def __init__(self, small):
+        self.small = small
 
     def __call__(self, state):
-        if self.active_direction == '+':
-            goal_pos = np.array([140, 75])
-        elif self.active_direction == 'x':
-            goal_pos = np.array([140, 140])
 
-        pos = np.array([state[0], state[1]])
-        if np.linalg.norm(pos-goal_pos) <= 10 \
-                or pos[0] > 150 or pos[0] < 0 \
-                or pos[1] > 150 or pos[1] < 0:
-            #if np.linalg.norm(pos-goal_pos) <= 10:
-            #    print('reached ', self.active_direction)
+        if self.small:
+            lim = 0.2
+        else:
+            lim = 2
+        goal_pos = np.array([state[0], state[1]])
+        pos = np.array([state[2], state[3]])
+        if np.linalg.norm(pos-goal_pos) <= lim:
+            print("True")
             return True
         else:
             return False
@@ -95,9 +95,11 @@ def build_computational_graph(mdp, agent_low, agent_high,
     control_block_h = ControlBlock(name='Control Block H', agent=agent_high,
                                   n_eps_per_fit=ep_per_fit_high)
 
+    # Termination condition
+    termination_condition = TerminationCondition(mdp._small)
     # Control Block 2
     control_block_l = ControlBlock(name='Control Block L', agent=agent_low,
-                                  n_eps_per_fit=ep_per_fit_low)
+                                  n_eps_per_fit=ep_per_fit_low, termination_condition=termination_condition)
 
     # Reward Accumulator
     reward_acc = reward_accumulator_block(gamma=mdp.info.gamma,
@@ -119,6 +121,8 @@ def build_computational_graph(mdp, agent_low, agent_high,
     function_block1.add_input(state_ph)
     function_block2.add_input(function_block1)
 
+    control_block_l.add_input(control_block_h)
+    control_block_l.add_input(state_ph)
     control_block_l.add_input(function_block1)
     control_block_l.add_reward(function_block2)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
