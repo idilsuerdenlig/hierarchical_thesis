@@ -99,7 +99,6 @@ class ControlBlock(Block):
 
             self.alarm_output = local_last
 
-
     def reset(self, inputs):
 
         state = np.concatenate(inputs, axis=0)
@@ -119,7 +118,6 @@ class ControlBlock(Block):
         self.last_output = None
         self.need_reset = False
         self.alarm_output = False
-        self.mask = False
 
     def stop(self):
         self.agent.stop()

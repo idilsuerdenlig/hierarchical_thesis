@@ -1,5 +1,7 @@
 import numpy as np
 
+from mushroom.algorithms.value import QLearning
+from mushroom.policy import EpsGreedy
 from mushroom.environments import MDPInfo
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
@@ -11,9 +13,10 @@ from mushroom.utils import spaces
 from mushroom_hierarchical.core.hierarchical_core import HierarchicalCore
 from mushroom_hierarchical.blocks.computational_graph import ComputationalGraph
 from mushroom_hierarchical.blocks.control_block import ControlBlock
+from mushroom_hierarchical.blocks.mux_block import MuxBlock
 from mushroom_hierarchical.blocks.functions.feature_angle_diff_ship_steering\
     import *
-from mushroom_hierarchical.blocks.functions.gate_to_pass import GateToPass
+from mushroom_hierarchical.blocks.functions.hi_level_state import hi_lev_state
 from mushroom_hierarchical.blocks.basic_operation_block import *
 from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
 from mushroom_hierarchical.blocks.reward_accumulator import \
@@ -23,17 +26,24 @@ from mushroom_hierarchical.policy.deterministic_control_policy \
     import DeterministicControlPolicy
 
 
-def count_gates(dataset):
-    gates = list()
+#def count_gates(dataset):
+#    gates = list()
 
-    for i in range(len(dataset)):
-        if dataset[i][-1]:
-            gates.append(dataset[i][0][4])
+#    for i in range(len(dataset)):
+#        if dataset[i][-1]:
+#            gates.append(dataset[i][0][4])
 
-    return np.mean(gates)
+#    return np.mean(gates)
+
+def build_high_level_agent(alg, params, mdp, epsilon):
+    pi = EpsGreedy(epsilon=epsilon, )
+
+    agent = alg(pi, mdp.info, **params)
+
+    return agent
 
 
-def build_high_level_agent(alg, params, mdp, mu, sigma):
+def build_mid_level_agent(alg, params, mdp, mu, sigma):
     n = mdp.no_of_gates - 1
 
     mu_approximator = Regressor(LinearApproximator, input_shape=(n,),
@@ -73,8 +83,9 @@ def build_low_level_agent(alg, params, mdp):
     return agent
 
 
-def build_computational_graph(mdp, agent_low, agent_high,
-                              ep_per_fit_low, ep_per_fit_high):
+def build_computational_graph(mdp, agent_low, agent_m1,
+                            agent_m2, agent_m3, agent_m4, agent_high,
+                              ep_per_fit_low, ep_per_fit_mid):
 
     # State Placeholder
     state_ph = PlaceHolder(name='state_ph')
@@ -85,6 +96,9 @@ def build_computational_graph(mdp, agent_low, agent_high,
     # Last_In Placeholder
     lastaction_ph = PlaceHolder(name='lastaction_ph')
 
+    # Function Block 0
+    function_block0 = fBlock(name='f0 (state build for high level)', phi=hi_lev_state)
+
     # Function Block 1
     function_block1 = fBlock(name='f1 (angle difference)',
                              phi=pos_ref_angle_difference)
@@ -92,18 +106,30 @@ def build_computational_graph(mdp, agent_low, agent_high,
     # Function Block 2
     function_block2 = fBlock(name='f2 (cost cosine)', phi=cost_cosine)
 
-    # Function Block 3
-    gate_to_pass = GateToPass(n_gates=3)
-    function_block3 = fBlock(name='f3 (gate index)',
-                             phi=gate_to_pass)
-
     # Control Block H
     control_block_h = ControlBlock(name='Control Block H', agent=agent_high,
-                                  n_eps_per_fit=ep_per_fit_high)
-
-    # Control Block 2
+                                  n_steps_per_fit=1)
+    # Cotrol Block M1
+    control_block_m1 = ControlBlock(name='Control Block M1', agant=agent_m1,
+                                    n_eps_per_fit=ep_per_fit_mid)
+    # Cotrol Block M2
+    control_block_m2 = ControlBlock(name='Control Block M2', agant=agent_m2,
+                                  n_eps_per_fit=ep_per_fit_mid)
+    # Cotrol Block M3
+    control_block_m3 = ControlBlock(name='Control Block M3', agant=agent_m3,
+                                    n_eps_per_fit=ep_per_fit_mid)
+    # Cotrol Block M4
+    control_block_m4 = ControlBlock(name='Control Block M4', agant=agent_m4,
+                                    n_eps_per_fit=ep_per_fit_mid)
+    # Control Block L
     control_block_l = ControlBlock(name='Control Block L', agent=agent_low,
                                   n_eps_per_fit=ep_per_fit_low)
+    # Selector Block
+    mux_block = MuxBlock(name='Mux Block')
+    mux_block.add_block_list([control_block_m1])
+    mux_block.add_block_list([control_block_m2])
+    mux_block.add_block_list([control_block_m3])
+    mux_block.add_block_list([control_block_m4])
 
     # Reward Accumulator
     reward_acc = reward_accumulator_block(gamma=mdp.info.gamma,
@@ -111,23 +137,38 @@ def build_computational_graph(mdp, agent_low, agent_high,
 
     # Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_block_h,
-              control_block_l, function_block1, function_block2, function_block3,
-              reward_acc]
+              control_block_l, function_block0,
+              function_block1, function_block2,
+              reward_acc, mux_block]
 
     state_ph.add_input(control_block_l)
     reward_ph.add_input(control_block_l)
     lastaction_ph.add_input(control_block_l)
 
-    function_block3.add_input(state_ph)
+    control_block_h.add_input(function_block0)
+    control_block_h.add_reward(reward_ph)
 
-    control_block_h.add_input(function_block3)
-    control_block_h.add_reward(reward_acc)
-    control_block_h.add_alarm_connection(control_block_l)
+    mux_block.add_input(control_block_h)
+    mux_block.add_input(state_ph)
+
+    control_block_m1.add_reward(reward_acc)
+    control_block_m1.add_alarm_connection(control_block_l)
+
+    control_block_m2.add_reward(reward_acc)
+    control_block_m2.add_alarm_connection(control_block_l)
+
+    control_block_m3.add_reward(reward_acc)
+    control_block_m3.add_alarm_connection(control_block_l)
+
+    control_block_m4.add_reward(reward_acc)
+    control_block_m4.add_alarm_connection(control_block_l)
 
     reward_acc.add_input(reward_ph)
     reward_acc.add_alarm_connection(control_block_l)
 
-    function_block1.add_input(control_block_h)
+    function_block0.add_input(state_ph)
+
+    function_block1.add_input(mux_block)
     function_block1.add_input(state_ph)
 
     function_block2.add_input(function_block1)
@@ -140,13 +181,16 @@ def build_computational_graph(mdp, agent_low, agent_high,
     return computational_graph
 
 
-def hierarchical_experiment(mdp, agent_low, agent_high,
-                            n_epochs, n_iterations,
-                            ep_per_iteration, ep_per_eval,
-                            ep_per_iteration_low):
+def hierarchical_experiment(mdp, agent_low, agent_m1,
+                            agent_m2, agent_m3, agent_m4,
+                            agent_high, n_epochs,
+                            n_iterations, ep_per_iteration,
+                            ep_per_eval, ep_per_iteration_low):
     np.random.seed()
 
-    computational_graph = build_computational_graph(mdp, agent_low, agent_high,
+    computational_graph = build_computational_graph(mdp, agent_low, agent_m1,
+                                                    agent_m2, agent_m3, agent_m4,
+                                                    agent_high,
                                                     ep_per_iteration_low,
                                                     ep_per_iteration)
 
@@ -157,7 +201,7 @@ def hierarchical_experiment(mdp, agent_low, agent_high,
     J = compute_J(dataset, gamma=mdp.info.gamma)
     J_list.append(np.mean(J))
     print('J at start: ', np.mean(J))
-    print('Mean gates passed: ', count_gates(dataset))
+    #print('Mean gates passed: ', count_gates(dataset))
 
     for n in range(n_epochs):
         core.learn(n_episodes=n_iterations * ep_per_iteration, skip=True,
@@ -166,6 +210,6 @@ def hierarchical_experiment(mdp, agent_low, agent_high,
         J = compute_J(dataset, gamma=mdp.info.gamma)
         J_list.append(np.mean(J))
         print('J at iteration ', n, ': ', np.mean(J))
-        print('Mean gates passed: ', count_gates(dataset))
+        #print('Mean gates passed: ', count_gates(dataset))
 
     return J_list
