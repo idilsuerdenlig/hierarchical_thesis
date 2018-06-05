@@ -19,7 +19,7 @@ from tqdm import tqdm
 tqdm.monitor_interval = 0
 
 
-def experiment(n_epochs, n_episodes, n_ep_per_fit):
+def experiment(n_epochs, ep_per_epoch_train, ep_per_epoch_eval, n_iterations):
     np.random.seed()
 
     # MDP
@@ -38,34 +38,40 @@ def experiment(n_epochs, n_episodes, n_ep_per_fit):
     policy = GaussianPolicy(approximator, sigma)
 
     lr = Parameter(1e-5)
-    #agent = GPOMDP(policy, mdp.info, lr, phi)
-    agent = KeyboardAgent()
+    agent = GPOMDP(policy, mdp.info, lr, phi)
+    #agent = KeyboardAgent()
 
 
     # Train
-    dataset_callback = CollectDataset()
-    core = Core(agent, mdp, callbacks=[dataset_callback])
+    core = Core(agent, mdp)
+    dataset = core.evaluate(n_episodes=ep_per_epoch_eval, render=True)
+    J = compute_J(dataset, gamma=mdp.info.gamma)
+    print('Reward at start: ', np.mean(J))
 
     for i in range(n_epochs):
-        core.learn(n_episodes=n_episodes,
-                   n_episodes_per_fit=n_ep_per_fit, render=True)
-        J = compute_J(dataset_callback.get(), gamma=mdp.info.gamma)
-        dataset_callback.clean()
+        core.learn(n_episodes=ep_per_epoch_train,
+                   n_episodes_per_fit=ep_per_epoch_train//n_iterations,
+                   render=False)
+        dataset = core.evaluate(n_episodes=ep_per_epoch_eval, render=True)
+        J = compute_J(dataset, gamma=mdp.info.gamma)
 
-        p = dist.get_parameters()
+        p = policy.get_weights()
 
-        print('mu:    ', p[:n_weights])
-        print('sigma: ', p[n_weights:])
-        print('Reward at iteration ' + str(i) + ': ' +
-              str(np.sum(J)/n_episodes))
+        print('mu:    ', p)
+        print('Reward at iteration ', i, ': ', np.mean(J))
 
     print('Press a button to visualize the segway...')
     input()
     core.evaluate(n_episodes=3, render=True)
 
+
 if __name__ == '__main__':
     n_epochs = 20
-    n_episodes = 100
-    n_ep_per_fit = 25
+    ep_per_epoch_train = 100
+    ep_per_epoch_eval = 1
+    n_iterations = 4
 
-    experiment(n_epochs, n_episodes, n_ep_per_fit)
+    experiment(n_epochs=20,
+               ep_per_epoch_train=100,
+               ep_per_epoch_eval=1,
+               n_iterations=4)

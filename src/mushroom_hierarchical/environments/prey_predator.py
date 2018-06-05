@@ -115,12 +115,13 @@ class PreyPredator(Environment):
 
         delta_norm_new = np.linalg.norm(self._state[:2]-self._state[3:5])
 
+
         if delta_norm_new < self._catch_radius:
             absorbing = True
             reward = 100
         else:
             absorbing = False
-            reward = -1
+            reward = 0
 
         return self._state, reward, absorbing, {}
 
