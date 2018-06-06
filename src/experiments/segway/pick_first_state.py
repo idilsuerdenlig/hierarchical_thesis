@@ -1,5 +1,4 @@
 import numpy as np
-from mushroom.utils.angles_utils import shortest_angular_distance, normalize_angle
 
 
 def pick_first_state(inputs):

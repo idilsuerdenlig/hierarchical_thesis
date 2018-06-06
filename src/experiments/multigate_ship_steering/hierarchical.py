@@ -16,7 +16,6 @@ from mushroom_hierarchical.blocks.control_block import ControlBlock
 from mushroom_hierarchical.blocks.mux_block import MuxBlock
 from mushroom_hierarchical.blocks.functions.feature_angle_diff_ship_steering\
     import *
-from mushroom_hierarchical.blocks.functions.hi_level_state import hi_lev_state
 from mushroom_hierarchical.blocks.basic_operation_block import *
 from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
 from mushroom_hierarchical.blocks.reward_accumulator import \
@@ -34,6 +33,17 @@ from mushroom_hierarchical.policy.deterministic_control_policy \
 #            gates.append(dataset[i][0][4])
 
 #    return np.mean(gates)
+
+def hi_lev_state(ins):
+
+    x = np.concatenate(ins)
+    out = np.zeros(4)
+
+    for i in [4, 5, 6, 7]:
+        if x[i] > 0:
+            out[i-4] = 1
+
+    return out
 
 def build_high_level_agent(alg, params, mdp, epsilon):
     pi = EpsGreedy(epsilon=epsilon, )

@@ -19,13 +19,29 @@ from mushroom_hierarchical.blocks.control_block import ControlBlock
 from mushroom_hierarchical.blocks.basic_operation_block import *
 from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
 from mushroom_hierarchical.blocks.functions.pick_first_state import pick_first_state
-from mushroom_hierarchical.blocks.functions.fall_reward import fall_reward
-from mushroom_hierarchical.blocks.functions.angle_to_angle_diff_complete_state \
-    import angle_to_angle_diff_complete_state
-from mushroom_hierarchical.blocks.functions.lqr_cost_segway import lqr_cost_segway
 from mushroom_hierarchical.utils.callbacks.collect_distribution_parameter import\
     CollectDistributionParameter
 from mushroom_hierarchical.policy.deterministic_control_policy import DeterministicControlPolicy
+
+from lqr_cost_segway import lqr_cost_segway
+from angle_to_angle_diff_complete_state import *
+
+def fall_reward(inputs):
+    state = inputs[0]
+    if abs(state[1]) > np.pi / 2:
+        res = -10000.0
+    else:
+        res = 0.0
+    return np.array([res])
+
+
+def lqr_cost_segway(ins):
+    x = np.concatenate(ins)
+    Q = np.diag([3.0, 0.1, 0.1])
+    J = x.dot(Q).dot(x)
+    reward = -J
+
+    return np.array([reward])
 
 
 def segway_experiment(alg_high, alg_low, params_high, params_low):

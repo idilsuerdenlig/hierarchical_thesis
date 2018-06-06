@@ -10,12 +10,13 @@ from mushroom.utils import spaces
 from mushroom_hierarchical.core.hierarchical_core import HierarchicalCore
 from mushroom_hierarchical.blocks.computational_graph import ComputationalGraph
 from mushroom_hierarchical.blocks.control_block import ControlBlock
-from mushroom_hierarchical.blocks.functions.feature_angle_diff_ship_steering import *
+from mushroom_hierarchical.blocks.functions.feature_angle_diff_ship_steering \
+    import *
 from mushroom_hierarchical.blocks.basic_operation_block import *
 from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
 from mushroom_hierarchical.blocks.reward_accumulator import \
     reward_accumulator_block
-from mushroom_hierarchical.blocks.functions.cost_cosine import cost_cosine
+from mushroom_hierarchical.functions.cost_cosine import cost_cosine
 from mushroom.distributions import GaussianDiagonalDistribution
 from mushroom_hierarchical.policy.deterministic_control_policy \
     import DeterministicControlPolicy
