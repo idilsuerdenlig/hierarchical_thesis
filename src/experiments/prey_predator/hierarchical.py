@@ -1,6 +1,7 @@
 from mushroom.environments import MDPInfo
 from mushroom.features.tiles import Tiles
 from mushroom.features.features import *
+from mushroom.features.basis import *
 from mushroom.policy.gaussian_policy import *
 from mushroom.policy.td_policy import EpsGreedy
 from mushroom.approximators.parametric import LinearApproximator
@@ -18,8 +19,8 @@ from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
 from mushroom_hierarchical.blocks.functions.cost_cosine import cost_cosine
 
 
-def heading_difference(input):
-    state = input[0]
+def heading_difference(ins):
+    state = ins[0]
     x = state[0]
     y = state[1]
     theta = state[2]
@@ -31,14 +32,54 @@ def heading_difference(input):
     theta_ref = normalize_angle(np.arctan2(del_y, del_x))
     del_theta = shortest_angular_distance(from_angle=theta, to_angle=theta_ref)
 
-    return np.array([del_theta])
+    return np.array([x, y, del_theta])
 
 
-def angular_difference(input):
-    angle = input[0][2]
+def angular_difference(ins):
+    angle = ins[0][2]
     setpoint = input[1][0]
 
     return shortest_angular_distance(from_angle=angle, to_angle=setpoint)
+
+
+def build_high_level_agent(alg, params, mdp, sigma):
+    high = mdp.info.observation_space.high[:3]
+    low = mdp.info.observation_space.low[:3]
+
+    observation_space = spaces.Box(low=low, high=high)
+    action_space = spaces.Box(low=np.array([-np.pi]), high=np.array([-np.pi]))
+
+    mdp_info_agent = MDPInfo(observation_space=observation_space,
+                        action_space=action_space,
+                        gamma=mdp.info.gamma,
+                        horizon=mdp.info.horizon)
+
+    tiles = Tiles.generate(10, [10, 10, 10], low, high)
+    features = Features(tilings=tiles)
+    approximator = Regressor(LinearApproximator, input_shape=(features.size,),
+                             output_shape=(2,))
+
+    pi1 = DiagonalGaussianPolicy(mu=approximator, std=sigma)
+
+    agent = alg(pi1, mdp_info_agent, features=features, **params)
+
+    return agent
+
+def build_low_level_agent():
+    basis = PolynomialBasis.generate(1, 2)
+    features = Features(basis_list=basis)
+
+    std = 1e-3 * np.ones(4)
+    approxima
+    pi = DiagonalGaussianPolicy(np.array([0]), std)
+
+    mdp_info_agent = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
+                             action_space=mdp.info.action_space,
+                             gamma=mdp.info.gamma, horizon=100)
+    agent = alg(distribution, pi, mdp_info_agent, features=features, **params)
+
+    return agent
+    pass
 
 def build_computational_graph(mdp, agent_low, agent_high,
                               ep_per_fit_low, ep_per_fit_high):
