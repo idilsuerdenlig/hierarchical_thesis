@@ -3,7 +3,6 @@ import numpy as np
 
 
 class addBlock(fBlock):
-
     def __init__(self, name=None, phi=None):
         def summation(inputs):
 
@@ -15,8 +14,8 @@ class addBlock(fBlock):
         self.phi = summation
         super(addBlock, self).__init__(phi=summation, name=name)
 
-class signBlock(fBlock):
 
+class signBlock(fBlock):
     def __init__(self, name=None, phi=None):
         def minus(inputs):
             res = np.zeros(1)
@@ -26,8 +25,8 @@ class signBlock(fBlock):
         self.phi = minus
         super(signBlock, self).__init__(phi=minus, name=name)
 
-class squarednormBlock(fBlock):
 
+class squarednormBlock(fBlock):
     def __init__(self, name=None, phi=None):
         def squared_norm(inputs):
             res = np.zeros(1)

@@ -1,6 +1,7 @@
 from .block import Block
 import numpy as np
 
+
 class ErrorAccumulatorBlock(Block):
  
     def __init__(self, name=None):

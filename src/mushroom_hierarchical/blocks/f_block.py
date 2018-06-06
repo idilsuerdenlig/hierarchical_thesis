@@ -1,5 +1,5 @@
 from .block import Block
-import numpy as np
+
 
 class fBlock(Block):
 

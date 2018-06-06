@@ -1,6 +1,7 @@
 from .block import Block
 from .control_block import ControlBlock
 
+
 class MuxBlock(Block):
     """
     This class implements the multiplexer object of a computational graph for hierarchical learning.

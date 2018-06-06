@@ -1,7 +1,7 @@
 from .block import Block
 
-class PlaceHolder(Block):
 
+class PlaceHolder(Block):
     def __init__(self, name=None):
         super(PlaceHolder, self).__init__(name=name)
 

@@ -1,13 +1,9 @@
 from mushroom.algorithms.value.td import TD
 import numpy as np
-from copy import deepcopy
 
-from mushroom.algorithms.agent import Agent
-from mushroom.approximators import Regressor
-from mushroom.approximators.parametric import LinearApproximator
-from mushroom.features import get_action_features
 from mushroom.utils.eligibility_trace import EligibilityTrace
-from mushroom.utils.table import EnsembleTable, Table
+from mushroom.utils.table import Table
+
 
 class QLambdaDiscrete(TD):
     """
@@ -49,7 +45,6 @@ class QLambdaDiscrete(TD):
                 self.e.table *= self.mdp_info.gamma * self._lambda
             else:
                 self.e.reset()
-
 
     def episode_start(self):
         self.e.reset()

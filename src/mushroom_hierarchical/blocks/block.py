@@ -1,4 +1,6 @@
 import numpy as np
+
+
 class Block(object):
     """
     This class implements the block object of a computational graph for hierarchical learning.
@@ -17,10 +19,11 @@ class Block(object):
         self.last_output = None
         self.name = name
         self.alarm_output = False
+
     def __call__(self, inputs, reward, absorbing, last, learn_flag, alarms):
         """
-                whatever the block does when activated by the computational graph.
-                if the state is absorbing, fit is called for controllers
+         Whatever the block does when activated by the computational graph.
+         If the state is absorbing, fit is called for controllers
 
         """
         if np.any(alarms) or last:

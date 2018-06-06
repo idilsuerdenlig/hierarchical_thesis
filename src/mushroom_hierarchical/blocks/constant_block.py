@@ -2,7 +2,6 @@ from .block import Block
 
 
 class ConstantBlock(Block):
-
     def __init__(self, constant, name=None):
 
         self.last_output = constant

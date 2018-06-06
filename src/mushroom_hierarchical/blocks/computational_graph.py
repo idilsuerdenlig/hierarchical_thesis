@@ -2,6 +2,7 @@ import numpy as np
 from mushroom_hierarchical.utils.topological_sort import topological_sort
 from mushroom_hierarchical.blocks.control_block import ControlBlock
 
+
 class ComputationalGraph(object):
     """
     This class implements the computational graph for hierarchical learning.

@@ -1,6 +1,5 @@
 from .block import Block
 import numpy as np
-from mushroom.utils.dataset import compute_J
 from copy import deepcopy
 
 

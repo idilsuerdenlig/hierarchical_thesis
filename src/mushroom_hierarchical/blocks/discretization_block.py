@@ -1,6 +1,5 @@
 from mushroom.features.features import *
 from mushroom.features.tiles import Tiles
-from mushroom.features._implementations.tiles_features import TilesFeatures
 from .block import Block
 
 
@@ -10,23 +9,18 @@ class DiscretizationBlock(Block):
         self.low = low*np.ones(shape=np.shape(n_tiles))
         self.high = high*np.ones(shape=np.shape(n_tiles))
         self.n_tiles = n_tiles
-        self.tilings = tilings = Tiles.generate(n_tilings=1, n_tiles=self.n_tiles,
-                                 low=self.low, high=self.high)
+        self.tilings = Tiles.generate(n_tilings=1, n_tiles=self.n_tiles,
+                                      low=self.low, high=self.high)
         super(DiscretizationBlock, self).__init__(name=name)
 
     def _call(self, inputs, reward, absorbing, last, learn_flag):
-
-
         state = np.concatenate(inputs, axis=0)
 
         index = list()
         for tile in self.tilings:
-            #print('------------------------------------')
-            #print('STATE    :', state)
             index.append(tile(state))
-            #print('INDEX    :', index)
-        self.last_output = index
 
+        self.last_output = index
 
     def init(self):
         pass

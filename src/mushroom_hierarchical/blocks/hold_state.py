@@ -1,6 +1,7 @@
 from .block import Block
 import numpy as np
 
+
 class hold_state(Block):
 
     def __init__(self, name=None):
