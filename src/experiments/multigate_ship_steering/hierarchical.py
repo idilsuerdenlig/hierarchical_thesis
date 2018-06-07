@@ -14,13 +14,13 @@ from mushroom_hierarchical.core.hierarchical_core import HierarchicalCore
 from mushroom_hierarchical.blocks.computational_graph import ComputationalGraph
 from mushroom_hierarchical.blocks.control_block import ControlBlock
 from mushroom_hierarchical.blocks.mux_block import MuxBlock
-from mushroom_hierarchical.blocks.functions.feature_angle_diff_ship_steering\
+from mushroom_hierarchical.functions.feature_angle_diff_ship_steering\
     import *
 from mushroom_hierarchical.blocks.basic_operation_block import *
 from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
 from mushroom_hierarchical.blocks.reward_accumulator import \
     reward_accumulator_block
-from mushroom_hierarchical.blocks.functions.cost_cosine import cost_cosine
+from mushroom_hierarchical.functions.cost_cosine import cost_cosine
 from mushroom_hierarchical.policy.deterministic_control_policy \
     import DeterministicControlPolicy
 
@@ -38,17 +38,23 @@ def hi_lev_state(ins):
 
     x = np.concatenate(ins)
     out = np.zeros(4)
+    res = 0
 
     for i in [4, 5, 6, 7]:
         if x[i] > 0:
             out[i-4] = 1
+            res += 2**(i-4)
 
-    return out
+    return np.array([res])
 
 def build_high_level_agent(alg, params, mdp, epsilon):
     pi = EpsGreedy(epsilon=epsilon, )
+    mdp_info_high = MDPInfo(observation_space=spaces.Discrete(16),
+                              action_space=spaces.Discrete(4),
+                              gamma=mdp.info.gamma,
+                              horizon=100)
 
-    agent = alg(pi, mdp.info, **params)
+    agent = alg(pi, mdp_info_high, **params)
 
     return agent
 
@@ -120,16 +126,16 @@ def build_computational_graph(mdp, agent_low, agent_m1,
     control_block_h = ControlBlock(name='Control Block H', agent=agent_high,
                                   n_steps_per_fit=1)
     # Cotrol Block M1
-    control_block_m1 = ControlBlock(name='Control Block M1', agant=agent_m1,
+    control_block_m1 = ControlBlock(name='Control Block M1', agent=agent_m1,
                                     n_eps_per_fit=ep_per_fit_mid)
     # Cotrol Block M2
-    control_block_m2 = ControlBlock(name='Control Block M2', agant=agent_m2,
+    control_block_m2 = ControlBlock(name='Control Block M2', agent=agent_m2,
                                   n_eps_per_fit=ep_per_fit_mid)
     # Cotrol Block M3
-    control_block_m3 = ControlBlock(name='Control Block M3', agant=agent_m3,
+    control_block_m3 = ControlBlock(name='Control Block M3', agent=agent_m3,
                                     n_eps_per_fit=ep_per_fit_mid)
     # Cotrol Block M4
-    control_block_m4 = ControlBlock(name='Control Block M4', agant=agent_m4,
+    control_block_m4 = ControlBlock(name='Control Block M4', agent=agent_m4,
                                     n_eps_per_fit=ep_per_fit_mid)
     # Control Block L
     control_block_l = ControlBlock(name='Control Block L', agent=agent_low,
@@ -191,32 +197,31 @@ def build_computational_graph(mdp, agent_low, agent_m1,
     return computational_graph
 
 
-def hierarchical_experiment(mdp, agent_low, agent_m1,
+def hierarchical_experiment(mdp, agent_l, agent_m1,
                             agent_m2, agent_m3, agent_m4,
-                            agent_high, n_epochs,
-                            n_iterations, ep_per_iteration,
-                            ep_per_eval, ep_per_iteration_low):
+                            agent_h, n_epochs,
+                            n_iterations, ep_per_epoch_train,
+                            ep_per_epoch_eval, ep_per_fit_low, ep_per_fit_mid):
     np.random.seed()
 
-    computational_graph = build_computational_graph(mdp, agent_low, agent_m1,
+    computational_graph = build_computational_graph(mdp, agent_l, agent_m1,
                                                     agent_m2, agent_m3, agent_m4,
-                                                    agent_high,
-                                                    ep_per_iteration_low,
-                                                    ep_per_iteration)
+                                                    agent_h,
+                                                    ep_per_fit_low, ep_per_fit_mid)
 
     core = HierarchicalCore(computational_graph)
     J_list = list()
 
-    dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
+    dataset = core.evaluate(n_episodes=ep_per_epoch_eval, quiet=True)
     J = compute_J(dataset, gamma=mdp.info.gamma)
     J_list.append(np.mean(J))
     print('J at start: ', np.mean(J))
     #print('Mean gates passed: ', count_gates(dataset))
 
     for n in range(n_epochs):
-        core.learn(n_episodes=n_iterations * ep_per_iteration, skip=True,
+        core.learn(n_episodes=n_iterations * ep_per_epoch_train, skip=True,
                    quiet=True)
-        dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
+        dataset = core.evaluate(n_episodes=ep_per_epoch_eval, quiet=True)
         J = compute_J(dataset, gamma=mdp.info.gamma)
         J_list.append(np.mean(J))
         print('J at iteration ', n, ': ', np.mean(J))
