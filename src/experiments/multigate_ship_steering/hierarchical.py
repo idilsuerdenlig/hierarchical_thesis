@@ -9,6 +9,8 @@ from mushroom.distributions import GaussianDiagonalDistribution
 from mushroom.policy.gaussian_policy import *
 from mushroom.utils.dataset import compute_J
 from mushroom.utils import spaces
+from mushroom.features.features import *
+from mushroom.features.basis import PolynomialBasis
 
 from mushroom_hierarchical.core.hierarchical_core import HierarchicalCore
 from mushroom_hierarchical.blocks.computational_graph import ComputationalGraph
@@ -62,9 +64,9 @@ def build_high_level_agent(alg, params, mdp, epsilon):
 def build_mid_level_agent(alg, params, mdp, mu, sigma):
     n = mdp.no_of_gates - 1
 
-    mu_approximator = Regressor(LinearApproximator, input_shape=(n,),
+    mu_approximator = Regressor(LinearApproximator, input_shape=(1,),
                               output_shape=(2,))
-    sigma_approximator = Regressor(LinearApproximator, input_shape=(n,),
+    sigma_approximator = Regressor(LinearApproximator, input_shape=(1,),
                                    output_shape=(2,))
     w_mu = mu*np.ones(mu_approximator.weights_size)
     mu_approximator.set_weights(w_mu)
@@ -76,11 +78,13 @@ def build_mid_level_agent(alg, params, mdp, mu, sigma):
                                 std=sigma_approximator)
 
     lim = mdp.info.observation_space.high[0]
-    mdp_info_agent1 = MDPInfo(observation_space=spaces.Box(0, 1, (3,)),
+    basis = PolynomialBasis()
+    features = BasisFeatures(basis=[basis])
+    mdp_info_agent1 = MDPInfo(observation_space=spaces.Box(0, 1, (1,)),
                               action_space=spaces.Box(0, lim, (2,)),
                               gamma=mdp.info.gamma,
                               horizon=100)
-    agent = alg(pi, mdp_info_agent1, **params)
+    agent = alg(policy=pi, mdp_info=mdp_info_agent1, features=features, **params)
 
     return agent
 
