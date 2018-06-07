@@ -42,7 +42,7 @@ def angular_difference(ins):
     return shortest_angular_distance(from_angle=angle, to_angle=setpoint)
 
 
-def build_high_level_agent(alg, params, mdp, sigma):
+def build_high_level_agent(alg, params, mdp, std):
     high = mdp.info.observation_space.high[:3]
     low = mdp.info.observation_space.low[:3]
 
@@ -59,27 +59,28 @@ def build_high_level_agent(alg, params, mdp, sigma):
     approximator = Regressor(LinearApproximator, input_shape=(features.size,),
                              output_shape=(2,))
 
-    pi1 = DiagonalGaussianPolicy(mu=approximator, std=sigma)
+    pi1 = DiagonalGaussianPolicy(approximator, std)
 
     agent = alg(pi1, mdp_info_agent, features=features, **params)
 
     return agent
 
-def build_low_level_agent():
+
+def build_low_level_agent(alg, params, mdp, std):
     basis = PolynomialBasis.generate(1, 2)
     features = Features(basis_list=basis)
 
-    std = 1e-3 * np.ones(4)
-    approxima
-    pi = DiagonalGaussianPolicy(np.array([0]), std)
+    approximator = Regressor(LinearApproximator, input_shape=(features.size,),
+                             output_shape=mdp.info.action_space.shape)
+    pi = DiagonalGaussianPolicy(approximator, std)
 
     mdp_info_agent = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
                              action_space=mdp.info.action_space,
                              gamma=mdp.info.gamma, horizon=100)
-    agent = alg(distribution, pi, mdp_info_agent, features=features, **params)
+    agent = alg(pi, mdp_info_agent, features=features, **params)
 
     return agent
-    pass
+
 
 def build_computational_graph(mdp, agent_low, agent_high,
                               ep_per_fit_low, ep_per_fit_high):

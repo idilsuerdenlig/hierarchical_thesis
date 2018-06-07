@@ -10,7 +10,7 @@ from mushroom.utils import spaces
 from mushroom_hierarchical.core.hierarchical_core import HierarchicalCore
 from mushroom_hierarchical.blocks.computational_graph import ComputationalGraph
 from mushroom_hierarchical.blocks.control_block import ControlBlock
-from mushroom_hierarchical.blocks.functions.feature_angle_diff_ship_steering \
+from mushroom_hierarchical.functions.feature_angle_diff_ship_steering \
     import *
 from mushroom_hierarchical.blocks.basic_operation_block import *
 from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
@@ -100,7 +100,8 @@ def build_computational_graph(mdp, agent_low, agent_high,
     termination_condition = TerminationCondition(mdp._small)
     # Control Block 2
     control_block_l = ControlBlock(name='Control Block L', agent=agent_low,
-                                  n_eps_per_fit=ep_per_fit_low, termination_condition=termination_condition)
+                                   n_eps_per_fit=ep_per_fit_low,
+                                   termination_condition=termination_condition)
 
     # Reward Accumulator
     reward_acc = reward_accumulator_block(gamma=mdp.info.gamma,
@@ -133,13 +134,13 @@ def build_computational_graph(mdp, agent_low, agent_high,
 
 def hierarchical_experiment(mdp, agent_low, agent_high,
                             n_epochs, n_iterations,
-                            ep_per_iteration, ep_per_eval,
-                            ep_per_iteration_low):
+                            ep_per_fit, ep_per_eval,
+                            ep_per_fit_low):
     np.random.seed()
 
     computational_graph = build_computational_graph(mdp, agent_low, agent_high,
-                                                    ep_per_iteration_low,
-                                                    ep_per_iteration)
+                                                    ep_per_fit_low,
+                                                    ep_per_fit)
 
     core = HierarchicalCore(computational_graph)
     J_list = list()
@@ -149,7 +150,7 @@ def hierarchical_experiment(mdp, agent_low, agent_high,
     J_list.append(np.mean(J))
 
     for n in range(n_epochs):
-        core.learn(n_episodes=n_iterations * ep_per_iteration, skip=True,
+        core.learn(n_episodes=n_iterations * ep_per_fit, skip=True,
                    quiet=True)
         dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
         J = compute_J(dataset, gamma=mdp.info.gamma)
