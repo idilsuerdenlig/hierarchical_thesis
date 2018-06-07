@@ -103,6 +103,7 @@ class ShipSteeringMultiGate(Environment):
             new_state[5] = state[5]
             new_state[6] = state[6]
             new_state[7] = state[7]
+            absorbing = False
 
             if new_state[0] > self.field_size \
                or new_state[1] > self.field_size \
@@ -117,34 +118,30 @@ class ShipSteeringMultiGate(Environment):
                     reward = 10
                 else:
                     reward = 0
-                absorbing = False
             elif self._through_gate(self._state[:2], new_state[:2], 1):
                 state[5] += 1
                 if state[5] == 1:
                     reward = 10
                 else:
                     reward = 0
-                absorbing = False
             elif self._through_gate(self._state[:2], new_state[:2], 2):
                 state[6] += 1
                 if state[6] == 1:
                     reward = 10
                 else:
                     reward = 0
-                absorbing = False
             elif self._through_gate(self._state[:2], new_state[:2], 3):
                 state[7] += 1
                 if state[7] == 1:
                     reward = 10
-                    absorbing = True
                 else:
                     reward = 0
-                    absorbing = False
 
             else:
                 reward = 0
-                absorbing = False
 
+            if np.all(state[5:]>0):
+                absorbing = True
         self._state = new_state
 
         return self._state, reward, absorbing, {}

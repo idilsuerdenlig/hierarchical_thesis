@@ -49,6 +49,52 @@ def hi_lev_state(ins):
 
     return np.array([res])
 
+def reward_m1(ins):
+    ins = np.concatenate(ins)
+    gate_state = ins[4]
+    passed = False
+    if gate_state == 1 and not passed:
+        reward = 100
+        passed = True
+    else:
+        reward = -1
+    return np.array([reward])
+
+def reward_m2(ins):
+    ins = np.concatenate(ins)
+    gate_state = ins[5]
+    passed = False
+    if gate_state == 1 and not passed:
+        reward = 100
+        passed = True
+    else:
+        reward = -1
+    return np.array([reward])
+
+
+def reward_m3(ins):
+    ins = np.concatenate(ins)
+    gate_state = ins[6]
+    passed = False
+    if gate_state == 1 and not passed:
+        reward = 100
+        passed = True
+    else:
+        reward = -1
+    return np.array([reward])
+
+
+def reward_m4(ins):
+    ins = np.concatenate(ins)
+    gate_state = ins[7]
+    passed = False
+    if gate_state == 1 and not passed:
+        reward = 100
+        passed = True
+    else:
+        reward = -1
+    return np.array([reward])
+
 def build_high_level_agent(alg, params, mdp, epsilon):
     pi = EpsGreedy(epsilon=epsilon, )
     mdp_info_high = MDPInfo(observation_space=spaces.Discrete(16),
@@ -126,6 +172,12 @@ def build_computational_graph(mdp, agent_low, agent_m1,
     # Function Block 2
     function_block2 = fBlock(name='f2 (cost cosine)', phi=cost_cosine)
 
+    # External reward block
+    reward_blockm1 = fBlock(name='rm1 (reward m1)', phi=reward_m1)
+    reward_blockm2 = fBlock(name='rm2 (reward m2)', phi=reward_m2)
+    reward_blockm3 = fBlock(name='rm3 (reward m3)', phi=reward_m3)
+    reward_blockm4 = fBlock(name='rm4 (reward m4)', phi=reward_m4)
+
     # Control Block H
     control_block_h = ControlBlock(name='Control Block H', agent=agent_high,
                                   n_steps_per_fit=1)
@@ -151,40 +203,67 @@ def build_computational_graph(mdp, agent_low, agent_m1,
     mux_block.add_block_list([control_block_m3])
     mux_block.add_block_list([control_block_m4])
 
-    # Reward Accumulator
-    reward_acc = reward_accumulator_block(gamma=mdp.info.gamma,
-                                          name='reward_acc')
+    # Reward Accumulators
+    reward_acc = reward_accumulator_block(gamma=mdp.info.gamma, name='reward_acc1')
+    reward_acc_m1 = reward_accumulator_block(gamma=mdp.info.gamma, name='reward_acc1')
+    reward_acc_m2 = reward_accumulator_block(gamma=mdp.info.gamma, name='reward_acc2')
+    reward_acc_m3 = reward_accumulator_block(gamma=mdp.info.gamma, name='reward_acc3')
+    reward_acc_m4 = reward_accumulator_block(gamma=mdp.info.gamma, name='reward_acc4')
 
     # Algorithm
-    blocks = [state_ph, reward_ph, lastaction_ph, control_block_h,
-              control_block_l, function_block0,
-              function_block1, function_block2,
-              reward_acc, mux_block]
+    blocks = [state_ph, reward_ph, lastaction_ph, control_block_h, reward_acc,
+              control_block_l, function_block0, function_block1, function_block2,
+              reward_blockm1, reward_blockm2, reward_blockm3, reward_blockm4,
+              reward_acc_m1, reward_acc_m2, reward_acc_m3, reward_acc_m4, mux_block]
 
     state_ph.add_input(control_block_l)
     reward_ph.add_input(control_block_l)
     lastaction_ph.add_input(control_block_l)
 
     control_block_h.add_input(function_block0)
-    control_block_h.add_reward(reward_ph)
+    control_block_h.add_reward(reward_acc)
+    control_block_h.add_alarm_connection(control_block_m1)
+    control_block_h.add_alarm_connection(control_block_m2)
+    control_block_h.add_alarm_connection(control_block_m3)
+    control_block_h.add_alarm_connection(control_block_m4)
 
     mux_block.add_input(control_block_h)
     mux_block.add_input(state_ph)
 
-    control_block_m1.add_reward(reward_acc)
+    control_block_m1.add_reward(reward_acc_m1)
     control_block_m1.add_alarm_connection(control_block_l)
 
-    control_block_m2.add_reward(reward_acc)
+    control_block_m2.add_reward(reward_acc_m2)
     control_block_m2.add_alarm_connection(control_block_l)
 
-    control_block_m3.add_reward(reward_acc)
+    control_block_m3.add_reward(reward_acc_m3)
     control_block_m3.add_alarm_connection(control_block_l)
 
-    control_block_m4.add_reward(reward_acc)
+    control_block_m4.add_reward(reward_acc_m4)
     control_block_m4.add_alarm_connection(control_block_l)
 
     reward_acc.add_input(reward_ph)
-    reward_acc.add_alarm_connection(control_block_l)
+    reward_acc.add_alarm_connection(control_block_m1)
+    reward_acc.add_alarm_connection(control_block_m2)
+    reward_acc.add_alarm_connection(control_block_m3)
+    reward_acc.add_alarm_connection(control_block_m4)
+
+    reward_acc_m1.add_input(reward_blockm1)
+    reward_acc_m1.add_alarm_connection(control_block_l)
+
+    reward_acc_m2.add_input(reward_blockm2)
+    reward_acc_m2.add_alarm_connection(control_block_l)
+
+    reward_acc_m3.add_input(reward_blockm3)
+    reward_acc_m3.add_alarm_connection(control_block_l)
+
+    reward_acc_m4.add_input(reward_blockm4)
+    reward_acc_m4.add_alarm_connection(control_block_l)
+
+    reward_blockm4.add_input(state_ph)
+    reward_blockm3.add_input(state_ph)
+    reward_blockm2.add_input(state_ph)
+    reward_blockm1.add_input(state_ph)
 
     function_block0.add_input(state_ph)
 

@@ -21,6 +21,8 @@ class MuxBlock(Block):
         #print('selector in  : ', selector)
         #print('state in : ', state)
         alarms = list()
+        #print('STEP ',selector)
+
         for i in range(len(self.block_lists)):
             if i == selector:
                 selected_block_list = self.block_lists[i]
@@ -56,6 +58,7 @@ class MuxBlock(Block):
     def reset(self, inputs):
         selector = inputs[0]
         state = inputs[1:]
+        #print('RESET ',selector)
         for i in range(len(self.block_lists)):
             if i == selector:
                 selected_block_list = self.block_lists[i]
