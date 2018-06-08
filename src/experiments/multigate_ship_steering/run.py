@@ -17,8 +17,8 @@ if __name__ == '__main__':
 
     how_many = 1#00
     n_epochs = 50
-    ep_per_epoch_train = 800
-    ep_per_epoch_eval = 50
+    ep_per_epoch_train = 100
+    ep_per_epoch_eval = 10
     n_iterations = 10
 
     ep_per_fit_low = 10

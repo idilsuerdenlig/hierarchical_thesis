@@ -36,6 +36,7 @@ from mushroom_hierarchical.policy.deterministic_control_policy \
 
 #    return np.mean(gates)
 
+
 def hi_lev_state(ins):
 
     x = np.concatenate(ins)
@@ -49,50 +50,74 @@ def hi_lev_state(ins):
 
     return np.array([res])
 
+gate1_state = 0
+
 def reward_m1(ins):
     ins = np.concatenate(ins)
     gate_state = ins[4]
-    passed = False
-    if gate_state == 1 and not passed:
+    print('GATE 1 ',gate_state)
+    if gate_state == 0:
+        gate1_state = gate_state
+    if gate_state > gate1_state:
         reward = 100
-        passed = True
+        gate1_state = gate_state
+        print('GATE 1 passed ', gate1_state)
+
     else:
         reward = -1
+
     return np.array([reward])
 
 def reward_m2(ins):
     ins = np.concatenate(ins)
     gate_state = ins[5]
-    passed = False
-    if gate_state == 1 and not passed:
+    print('GATE 2 ',gate_state)
+
+    if gate_state == 0:
+        gate2_state = gate_state
+    if gate_state > gate2_state:
         reward = 100
-        passed = True
+        gate2_state = gate_state
+        print('GATE 2 passed ', gate2_state)
+
     else:
         reward = -1
+
     return np.array([reward])
 
 
 def reward_m3(ins):
     ins = np.concatenate(ins)
     gate_state = ins[6]
-    passed = False
-    if gate_state == 1 and not passed:
+    print('GATE 3 ',gate_state)
+
+    if gate_state == 0:
+        gate3_state = gate_state
+    if gate_state > gate3_state:
         reward = 100
-        passed = True
+        gate3_state = gate_state
+        print('GATE 3 passed ', gate3_state)
     else:
         reward = -1
+
     return np.array([reward])
 
 
 def reward_m4(ins):
     ins = np.concatenate(ins)
     gate_state = ins[7]
-    passed = False
-    if gate_state == 1 and not passed:
+    print('GATE 4 ',gate_state)
+
+    if gate_state == 0:
+        gate4_state = gate_state
+    if gate_state > gate4_state:
         reward = 100
-        passed = True
+        gate4_state = gate_state
+        print('GATE 4 passed ', gate4_state)
+
     else:
         reward = -1
+
     return np.array([reward])
 
 def build_high_level_agent(alg, params, mdp, epsilon):
@@ -303,8 +328,8 @@ def hierarchical_experiment(mdp, agent_l, agent_m1,
 
     for n in range(n_epochs):
         core.learn(n_episodes=n_iterations * ep_per_epoch_train, skip=True,
-                   quiet=True)
-        dataset = core.evaluate(n_episodes=ep_per_epoch_eval, quiet=True)
+                   quiet=False)
+        dataset = core.evaluate(n_episodes=ep_per_epoch_eval, quiet=True, render=True)
         J = compute_J(dataset, gamma=mdp.info.gamma)
         J_list.append(np.mean(J))
         print('J at iteration ', n, ': ', np.mean(J))

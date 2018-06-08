@@ -184,6 +184,6 @@ class ShipSteeringMultiGate(Environment):
             [4, -4]
         ]
         self._viewer.polygon(self._state[:2], self._state[2], boat,
-                             color=(32, 193, 54))
+                             color=(250, 55, 54))
 
         self._viewer.display(self._dt)
