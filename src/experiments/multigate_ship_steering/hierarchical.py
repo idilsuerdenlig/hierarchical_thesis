@@ -50,75 +50,27 @@ def hi_lev_state(ins):
 
     return np.array([res])
 
-gate1_state = 0
+class MidReward(object):
 
-def reward_m1(ins):
-    ins = np.concatenate(ins)
-    gate_state = ins[4]
-    print('GATE 1 ',gate_state)
-    if gate_state == 0:
-        gate1_state = gate_state
-    if gate_state > gate1_state:
-        reward = 100
-        gate1_state = gate_state
-        print('GATE 1 passed ', gate1_state)
+    def __init__(self, gate_no):
+        self.gate_no = gate_no
+        self.gate_state_old = 0
+        self.gate_state = 0
 
-    else:
-        reward = -1
+    def __call__(self, ins):
+        state = np.concatenate(ins)
+        self.gate_state = state[self.gate_no+4]
 
-    return np.array([reward])
+        if self.gate_state > self.gate_state_old:
+            reward = 100
+            self.gate_state_old = self.gate_state
+            print('GATE', self.gate_no, ' PASSED')
+        else:
+            reward = -1
 
-def reward_m2(ins):
-    ins = np.concatenate(ins)
-    gate_state = ins[5]
-    print('GATE 2 ',gate_state)
-
-    if gate_state == 0:
-        gate2_state = gate_state
-    if gate_state > gate2_state:
-        reward = 100
-        gate2_state = gate_state
-        print('GATE 2 passed ', gate2_state)
-
-    else:
-        reward = -1
-
-    return np.array([reward])
+        return np.array([reward])
 
 
-def reward_m3(ins):
-    ins = np.concatenate(ins)
-    gate_state = ins[6]
-    print('GATE 3 ',gate_state)
-
-    if gate_state == 0:
-        gate3_state = gate_state
-    if gate_state > gate3_state:
-        reward = 100
-        gate3_state = gate_state
-        print('GATE 3 passed ', gate3_state)
-    else:
-        reward = -1
-
-    return np.array([reward])
-
-
-def reward_m4(ins):
-    ins = np.concatenate(ins)
-    gate_state = ins[7]
-    print('GATE 4 ',gate_state)
-
-    if gate_state == 0:
-        gate4_state = gate_state
-    if gate_state > gate4_state:
-        reward = 100
-        gate4_state = gate_state
-        print('GATE 4 passed ', gate4_state)
-
-    else:
-        reward = -1
-
-    return np.array([reward])
 
 def build_high_level_agent(alg, params, mdp, epsilon):
     pi = EpsGreedy(epsilon=epsilon, )
@@ -198,6 +150,10 @@ def build_computational_graph(mdp, agent_low, agent_m1,
     function_block2 = fBlock(name='f2 (cost cosine)', phi=cost_cosine)
 
     # External reward block
+    reward_m1 = MidReward(gate_no=0)
+    reward_m2 = MidReward(gate_no=1)
+    reward_m3 = MidReward(gate_no=2)
+    reward_m4 = MidReward(gate_no=3)
     reward_blockm1 = fBlock(name='rm1 (reward m1)', phi=reward_m1)
     reward_blockm2 = fBlock(name='rm2 (reward m2)', phi=reward_m2)
     reward_blockm3 = fBlock(name='rm3 (reward m3)', phi=reward_m3)
