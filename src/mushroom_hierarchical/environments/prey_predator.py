@@ -117,10 +117,9 @@ class PreyPredator(Environment):
 
         if delta_norm_new < self._catch_radius:
             absorbing = True
-            reward = 100
         else:
             absorbing = False
-            reward = 0
+        reward = -delta_norm_new
 
         return self._state, reward, absorbing, {}
 

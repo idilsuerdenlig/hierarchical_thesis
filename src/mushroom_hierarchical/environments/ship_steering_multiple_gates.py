@@ -14,10 +14,11 @@ class ShipSteeringMultiGate(Environment):
     2013 with multiple gates.
 
     """
-    def __init__(self, n_steps_action=3):
+    def __init__(self, n_steps_action=3, viz_speed=100):
 
         self.__name__ = 'ShipSteeringMultiGate'
         self.n_steps_action = n_steps_action
+        self.viz_speed = viz_speed
 
         # MDP parameters
         self.no_of_gates = 4
@@ -53,8 +54,6 @@ class ShipSteeringMultiGate(Environment):
 
         self._gate_list = gate_1, gate_2, gate_3, gate_4
 
-        self.gate_to_pass = 0
-
         # MDP properties
         observation_space = spaces.Box(low=low, high=high)
         action_space = spaces.Box(low=-self.omega_max, high=self.omega_max)
@@ -77,11 +76,9 @@ class ShipSteeringMultiGate(Environment):
             self._state = np.zeros(8)
             self._state[0] = 500
             self._state[1] = 500
-
         else:
             self._state = state
-        #self.gate_to_pass = 0
-        #self.correct_order = False
+
         return self._state
 
     def step(self, action):
@@ -99,11 +96,10 @@ class ShipSteeringMultiGate(Environment):
             new_state[1] = state[1] + self._v * np.sin(state[2]) * self._dt
             new_state[2] = normalize_angle(state[2] + state[3] * self._dt)
             new_state[3] = state[3] + (r - state[3]) * self._dt / self._T
-            new_state[4] = state[4]
-            new_state[5] = state[5]
-            new_state[6] = state[6]
-            new_state[7] = state[7]
+            new_state[4:] = state[4:]
             absorbing = False
+
+            reward = 0
 
             if new_state[0] > self.field_size \
                or new_state[1] > self.field_size \
@@ -111,47 +107,24 @@ class ShipSteeringMultiGate(Environment):
                 reward = self._out_reward
                 absorbing = True
                 break
-
-            elif self._through_gate(self._state[:2], new_state[:2], 0):
-                state[4] += 1
-                if state[4] == 1:
-                    reward = 10
-                else:
-                    reward = 0
-            elif self._through_gate(self._state[:2], new_state[:2], 1):
-                state[5] += 1
-                if state[5] == 1:
-                    reward = 10
-                else:
-                    reward = 0
-            elif self._through_gate(self._state[:2], new_state[:2], 2):
-                state[6] += 1
-                if state[6] == 1:
-                    reward = 10
-                else:
-                    reward = 0
-            elif self._through_gate(self._state[:2], new_state[:2], 3):
-                state[7] += 1
-                if state[7] == 1:
-                    reward = 10
-                else:
-                    reward = 0
-
             else:
-                reward = 0
+                for i, gate in enumerate(self._gate_list):
+                    if self._through_gate(state[:2], new_state[:2], gate):
+                        new_state[4+i] += 1
+                        if new_state[4+i] == 1:
+                            reward = 10
 
-            if np.all(state[5:]>0):
+            if np.all(new_state[5:] > 0):
                 absorbing = True
+                break
+
         self._state = new_state
 
         return self._state, reward, absorbing, {}
 
-
-    def _through_gate(self, start, end, counter):
-
-        gate_ = self._gate_list[counter]
-        gate_e = gate_[1]
-        gate_s = gate_[0]
+    def _through_gate(self, start, end, gate):
+        gate_e = gate[1]
+        gate_s = gate[0]
 
         r = gate_e - gate_s
         s = end - start
@@ -186,4 +159,4 @@ class ShipSteeringMultiGate(Environment):
         self._viewer.polygon(self._state[:2], self._state[2], boat,
                              color=(250, 55, 54))
 
-        self._viewer.display(self._dt)
+        self._viewer.display(self._dt/self.viz_speed)

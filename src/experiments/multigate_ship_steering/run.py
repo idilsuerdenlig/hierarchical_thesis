@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     how_many = 1#00
     n_epochs = 50
-    ep_per_epoch_train = 100
+    ep_per_epoch_train = 10
     ep_per_epoch_eval = 10
     n_iterations = 10
 
@@ -39,24 +39,20 @@ if __name__ == '__main__':
     algs_and_params_hier = [
         (QLearning, {'learning_rate': Parameter(value=10)},
         GPOMDP, {'learning_rate': AdaptiveParameter(value=50)},
-        GPOMDP, {'learning_rate': AdaptiveParameter(value=50)},
-        GPOMDP, {'learning_rate': AdaptiveParameter(value=50)},
-        GPOMDP, {'learning_rate': AdaptiveParameter(value=50)},
         PGPE, {'learning_rate': AdaptiveParameter(value=5e-4)})
          ]
 
-    for alg_h, params_h, alg_m1, params_m1, alg_m2, params_m2,\
-        alg_m3, params_m3, alg_m4, params_m4, alg_l, params_l in algs_and_params_hier:
+    for alg_h, params_h, alg_m, params_m, alg_l, params_l in algs_and_params_hier:
 
         epsilon = Parameter(value=0.15)
         agent_h = build_high_level_agent(alg_h, params_h, mdp, epsilon)
 
-        mu1 = 500; mu2 = 500; mu3 = 500; mu4 = 500
-        sigma1 = 250; sigma2 = 250; sigma3 = 250; sigma4 = 250
-        agent_m1 = build_mid_level_agent(alg_m1, params_m1, mdp, mu1, sigma1)
-        agent_m2 = build_mid_level_agent(alg_m2, params_m2, mdp, mu2, sigma2)
-        agent_m3 = build_mid_level_agent(alg_m3, params_m3, mdp, mu3, sigma3)
-        agent_m4 = build_mid_level_agent(alg_m4, params_m4, mdp, mu4, sigma4)
+        mu = 500
+        sigma = 250
+        agent_m1 = build_mid_level_agent(alg_m, params_m, mdp, mu, sigma)
+        agent_m2 = build_mid_level_agent(alg_m, params_m, mdp, mu, sigma)
+        agent_m3 = build_mid_level_agent(alg_m, params_m, mdp, mu, sigma)
+        agent_m4 = build_mid_level_agent(alg_m, params_m, mdp, mu, sigma)
 
         agent_l = build_low_level_agent(alg_l, params_l, mdp)
 
