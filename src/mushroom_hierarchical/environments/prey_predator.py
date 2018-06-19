@@ -183,8 +183,6 @@ class PreyPredator(Environment):
 
         omega_prey = angle_current / np.pi
 
-
-
         u_prey = np.empty(2)
         u_prey[0] = self._bound(velocity_prey, 0, self._v_prey)
         u_prey[1] = self._bound(omega_prey, -self._omega_prey, self._omega_prey)
