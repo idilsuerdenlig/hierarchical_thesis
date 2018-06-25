@@ -3,7 +3,7 @@ import numpy as np
 
 from mushroom.environments import Environment, MDPInfo
 from mushroom.utils import spaces
-from mushroom.utils.angles_utils import normalize_angle, shortest_angular_distance
+from mushroom.utils.angles import normalize_angle, shortest_angular_distance
 
 
 class ShipGhavamzadeDiagonal(Environment):
