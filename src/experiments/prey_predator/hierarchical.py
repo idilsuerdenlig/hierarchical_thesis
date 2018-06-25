@@ -3,8 +3,6 @@ from mushroom.features.tiles import Tiles
 from mushroom.features.features import *
 from mushroom.features.basis import *
 from mushroom.policy.gaussian_policy import *
-from mushroom.policy.deterministic_policy import DeterministicPolicy
-from mushroom.distributions.gaussian import *
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.utils.callbacks import CollectDataset
@@ -18,6 +16,7 @@ from mushroom_hierarchical.blocks.computational_graph import ComputationalGraph
 from mushroom_hierarchical.blocks.control_block import ControlBlock
 from mushroom_hierarchical.blocks.basic_operation_block import *
 from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
+from mushroom_hierarchical.blocks.reward_accumulator import *
 
 
 def reward_low_level(ins):
@@ -109,7 +108,7 @@ def build_high_level_agent(alg, params, mdp, std):
     return agent'''
 
 
-def build_low_level_agent(alg, params, mdp, std):
+def build_low_level_agent(alg, params, mdp, horizon, std):
     basis = PolynomialBasis.generate(1, 2)
     features = Features(basis_list=basis)
     approximator = Regressor(LinearApproximator, input_shape=(features.size,),
@@ -119,7 +118,7 @@ def build_low_level_agent(alg, params, mdp, std):
 
     mdp_info_agent = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
                              action_space=mdp.info.action_space,
-                             gamma=mdp.info.gamma, horizon=10)
+                             gamma=mdp.info.gamma, horizon=horizon)
     agent = alg(pi, mdp_info_agent, features=features, **params)
 
     return agent
@@ -145,6 +144,9 @@ def build_computational_graph(mdp, agent_low, agent_high,
                              phi=angle_and_distance)
     function_block3 = fBlock(name='cost cosine', phi=reward_low_level)
 
+    reward_acc = reward_accumulator_block(mdp.info.gamma,
+                                          name='reward accumulator')
+
     control_block_h = ControlBlock(name='Control Block H', agent=agent_high,
                                    n_eps_per_fit=ep_per_fit_high)
 
@@ -154,7 +156,8 @@ def build_computational_graph(mdp, agent_low, agent_high,
 
     blocks = [state_ph, reward_ph, lastaction_ph,
               control_block_h, control_block_l,
-              function_block1, function_block2, function_block3]
+              function_block1, function_block2, function_block3,
+              reward_acc]
 
     state_ph.add_input(control_block_l)
     reward_ph.add_input(control_block_l)
@@ -162,8 +165,11 @@ def build_computational_graph(mdp, agent_low, agent_high,
 
     function_block1.add_input(state_ph)
 
+    reward_acc.add_input(reward_ph)
+    reward_acc.add_alarm_connection(control_block_l)
+
     control_block_h.add_input(function_block1)
-    control_block_h.add_reward(reward_ph)
+    control_block_h.add_reward(reward_acc)
     control_block_h.add_alarm_connection(control_block_l)
 
     function_block2.add_input(state_ph)

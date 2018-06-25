@@ -41,11 +41,12 @@ if __name__ == '__main__':
          GPOMDP, {'learning_rate': Parameter(value=1e-2)})
     ]
 
-    std_high = 1e-3*np.ones(1)
-    std_low = 1e-3*np.ones(2)
+    std_high = 1e-0*np.ones(1)
+    std_low = 1e-1*np.ones(2)
+    horizon = 5
     for alg_h, params_h, alg_l, params_l in algs_and_params_hier:
         agent_h = build_high_level_agent(alg_h, params_h, mdp, std_high)
-        agent_l = build_low_level_agent(alg_l, params_l, mdp, std_low)
+        agent_l = build_low_level_agent(alg_l, params_l, mdp, horizon, std_low)
 
         ep_per_fit_high = ep_per_epoch // n_iterations
 
