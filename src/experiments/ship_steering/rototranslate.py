@@ -1,5 +1,5 @@
 import numpy as np
-from mushroom.utils.angles_utils import normalize_angle
+from mushroom.utils.angles import normalize_angle
 
 
 def rototranslate(inputs):

@@ -1,5 +1,5 @@
 import numpy as np
-from mushroom.utils.angles_utils import shortest_angular_distance
+from mushroom.utils.angles import shortest_angular_distance
 
 
 def angle_to_angle_diff_complete_state(inputs):

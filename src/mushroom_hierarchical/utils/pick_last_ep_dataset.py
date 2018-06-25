@@ -1,4 +1,3 @@
-import numpy as np
 
 
 def pick_last_ep(dataset):

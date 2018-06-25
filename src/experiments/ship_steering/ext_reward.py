@@ -1,5 +1,5 @@
 import numpy as np
-from mushroom.utils.angles_utils import *
+from mushroom.utils.angles import *
 
 
 def G_high(inputs):

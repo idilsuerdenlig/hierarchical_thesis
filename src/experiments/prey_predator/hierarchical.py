@@ -8,7 +8,7 @@ from mushroom.approximators.regressor import Regressor
 from mushroom.utils.callbacks import CollectDataset
 from mushroom.utils.dataset import compute_J
 from mushroom.utils import spaces
-from mushroom.utils.angles_utils import *
+from mushroom.utils.angles import *
 
 
 from mushroom_hierarchical.core.hierarchical_core import HierarchicalCore
