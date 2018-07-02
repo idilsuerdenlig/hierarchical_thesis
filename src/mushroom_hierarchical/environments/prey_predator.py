@@ -2,7 +2,7 @@ import numpy as np
 
 from mushroom.environments import Environment, MDPInfo
 from mushroom.utils import spaces
-from mushroom.utils.angles_utils import *
+from mushroom.utils.angles import *
 from mushroom.utils.viewer import Viewer
 
 
@@ -182,8 +182,6 @@ class PreyPredator(Environment):
                     angle_current = rotation_sign * np.pi
 
         omega_prey = angle_current / np.pi
-
-
 
         u_prey = np.empty(2)
         u_prey[0] = self._bound(velocity_prey, 0, self._v_prey)

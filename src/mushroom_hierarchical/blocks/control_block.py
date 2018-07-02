@@ -87,7 +87,6 @@ class ControlBlock(Block):
                 self.dataset.empty()
                 self.curr_episode_counter = 0
 
-
                 for c in self.callbacks:
                     callback_pars = dict(dataset=dataset)
                     c(**callback_pars)

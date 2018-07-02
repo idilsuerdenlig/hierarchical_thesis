@@ -1,7 +1,6 @@
 import pygame
 
 import numpy as np
-from mushroom.algorithms import Agent
 
 
 class KeyboardAgent:

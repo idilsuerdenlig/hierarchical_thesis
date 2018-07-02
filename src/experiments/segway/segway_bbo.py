@@ -4,7 +4,7 @@ from mushroom.core import Core
 from mushroom.algorithms.policy_search import *
 from mushroom.distributions import GaussianDiagonalDistribution
 from mushroom.utils.dataset import compute_J
-from mushroom.utils.angles_utils import shortest_angular_distance
+from mushroom.utils.angles import shortest_angular_distance
 from mushroom_hierarchical.environments.segway_linear_motion import SegwayLinearMotion
 
 from tqdm import tqdm

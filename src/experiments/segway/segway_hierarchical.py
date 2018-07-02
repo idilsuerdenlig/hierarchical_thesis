@@ -3,7 +3,6 @@ from joblib import Parallel, delayed
 from mushroom.utils import spaces
 from mushroom.environments import MDPInfo
 from mushroom.algorithms.policy_search import *
-from mushroom.policy.gaussian_policy import *
 from mushroom.distributions import *
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
@@ -18,13 +17,13 @@ from mushroom_hierarchical.blocks.computational_graph import ComputationalGraph
 from mushroom_hierarchical.blocks.control_block import ControlBlock
 from mushroom_hierarchical.blocks.basic_operation_block import *
 from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
-from mushroom_hierarchical.blocks.functions.pick_first_state import pick_first_state
 from mushroom_hierarchical.utils.callbacks.collect_distribution_parameter import\
     CollectDistributionParameter
 from mushroom_hierarchical.policy.deterministic_control_policy import DeterministicControlPolicy
 
 from lqr_cost_segway import lqr_cost_segway
 from angle_to_angle_diff_complete_state import *
+from pick_first_state import pick_first_state
 
 def fall_reward(inputs):
     state = inputs[0]
