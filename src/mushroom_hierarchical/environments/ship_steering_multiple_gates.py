@@ -32,23 +32,23 @@ class ShipSteeringMultiGate(Environment):
         self._T = 5.
         self._dt = .2
 
-        gate_1s = np.array([800, 350])
-        gate_1e = np.array([900, 350])
+        gate_1s = np.array([150, 350])
+        gate_1e = np.array([250, 350])
 
         gate_1 = np.array([gate_1s, gate_1e])
 
-        gate_2s = np.array([300, 600])
-        gate_2e = np.array([400, 600])
+        gate_2s = np.array([300, 400])
+        gate_2e = np.array([400, 400])
 
         gate_2 = np.array([gate_2s, gate_2e])
 
-        gate_3s = np.array([500, 700])
-        gate_3e = np.array([600, 700])
+        gate_3s = np.array([500, 600])
+        gate_3e = np.array([600, 600])
 
         gate_3 = np.array([gate_3s, gate_3e])
 
-        gate_4s = np.array([300, 999])
-        gate_4e = np.array([400, 999])
+        gate_4s = np.array([600, 700])
+        gate_4e = np.array([700, 700])
 
         gate_4 = np.array([gate_4s, gate_4e])
 

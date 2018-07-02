@@ -101,9 +101,11 @@ class ControlBlock(Block):
     def reset(self, inputs):
 
         state = np.concatenate(inputs, axis=0)
-
         self.agent.episode_start()
         action = self.agent.draw_action(state)
+        if self.name == 'Control Block H':
+            print('INS  : ',inputs)
+            print('ACT  : ',action)
         self.dataset.add_first(state, action)
         self.ep_step_counter = 0
         self.alarm_output = False

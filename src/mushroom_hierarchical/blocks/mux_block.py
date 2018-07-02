@@ -1,6 +1,6 @@
 from .block import Block
 from .control_block import ControlBlock
-
+import numpy as np
 
 class MuxBlock(Block):
     """
@@ -21,6 +21,7 @@ class MuxBlock(Block):
         #print('selector in  : ', selector)
         #print('state in : ', state)
         alarms = list()
+
         #print('STEP ',selector)
 
         for i in range(len(self.block_lists)):
