@@ -74,8 +74,8 @@ class ShipSteeringMultiGate(Environment):
 
         if state is None:
             self._state = np.zeros(8)
-            self._state[0] = 500
-            self._state[1] = 500
+            #self._state[0] = 500
+            #self._state[1] = 500
         else:
             self._state = state
 
