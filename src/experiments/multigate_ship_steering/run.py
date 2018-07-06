@@ -17,12 +17,12 @@ if __name__ == '__main__':
 
     how_many = 1#00
     n_epochs = 50
-    ep_per_epoch_train = 10
-    ep_per_epoch_eval = 10
+    ep_per_epoch_train = 100
+    ep_per_epoch_eval = 5
     n_iterations = 10
 
     ep_per_fit_low = 10
-    ep_per_fit_mid = 20
+    ep_per_fit_mid = 10
 
     # MDP
     mdp = ShipSteeringMultiGate(n_steps_action=3)
@@ -37,14 +37,14 @@ if __name__ == '__main__':
 
     # Hierarchical
     algs_and_params_hier = [
-        (QLearning, {'learning_rate': Parameter(value=10)},
+        (QLearning, {'learning_rate': Parameter(value=0.2)},
         GPOMDP, {'learning_rate': AdaptiveParameter(value=50)},
         PGPE, {'learning_rate': AdaptiveParameter(value=5e-4)})
          ]
 
     for alg_h, params_h, alg_m, params_m, alg_l, params_l in algs_and_params_hier:
 
-        epsilon = Parameter(value=0.15)
+        epsilon = Parameter(value=0.8)
         agent_h = build_high_level_agent(alg_h, params_h, mdp, epsilon)
 
         mu = 500
