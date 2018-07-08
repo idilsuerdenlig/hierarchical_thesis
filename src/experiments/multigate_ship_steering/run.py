@@ -37,14 +37,14 @@ if __name__ == '__main__':
 
     # Hierarchical
     algs_and_params_hier = [
-        (QLearning, {'learning_rate': Parameter(value=0.2)},
+        (QLearning, {'learning_rate': Parameter(value=0.4)},
         GPOMDP, {'learning_rate': AdaptiveParameter(value=50)},
         PGPE, {'learning_rate': AdaptiveParameter(value=5e-4)})
          ]
 
     for alg_h, params_h, alg_m, params_m, alg_l, params_l in algs_and_params_hier:
 
-        epsilon = Parameter(value=0.8)
+        epsilon = Parameter(value=0.2)
         agent_h = build_high_level_agent(alg_h, params_h, mdp, epsilon)
 
         mu = 500

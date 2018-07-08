@@ -65,6 +65,22 @@ class MidReward(object):
 
         return np.array([reward])
 
+class TerminationCondition(object):
+
+    def __init__(self, gate_no):
+        self.gate_no = gate_no
+        self.gate_state_old = 0
+
+    def __call__(self, ins):
+        state = ins
+        gate_state = state[self.gate_no+4]
+
+        if gate_state > self.gate_state_old:
+            self.gate_state_old = gate_state
+            return True
+        else:
+            self.gate_state_old = gate_state
+            return False
 
 def build_high_level_agent(alg, params, mdp, epsilon):
     pi = EpsGreedy(epsilon=epsilon, )
@@ -94,7 +110,7 @@ def build_mid_level_agent(alg, params, mdp, mu, std):
     mdp_info_agent1 = MDPInfo(observation_space=spaces.Box(0, 1, (1,)),
                               action_space=spaces.Box(0, lim, (2,)),
                               gamma=mdp.info.gamma,
-                              horizon=100)
+                              horizon=10)
     agent = alg(policy=pi, mdp_info=mdp_info_agent1, features=features, **params)
 
     return agent
@@ -151,17 +167,21 @@ def build_computational_graph(mdp, agent_low, agent_m0,
     control_block_h = ControlBlock(name='Control Block H', agent=agent_high,
                                    n_steps_per_fit=1)
     # Cotrol Block M1
+    termination_condition_m1 = TerminationCondition(gate_no=0)
     control_block_m0 = ControlBlock(name='Control Block M0', agent=agent_m0,
-                                    n_eps_per_fit=ep_per_fit_mid)
+                                    n_eps_per_fit=ep_per_fit_mid, termination_condition=termination_condition_m1)
     # Cotrol Block M2
+    termination_condition_m2 = TerminationCondition(gate_no=1)
     control_block_m1 = ControlBlock(name='Control Block M1', agent=agent_m1,
-                                    n_eps_per_fit=ep_per_fit_mid)
+                                    n_eps_per_fit=ep_per_fit_mid, termination_condition=termination_condition_m2)
     # Cotrol Block M3
+    termination_condition_m3 = TerminationCondition(gate_no=2)
     control_block_m2 = ControlBlock(name='Control Block M2', agent=agent_m2,
-                                    n_eps_per_fit=ep_per_fit_mid)
+                                    n_eps_per_fit=ep_per_fit_mid, termination_condition=termination_condition_m3)
     # Cotrol Block M4
+    termination_condition_m4 = TerminationCondition(gate_no=3)
     control_block_m3 = ControlBlock(name='Control Block M3', agent=agent_m3,
-                                    n_eps_per_fit=ep_per_fit_mid)
+                                    n_eps_per_fit=ep_per_fit_mid, termination_condition=termination_condition_m4)
     # Control Block L
     control_block_l = ControlBlock(name='Control Block L', agent=agent_low,
                                    n_eps_per_fit=ep_per_fit_low)
