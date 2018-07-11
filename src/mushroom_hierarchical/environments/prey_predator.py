@@ -67,12 +67,12 @@ class PreyPredator(Environment):
 
         # MDP properties
         horizon = 2000
-        gamma = 0.99
+        gamma = 0.997
 
         observation_space = spaces.Box(low=-high, high=high)
-        action_space = spaces.Box(low=np.array([0,
+        action_space = spaces.Box(low=np.array([#0,
                                                 -self._omega_predator]),
-                                  high=np.array([self._v_predator,
+                                  high=np.array([#self._v_predator,
                                                  self._omega_predator]))
         mdp_info = MDPInfo(observation_space, action_space, gamma, horizon)
 
@@ -89,6 +89,17 @@ class PreyPredator(Environment):
                                     self._max_x/2, self._max_y/2, np.pi/2])
             self._state = np.array([3., 1., np.pi/2,
                                     3., 2., np.pi/2])
+
+            ok = False
+
+            while not ok:
+                self._state = np.random.uniform(
+                    low=self.info.observation_space.low,
+                    high=self.info.observation_space.high)
+
+                delta_norm = np.linalg.norm(self._state[:2] - self._state[3:5])
+                ok = delta_norm > self._catch_radius
+
         else:
             self._state = state
             self._state[2] = normalize_angle(self._state[2])
@@ -101,6 +112,7 @@ class PreyPredator(Environment):
         u = self._bound(action,
                         self.info.action_space.low,
                         self.info.action_space.high)
+        u = np.array([self._v_predator, u])
 
         state_predator = self._state[:3]
         state_predator = self._differential_drive_dynamics(state_predator, u)
@@ -116,7 +128,12 @@ class PreyPredator(Environment):
         delta_norm_new = np.linalg.norm(self._state[:2]-self._state[3:5])
 
         if delta_norm_new < self._catch_radius:
-            absorbing = True
+            collision, _ = self._check_collision(self._state[:2],
+                                                 self._state[3:5])
+            if collision is None:
+                absorbing = True
+            else:
+                absorbing = False
         else:
             absorbing = False
         reward = -delta_norm_new
