@@ -49,7 +49,8 @@ class KeyboardAgent:
 
         omega = 0.16*self._location1
         v = 0.1*self._location2
-        return np.array([v, omega])
+        #return np.array([v, omega])
+        return np.array([omega])
 
     def episode_start(self):
 

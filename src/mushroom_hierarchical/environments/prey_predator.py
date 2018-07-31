@@ -66,8 +66,8 @@ class PreyPredator(Environment):
 
 
         # MDP properties
-        horizon = 2000
-        gamma = 0.997
+        horizon = 500
+        gamma = 0.99
 
         observation_space = spaces.Box(low=-high, high=high)
         action_space = spaces.Box(low=np.array([#0,

@@ -3,6 +3,7 @@ from mushroom.features.tiles import Tiles
 from mushroom.features.features import *
 from mushroom.features.basis import *
 from mushroom.policy.gaussian_policy import *
+from mushroom.policy.td_policy import EpsGreedy
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.utils.callbacks import CollectDataset
@@ -22,96 +23,110 @@ from mushroom_hierarchical.blocks.reward_accumulator import *
 def reward_low_level(ins):
     state = ins[0]
 
-    value = np.cos(state[0]) - state[1]**2
+    value = np.cos(state[0])
     return np.array([value])
+
+
+def compute_angle(ins):
+    n_actions = 4
+
+    state = ins[0]
+    action = int(np.asscalar(ins[1]))
+    #print('compute_angle: ', action)
+
+    if action == n_actions:
+        x = state[0]
+        y = state[1]
+        x_prey = state[3]
+        y_prey = state[4]
+
+        del_x = x_prey - x
+        del_y = y_prey - y
+        theta_target = normalize_angle(np.arctan2(del_y, del_x))
+    else:
+        theta_target = 2*np.pi/n_actions*action-np.pi
+
+    return np.array([theta_target])
 
 
 def pick_position(ins):
     state = ins[0]
 
-    return state[:2]
-
-
-def angle_and_distance(ins):
-    state = ins[0]
-    drift = ins[1]
-
+    '''
     x = state[0]
     y = state[1]
-    theta = state[2]
+    #theta = state[2]
     x_prey = state[3]
     y_prey = state[4]
 
     del_x = x_prey - x
     del_y = y_prey - y
-    theta_ref = normalize_angle(np.arctan2(del_y, del_x)+drift)
+    theta_target = normalize_angle(np.arctan2(del_y, del_x))
+    distance = np.sqrt(del_x**2 + del_y**2)
 
-    del_theta = shortest_angular_distance(from_angle=theta,
-                                          to_angle=theta_ref)
+    return np.array([x, y, theta_target, distance])
+    #return np.array([x, y, theta_target])
+    '''
 
-    pos_predator = ins[0][0:2]
-    pos_prey = ins[0][3:5]
-
-    distance = np.linalg.norm(pos_prey-pos_predator)
-
-    return np.array([del_theta, distance])
+    return np.concatenate([state[0:2], state[3:5]], 0)
 
 
-def build_high_level_agent(alg, params, mdp, std):
-    high = mdp.info.observation_space.high[:2]
-    low = mdp.info.observation_space.low[:2]
+def angle_error(ins):
+    theta = ins[0][2]
+    theta_ref = np.asscalar(ins[1])
 
+    #print('angle_error: ', theta_ref)
+
+    error = shortest_angular_distance(from_angle=theta,
+                                      to_angle=theta_ref)
+
+    return np.array([error])
+
+
+def build_high_level_agent(alg, params, mdp, eps):
+    #last = np.linalg.norm(mdp.info.observation_space.high[:2]
+    #                      - mdp.info.observation_space.low[:2])
+
+    high = np.ones(4)#*last
+    low = np.zeros(4)
+
+    high[:2] = mdp.info.observation_space.high[:2]
+    low[:2] = mdp.info.observation_space.low[:2]
+
+    high[2:] = mdp.info.observation_space.high[3:5]
+    low[2:] = mdp.info.observation_space.low[3:5]
+
+    n_actions = 5
     observation_space = spaces.Box(low=low, high=high)
-    action_space = spaces.Box(low=np.array([-np.pi]), high=np.array([-np.pi]))
+    action_space = spaces.Discrete(n_actions)
+
+
 
     mdp_info_agent = MDPInfo(observation_space=observation_space,
                              action_space=action_space,
                              gamma=mdp.info.gamma,
                              horizon=mdp.info.horizon)
 
-    tiles = Tiles.generate(10, [5, 5], low, high)
+    tiles = Tiles.generate(3, [10, 10, 5, 5], low, high, uniform=True)
     features = Features(tilings=tiles)
-    approximator = Regressor(LinearApproximator, input_shape=(features.size,),
-                             output_shape=(1,))
 
-    pi1 = DiagonalGaussianPolicy(approximator, std)
+    pi = EpsGreedy(eps)
 
-    agent = alg(pi1, mdp_info_agent, features=features, **params)
+    approximator_params = dict(input_shape=(features.size,),
+                               output_shape=(n_actions,),
+                               n_actions=n_actions)
+    agent = alg(pi, mdp_info_agent, approximator_params=approximator_params,
+                features=features, **params)
 
     return agent
-
-
-'''def build_high_level_bbo_agent(alg, params, mdp, std):
-    high = mdp.info.observation_space.high[:3]
-    low = mdp.info.observation_space.low[:3]
-
-    observation_space = spaces.Box(low=low, high=high)
-    action_space = spaces.Box(low=np.array([-np.pi]), high=np.array([-np.pi]))
-
-    mdp_info_agent = MDPInfo(observation_space=observation_space,
-                             action_space=action_space,
-                             gamma=mdp.info.gamma,
-                             horizon=mdp.info.horizon)
-
-    tiles = Tiles.generate(3, [10, 10, 10], low, high)
-    features = Features(tilings=tiles)
-    approximator = Regressor(LinearApproximator, input_shape=(features.size,),
-                             output_shape=(1,))
-
-    mu = np.zeros(approximator.weights_size)
-    std = std*np.ones(approximator.weights_size)
-    dist = GaussianDiagonalDistribution(mu, std)
-    pi = DeterministicPolicy(approximator)
-
-    agent = alg(dist, pi, mdp_info_agent, features=features, **params)
-
-    return agent'''
 
 
 def build_low_level_agent(alg, params, mdp, horizon, std):
     basis = PolynomialBasis.generate(1, 2)
     features = Features(basis_list=basis)
-    approximator = Regressor(LinearApproximator, input_shape=(features.size,),
+    features = None
+    approximator = Regressor(LinearApproximator, input_shape=(1,),
+                             #input_shape=(features.size,),
                              output_shape=mdp.info.action_space.shape)
 
     pi = DiagonalGaussianPolicy(approximator, std)
@@ -125,8 +140,7 @@ def build_low_level_agent(alg, params, mdp, horizon, std):
 
 
 def build_computational_graph(mdp, agent_low, agent_high,
-                              ep_per_fit_low, ep_per_fit_high,
-                              low_level_callbacks=[]):
+                              ep_per_fit_low, low_level_callbacks=[]):
 
     # State Placeholder
     state_ph = PlaceHolder(name='state_ph')
@@ -140,15 +154,18 @@ def build_computational_graph(mdp, agent_low, agent_high,
     function_block1 = fBlock(name='pick position',
                              phi=pick_position)
 
-    function_block2 = fBlock(name='angle and distance',
-                             phi=angle_and_distance)
-    function_block3 = fBlock(name='cost cosine', phi=reward_low_level)
+    function_block2 = fBlock(name='compute angle',
+                             phi=compute_angle)
+
+    function_block3 = fBlock(name='angle and distance',
+                             phi=angle_error)
+    function_block4 = fBlock(name='cost cosine', phi=reward_low_level)
 
     reward_acc = reward_accumulator_block(mdp.info.gamma,
                                           name='reward accumulator')
 
     control_block_h = ControlBlock(name='Control Block H', agent=agent_high,
-                                   n_eps_per_fit=ep_per_fit_high)
+                                   n_steps_per_fit=1)
 
     control_block_l = ControlBlock(name='Control Block L', agent=agent_low,
                                    n_eps_per_fit=ep_per_fit_low,
@@ -156,7 +173,8 @@ def build_computational_graph(mdp, agent_low, agent_high,
 
     blocks = [state_ph, reward_ph, lastaction_ph,
               control_block_h, control_block_l,
-              function_block1, function_block2, function_block3,
+              function_block1, function_block2,
+              function_block3, function_block4,
               reward_acc]
 
     state_ph.add_input(control_block_l)
@@ -175,10 +193,13 @@ def build_computational_graph(mdp, agent_low, agent_high,
     function_block2.add_input(state_ph)
     function_block2.add_input(control_block_h)
 
+    function_block3.add_input(state_ph)
     function_block3.add_input(function_block2)
 
-    control_block_l.add_input(function_block2)
-    control_block_l.add_reward(function_block3)
+    function_block4.add_input(function_block3)
+
+    control_block_l.add_input(function_block3)
+    control_block_l.add_reward(function_block4)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
 
     return computational_graph
@@ -186,13 +207,13 @@ def build_computational_graph(mdp, agent_low, agent_high,
 
 def experiment(mdp, agent_high, agent_low,
                n_epochs, n_episodes, ep_per_eval,
-               ep_per_fit_low, ep_per_fit_high):
+               ep_per_fit_low):
     np.random.seed()
 
     dataset_callback = CollectDataset()
 
     computational_graph = build_computational_graph(
-        mdp, agent_low, agent_high, ep_per_fit_low, ep_per_fit_high,
+        mdp, agent_low, agent_high, ep_per_fit_low,
         [dataset_callback])
 
     core = HierarchicalCore(computational_graph)
@@ -202,6 +223,10 @@ def experiment(mdp, agent_high, agent_low,
     J = compute_J(dataset, gamma=mdp.info.gamma)
     print('Reward at start :', np.mean(J))
     J_list.append(np.mean(J))
+
+    #print('Press a key to run visualization')
+    #input()
+    #core.evaluate(n_episodes=1, render=True)
 
     for n in range(n_epochs):
         core.learn(n_episodes=n_episodes, skip=True, quiet=False)
@@ -215,6 +240,10 @@ def experiment(mdp, agent_high, agent_low,
         J = compute_J(dataset, gamma=mdp.info.gamma)
         J_list.append(np.mean(J))
         print('Reward at epoch ', n, ':', np.mean(J))
+
+        #print('Press a key to run visualization')
+        #input()
+        core.evaluate(n_episodes=1, render=True)
 
     print('Press a key to run visualization')
     input()

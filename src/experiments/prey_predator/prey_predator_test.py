@@ -38,8 +38,8 @@ def experiment(n_epochs, ep_per_epoch_train, ep_per_epoch_eval, n_iterations):
     policy = GaussianPolicy(approximator, sigma)
 
     lr = Parameter(1e-5)
-    agent = GPOMDP(policy, mdp.info, lr, phi)
-    #agent = KeyboardAgent()
+    #agent = GPOMDP(policy, mdp.info, lr, phi)
+    agent = KeyboardAgent()
 
 
     # Train
