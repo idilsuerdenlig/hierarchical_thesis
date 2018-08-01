@@ -4,7 +4,7 @@ from mushroom.features.features import *
 from mushroom.features.basis import *
 from mushroom.policy.gaussian_policy import *
 from mushroom.policy.td_policy import EpsGreedy
-from mushroom.approximators.parametric import LinearApproximator
+from mushroom.approximators.parametric import LinearApproximator, PyTorchApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.utils.callbacks import CollectDataset
 from mushroom.utils.dataset import compute_J
@@ -19,6 +19,7 @@ from mushroom_hierarchical.blocks.basic_operation_block import *
 from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
 from mushroom_hierarchical.blocks.reward_accumulator import *
 
+from network import Network
 
 def reward_low_level(ins):
     state = ins[0]
@@ -83,11 +84,8 @@ def angle_error(ins):
     return np.array([error])
 
 
-def build_high_level_agent(alg, params, mdp, eps):
-    #last = np.linalg.norm(mdp.info.observation_space.high[:2]
-    #                      - mdp.info.observation_space.low[:2])
-
-    high = np.ones(4)#*last
+def build_high_level_agent(alg, params, optim, loss, mdp, eps):
+    high = np.ones(4)
     low = np.zeros(4)
 
     high[:2] = mdp.info.observation_space.high[:2]
@@ -100,23 +98,24 @@ def build_high_level_agent(alg, params, mdp, eps):
     observation_space = spaces.Box(low=low, high=high)
     action_space = spaces.Discrete(n_actions)
 
-
-
-    mdp_info_agent = MDPInfo(observation_space=observation_space,
+    mdp_info = MDPInfo(observation_space=observation_space,
                              action_space=action_space,
                              gamma=mdp.info.gamma,
                              horizon=mdp.info.horizon)
 
-    tiles = Tiles.generate(3, [10, 10, 5, 5], low, high, uniform=True)
-    features = Features(tilings=tiles)
-
     pi = EpsGreedy(eps)
 
-    approximator_params = dict(input_shape=(features.size,),
-                               output_shape=(n_actions,),
-                               n_actions=n_actions)
-    agent = alg(pi, mdp_info_agent, approximator_params=approximator_params,
-                features=features, **params)
+    approximator_params = dict(network=Network,
+                               optimizer={'class': optim,
+                                          'params': {'lr': .001}},
+                               loss=loss,
+                               n_features=80,
+                               input_shape=mdp_info.observation_space.shape,
+                               output_shape=mdp_info.action_space.size,
+                               n_actions=mdp_info.action_space.n)
+
+    agent = alg(PyTorchApproximator, pi, mdp_info,
+                approximator_params=approximator_params, **params)
 
     return agent
 

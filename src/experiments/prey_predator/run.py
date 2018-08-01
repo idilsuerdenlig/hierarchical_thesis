@@ -9,6 +9,9 @@ from mushroom.utils.folder import *
 
 from mushroom_hierarchical.environments.prey_predator import PreyPredator
 
+import torch.optim as optim
+import torch.nn.functional as F
+
 from hierarchical import *
 
 
@@ -33,17 +36,29 @@ if __name__ == '__main__':
     force_symlink('./' + subdir, name + '_latest')
 
     # HIERARCHICAL
+    p = dict(
+        clip_reward=False,
+        initial_replay_size=500,
+        max_replay_size=5000,
+        target_update_frequency=100,
+        batch_size=200,
+        n_approximators=1,
+        history_length=1,
+        max_no_op_actions=0,
+        no_op_action_value=0,
+        dtype=np.float32)
     algs_and_params_hier = [
-        (TrueOnlineSARSALambda,
-         {'learning_rate': Parameter(value=0.9/3), 'lambda_coeff': 0.95},
-         GPOMDP, {'learning_rate': AdaptiveParameter(value=1e-3)})
+        (DQN, p, GPOMDP, {'learning_rate': AdaptiveParameter(value=1e-3)})
     ]
 
-    eps = ExponentialDecayParameter(1, 0.25)
+    eps = ExponentialDecayParameter(1, 1.0)
+    eps = Parameter(0.05)
     std_low = 1e-1*np.ones(1)
     horizon = 10
     for alg_h, params_h, alg_l, params_l in algs_and_params_hier:
-        agent_h = build_high_level_agent(alg_h, params_h, mdp, eps)
+        agent_h = build_high_level_agent(alg_h, params_h, optim.Adam,
+                                         F.smooth_l1_loss, mdp,
+                                         eps)
         agent_l = build_low_level_agent(alg_l, params_l, mdp, horizon, std_low)
 
         print('High: ', alg_h.__name__, ' Low: ', alg_l.__name__)

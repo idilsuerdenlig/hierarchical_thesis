@@ -294,7 +294,6 @@ def hierarchical_experiment(mdp, agent_l, agent_m1,
     J_list.append(np.mean(J))
     print('J at start: ', np.mean(J))
     print('Mean gates passed: ', count_gates(dataset))
-
     for n in range(n_epochs):
         core.learn(n_episodes=n_iterations * ep_per_epoch_train, skip=True,
                    quiet=False)
@@ -305,3 +304,4 @@ def hierarchical_experiment(mdp, agent_l, agent_m1,
         print('Mean gates passed: ', count_gates(dataset))
 
     return J_list
+

@@ -16,7 +16,7 @@ def build_approximator(mdp):
     n_tiles = [5, 5, 6]
     low = np.array(low, dtype=np.float)
     high = np.array(high, dtype=np.float)
-    n_tilings = 1
+    n_tilings = 3
 
     tilings = Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low,
                              high=high, uniform=True)
