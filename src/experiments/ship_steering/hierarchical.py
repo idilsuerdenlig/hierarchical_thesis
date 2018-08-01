@@ -69,7 +69,6 @@ class TerminationCondition(object):
         goal_pos = np.array([state[0], state[1]])
         pos = np.array([state[2], state[3]])
         if np.linalg.norm(pos-goal_pos) <= lim:
-            print("True")
             return True
         else:
             return False
