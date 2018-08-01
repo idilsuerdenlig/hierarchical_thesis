@@ -19,7 +19,7 @@ def build_approximator(mdp):
     n_tilings = 1
 
     tilings = Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low,
-                             high=high)
+                             high=high, uniform=True)
 
     phi = Features(tilings=tilings)
 
