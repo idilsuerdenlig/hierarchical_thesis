@@ -48,7 +48,7 @@ if __name__ == '__main__':
         J = Parallel(n_jobs=n_jobs)(delayed(flat_experiment)(mdp,
                                                              agent,
                                                              n_epochs,
-                                                             n_iterations_bbo,
+                                                             n_iterations_pg,
                                                              ep_per_run_pg,
                                                              ep_per_eval)
                                     for _ in range(how_many))
