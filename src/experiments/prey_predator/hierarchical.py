@@ -29,7 +29,7 @@ def reward_low_level(ins):
 
 
 def compute_angle(ins):
-    n_actions = 4
+    n_actions = 8
 
     state = ins[0]
     action = int(np.asscalar(ins[1]))
@@ -94,7 +94,7 @@ def build_high_level_agent(alg, params, optim, loss, mdp, eps):
     high[2:] = mdp.info.observation_space.high[3:5]
     low[2:] = mdp.info.observation_space.low[3:5]
 
-    n_actions = 5
+    n_actions = 9
     observation_space = spaces.Box(low=low, high=high)
     action_space = spaces.Discrete(n_actions)
 
