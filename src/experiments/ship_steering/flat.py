@@ -13,10 +13,10 @@ from mushroom.utils.dataset import compute_J
 def build_approximator(mdp):
     high = [150, 150, np.pi]
     low = [0, 0, -np.pi]
-    n_tiles = [5, 5, 6]
+    n_tiles = [5, 5, 8]
     low = np.array(low, dtype=np.float)
     high = np.array(high, dtype=np.float)
-    n_tilings = 3
+    n_tilings = 1
 
     tilings = Tiles.generate(n_tilings=n_tilings, n_tiles=n_tiles, low=low,
                              high=high, uniform=True)
