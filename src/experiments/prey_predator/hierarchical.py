@@ -3,7 +3,7 @@ from mushroom.features.tiles import Tiles
 from mushroom.features.features import *
 from mushroom.features.basis import *
 from mushroom.policy.gaussian_policy import *
-from mushroom.policy.td_policy import EpsGreedy
+from mushroom.policy.td_policy import EpsGreedy, Boltzmann
 from mushroom.approximators.parametric import LinearApproximator, PyTorchApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.utils.callbacks import CollectDataset
@@ -103,7 +103,7 @@ def build_high_level_agent(alg, params, optim, loss, mdp, eps):
                              gamma=mdp.info.gamma,
                              horizon=mdp.info.horizon)
 
-    pi = EpsGreedy(eps)
+    pi = Boltzmann(eps)
 
     approximator_params = dict(network=Network,
                                optimizer={'class': optim,
@@ -125,7 +125,6 @@ def build_low_level_agent(alg, params, mdp, horizon, std):
     features = Features(basis_list=basis)
     features = None
     approximator = Regressor(LinearApproximator, input_shape=(1,),
-                             #input_shape=(features.size,),
                              output_shape=mdp.info.action_space.shape)
 
     pi = DiagonalGaussianPolicy(approximator, std)

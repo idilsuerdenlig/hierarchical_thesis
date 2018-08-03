@@ -39,20 +39,16 @@ if __name__ == '__main__':
     p = dict(
         clip_reward=False,
         initial_replay_size=500,
-        max_replay_size=5000,
+        max_replay_size=10000,
         target_update_frequency=100,
         batch_size=200,
-        n_approximators=1,
-        history_length=1,
-        max_no_op_actions=0,
-        no_op_action_value=0,
-        dtype=np.float32)
+        n_approximators=1)
     algs_and_params_hier = [
         (DQN, p, GPOMDP, {'learning_rate': AdaptiveParameter(value=1e-3)})
     ]
 
-    eps = ExponentialDecayParameter(1, 1.0)
-    eps = Parameter(0.05)
+    #eps = ExponentialDecayParameter(1, 1.0)
+    eps = Parameter(1.0)
     std_low = 1e-1*np.ones(1)
     horizon = 10
     for alg_h, params_h, alg_l, params_l in algs_and_params_hier:

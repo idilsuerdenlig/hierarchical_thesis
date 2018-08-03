@@ -34,7 +34,7 @@ def build_approximator(mdp):
 def build_pg_agent(alg, params, mdp):
     phi, approximator = build_approximator(mdp)
 
-    std = np.array([3e-2])
+    std = np.array([1e-1])
     policy = DiagonalGaussianPolicy(mu=approximator, std=std)
 
     agent = alg(policy, mdp.info, features=phi, **params)
@@ -73,5 +73,6 @@ def flat_experiment(mdp, agent, n_epochs, n_iterations,
         dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
         J = compute_J(dataset, gamma=mdp.info.gamma)
         J_list.append(np.mean(J))
+        print('J', n, ':', J_list[-1])
 
     return J_list

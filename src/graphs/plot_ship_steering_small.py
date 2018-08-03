@@ -6,7 +6,7 @@ from common import *
 
 base_dir = '/media/dave/af351f33-87a3-4142-a426-ad42d5930c4e/hierarchical/ship_steering_small_2018-07-25_14-07-57'
 base_dir = '/home/dave'
-algs = ['GPOMDP', 'GPOMDP_1']
+algs = ['GPOMDP']
 ''',
         'PGPE',
         'REPS',
