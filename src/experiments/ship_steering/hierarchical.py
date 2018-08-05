@@ -4,7 +4,7 @@ from mushroom.features.features import *
 from mushroom.policy.gaussian_policy import *
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
-from mushroom.utils.dataset import compute_J
+from mushroom.utils.dataset import compute_J, episodes_length
 from mushroom.utils import spaces
 
 from mushroom_hierarchical.core.hierarchical_core import HierarchicalCore
@@ -143,10 +143,13 @@ def hierarchical_experiment(mdp, agent_low, agent_high,
 
     core = HierarchicalCore(computational_graph)
     J_list = list()
+    L_list = list()
 
     dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
     J = compute_J(dataset, gamma=mdp.info.gamma)
     J_list.append(np.mean(J))
+    L = episodes_length(dataset)
+    L_list.appen(np.mean(L))
 
     for n in range(n_epochs):
         core.learn(n_episodes=n_iterations * ep_per_fit, skip=True,
@@ -154,5 +157,7 @@ def hierarchical_experiment(mdp, agent_low, agent_high,
         dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
         J = compute_J(dataset, gamma=mdp.info.gamma)
         J_list.append(np.mean(J))
+        L = episodes_length(dataset)
+        L_list.appen(np.mean(L))
 
-    return J_list
+    return J_list, L_list

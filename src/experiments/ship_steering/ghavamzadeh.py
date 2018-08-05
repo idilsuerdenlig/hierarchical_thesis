@@ -6,7 +6,7 @@ from mushroom.policy.td_policy import EpsGreedy
 from mushroom.approximators.parametric import LinearApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.utils.parameters import Parameter
-from mushroom.utils.dataset import compute_J
+from mushroom.utils.dataset import compute_J, episodes_length
 from mushroom.utils import spaces
 
 from mushroom_hierarchical.core.hierarchical_core import HierarchicalCore
@@ -248,20 +248,25 @@ def ghavamzadeh_experiment(mdp, agent_plus, agent_cross, agent_high,
 
     core = HierarchicalCore(computational_graph)
     J_list = list()
+    L_list = list()
 
     epsilon_update = EpsilonUpdate(agent_high.policy)
 
     dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
     J = compute_J(dataset, gamma=mdp.info.gamma)
     J_list.append(np.mean(J))
+    L = episodes_length(dataset)
+    L_list.appen(np.mean(L))
 
     for n in range(n_epochs):
         core.learn(n_episodes=n_episodes, skip=True, quiet=True)
         dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
         J = compute_J(dataset, gamma=mdp.info.gamma)
         J_list.append(np.mean(J))
+        L = episodes_length(dataset)
+        L_list.appen(np.mean(L))
 
         if n == 4:
             control_blockH.callbacks = [epsilon_update]
 
-    return J_list
+    return J_list, L_list

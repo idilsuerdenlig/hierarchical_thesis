@@ -7,6 +7,8 @@ from mushroom.utils.parameters import AdaptiveParameter
 
 from mushroom.utils.folder import *
 
+from mushroom_hierarchical.utils.parse_joblib import parse_joblib
+
 from flat import *
 from hierarchical import *
 
@@ -45,14 +47,17 @@ if __name__ == '__main__':
         ep_per_run_pg = ep_per_epoch // n_iterations_pg
 
         print(alg.__name__)
-        J = Parallel(n_jobs=n_jobs)(delayed(flat_experiment)(mdp,
-                                                             agent,
-                                                             n_epochs,
-                                                             n_iterations_pg,
-                                                             ep_per_run_pg,
-                                                             ep_per_eval)
-                                    for _ in range(how_many))
-        np.save(subdir + '/' + alg.__name__, J)
+        res = Parallel(n_jobs=n_jobs)(delayed(flat_experiment)(mdp,
+                                                               agent,
+                                                               n_epochs,
+                                                               n_iterations_pg,
+                                                               ep_per_run_pg,
+                                                               ep_per_eval)
+                                      for _ in range(how_many))
+
+        J, L = parse_joblib(res)
+        np.save(subdir + '/J_' + alg.__name__, J)
+        np.save(subdir + '/L_' + alg.__name__, L)
 
     # FLAT BBO
     algs_and_params_bbo = [
@@ -67,14 +72,16 @@ if __name__ == '__main__':
         ep_per_run_bbo = ep_per_epoch // n_iterations_bbo
 
         print(alg.__name__)
-        J = Parallel(n_jobs=n_jobs)(delayed(flat_experiment)(mdp,
-                                                             agent,
-                                                             n_epochs,
-                                                             n_iterations_bbo,
-                                                             ep_per_run_bbo,
-                                                             ep_per_eval)
-                                    for _ in range(how_many))
-        np.save(subdir + '/' + alg.__name__, J)
+        res = Parallel(n_jobs=n_jobs)(delayed(flat_experiment)(mdp,
+                                                               agent,
+                                                               n_epochs,
+                                                               n_iterations_bbo,
+                                                               ep_per_run_bbo,
+                                                               ep_per_eval)
+                                      for _ in range(how_many))
+        J, L = parse_joblib(res)
+        np.save(subdir + '/J_' + alg.__name__, J)
+        np.save(subdir + '/L_' + alg.__name__, L)
 
     # HIERARCHICAL
     algs_and_params_hier = [
@@ -92,10 +99,13 @@ if __name__ == '__main__':
         ep_per_run_hier = ep_per_epoch // n_iterations_hier
 
         print('High: ', alg_h.__name__, ' Low: ', alg_l.__name__)
-        J = Parallel(n_jobs=n_jobs)(delayed(hierarchical_experiment)
-                                    (mdp, agent_l, agent_h,
-                                     n_epochs, n_iterations_hier,
-                                     ep_per_run_hier, ep_per_eval,
-                                     ep_per_run_low)
-                                    for _ in range(how_many))
-        np.save(subdir + '/H_' + alg_h.__name__ + '_' + alg_l.__name__, J)
+        res = Parallel(n_jobs=n_jobs)(delayed(hierarchical_experiment)
+                                      (mdp, agent_l, agent_h,
+                                       n_epochs, n_iterations_hier,
+                                       ep_per_run_hier, ep_per_eval,
+                                       ep_per_run_low)
+                                      for _ in range(how_many))
+
+        J, L = parse_joblib(res)
+        np.save(subdir + '/J_H_' + alg_h.__name__ + '_' + alg_l.__name__, J)
+        np.save(subdir + '/L_H_' + alg_h.__name__ + '_' + alg_l.__name__, L)

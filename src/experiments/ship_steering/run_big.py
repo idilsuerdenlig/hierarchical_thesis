@@ -8,6 +8,7 @@ from mushroom.utils.parameters import AdaptiveParameter
 from mushroom.utils.folder import *
 
 from mushroom_hierarchical.agents.Q_lambda_discrete import QLambdaDiscrete
+from mushroom_hierarchical.utils.parse_joblib import parse_joblib
 
 from hierarchical import *
 from ghavamzadeh import *
@@ -54,13 +55,15 @@ if __name__ == '__main__':
         ep_per_run_hier = ep_per_epoch // n_iterations_hier
 
         print('High: ', alg_h.__name__, ' Low: ', alg_l.__name__)
-        J = Parallel(n_jobs=n_jobs)(delayed(hierarchical_experiment)
-                                    (mdp, agent_l, agent_h,
-                                     n_epochs, n_iterations_hier,
-                                     ep_per_run_hier, ep_per_eval,
-                                     ep_per_run_low)
-                                    for _ in range(how_many))
-        np.save(subdir + '/H_' + alg_h.__name__ + '_' + alg_l.__name__, J)
+        res = Parallel(n_jobs=n_jobs)(delayed(hierarchical_experiment)
+                                      (mdp, agent_l, agent_h,
+                                       n_epochs, n_iterations_hier,
+                                       ep_per_run_hier, ep_per_eval,
+                                       ep_per_run_low)
+                                      for _ in range(how_many))
+        J, L = parse_joblib(res)
+        np.save(subdir + '/J_H_' + alg_h.__name__ + '_' + alg_l.__name__, J)
+        np.save(subdir + '/L_H_' + alg_h.__name__ + '_' + alg_l.__name__, L)
 
     # GHAVAMZADEH
     params_high = {'learning_rate': Parameter(value=8e-2), 'lambda_coeff': 0.9}
@@ -71,9 +74,11 @@ if __name__ == '__main__':
     agent_plus = build_low_level_ghavamzadeh(GPOMDP, params_low, mdp)
 
     print('ghavamzadeh')
-    J = Parallel(n_jobs=n_jobs)(delayed(ghavamzadeh_experiment)
-                                (mdp, agent_plus, agent_cross, agent_high,
-                                 n_epochs, ep_per_epoch, ep_per_eval,
-                                 ep_per_run_low_ghavamzadeh)
-                                for _ in range(how_many))
-    np.save(subdir + '/ghavamzadeh', J)
+    res = Parallel(n_jobs=n_jobs)(delayed(ghavamzadeh_experiment)
+                                  (mdp, agent_plus, agent_cross, agent_high,
+                                   n_epochs, ep_per_epoch, ep_per_eval,
+                                   ep_per_run_low_ghavamzadeh)
+                                  for _ in range(how_many))
+    J, L = parse_joblib(res)
+    np.save(subdir + '/J_ghavamzadeh', J)
+    np.save(subdir + '/L_ghavamzadeh', L)

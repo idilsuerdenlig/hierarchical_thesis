@@ -7,7 +7,7 @@ from mushroom.features.features import Features
 from mushroom.features.tiles import Tiles
 from mushroom.distributions import GaussianDiagonalDistribution
 from mushroom.policy import DiagonalGaussianPolicy, DeterministicPolicy
-from mushroom.utils.dataset import compute_J
+from mushroom.utils.dataset import compute_J, episodes_length
 
 
 def build_approximator(mdp):
@@ -61,11 +61,14 @@ def flat_experiment(mdp, agent, n_epochs, n_iterations,
     np.random.seed()
 
     J_list = list()
+    L_list = list()
     core = Core(agent, mdp)
 
     dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
     J = compute_J(dataset, gamma=mdp.info.gamma)
     J_list.append(np.mean(J))
+    L = episodes_length(dataset)
+    L_list.appen(np.mean(L))
 
     for n in range(n_epochs):
         core.learn(n_episodes=n_iterations * ep_per_iteration,
@@ -73,6 +76,8 @@ def flat_experiment(mdp, agent, n_epochs, n_iterations,
         dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
         J = compute_J(dataset, gamma=mdp.info.gamma)
         J_list.append(np.mean(J))
+        L = episodes_length(dataset)
+        L_list.appen(np.mean(L))
         #print('J', n, ':', J_list[-1])
 
-    return J_list
+    return J_list, L_list
