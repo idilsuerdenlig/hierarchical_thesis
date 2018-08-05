@@ -256,7 +256,7 @@ def ghavamzadeh_experiment(mdp, agent_plus, agent_cross, agent_high,
     J = compute_J(dataset, gamma=mdp.info.gamma)
     J_list.append(np.mean(J))
     L = episodes_length(dataset)
-    L_list.appen(np.mean(L))
+    L_list.append(np.mean(L))
 
     for n in range(n_epochs):
         core.learn(n_episodes=n_episodes, skip=True, quiet=True)
@@ -264,7 +264,7 @@ def ghavamzadeh_experiment(mdp, agent_plus, agent_cross, agent_high,
         J = compute_J(dataset, gamma=mdp.info.gamma)
         J_list.append(np.mean(J))
         L = episodes_length(dataset)
-        L_list.appen(np.mean(L))
+        L_list.append(np.mean(L))
 
         if n == 4:
             control_blockH.callbacks = [epsilon_update]
