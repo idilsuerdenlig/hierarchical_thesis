@@ -4,7 +4,7 @@ import numpy as np
 from common import *
 
 
-base_dir = '../experiments/ship_steering/ship_steering_small_latest'
+base_dir = '../results/ship_steering_small_2018-08-05_16-06-24'
 algs = ['GPOMDP',
         'PGPE',
         'REPS',

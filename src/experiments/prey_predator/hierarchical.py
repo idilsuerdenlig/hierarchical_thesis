@@ -21,6 +21,7 @@ from mushroom_hierarchical.blocks.reward_accumulator import *
 
 from network import Network
 
+
 def reward_low_level(ins):
     state = ins[0]
 
@@ -33,7 +34,6 @@ def compute_angle(ins):
 
     state = ins[0]
     action = int(np.asscalar(ins[1]))
-    #print('compute_angle: ', action)
 
     if action == n_actions:
         x = state[0]
@@ -53,30 +53,12 @@ def compute_angle(ins):
 def pick_position(ins):
     state = ins[0]
 
-    '''
-    x = state[0]
-    y = state[1]
-    #theta = state[2]
-    x_prey = state[3]
-    y_prey = state[4]
-
-    del_x = x_prey - x
-    del_y = y_prey - y
-    theta_target = normalize_angle(np.arctan2(del_y, del_x))
-    distance = np.sqrt(del_x**2 + del_y**2)
-
-    return np.array([x, y, theta_target, distance])
-    #return np.array([x, y, theta_target])
-    '''
-
     return np.concatenate([state[0:2], state[3:5]], 0)
 
 
 def angle_error(ins):
     theta = ins[0][2]
     theta_ref = np.asscalar(ins[1])
-
-    #print('angle_error: ', theta_ref)
 
     error = shortest_angular_distance(from_angle=theta,
                                       to_angle=theta_ref)
@@ -106,10 +88,9 @@ def build_high_level_agent(alg, params, optim, loss, mdp, eps):
     pi = Boltzmann(eps)
 
     approximator_params = dict(network=Network,
-                               optimizer={'class': optim,
-                                          'params': {'lr': .001}},
+                               optimizer=optim,
                                loss=loss,
-                               n_features=80,
+                               n_features=200,
                                input_shape=mdp_info.observation_space.shape,
                                output_shape=mdp_info.action_space.size,
                                n_actions=mdp_info.action_space.n)
