@@ -156,7 +156,7 @@ def segway_experiment(alg_high, alg_low, params_high, params_low):
     core = HierarchicalCore(computational_graph)
 
     # Train
-    dataset_eval_run = core.evaluate(n_episodes=eval_run, render=True)
+    dataset_eval_run = core.evaluate(n_episodes=eval_run, render=False)
     J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
     print('J at start : ' + str(np.mean(J)))
 
@@ -167,7 +167,7 @@ def segway_experiment(alg_high, alg_low, params_high, params_low):
         if n == 2:
             control_block1.unset_mask()
         core.learn(n_episodes=n_iterations*n_ep_per_fit, skip=True)
-        dataset_eval_run = core.evaluate(n_episodes=eval_run, render=True)
+        dataset_eval_run = core.evaluate(n_episodes=eval_run, render=False)
         J = compute_J(dataset_eval_run, gamma=mdp.info.gamma)
         print('J at iteration ' + str(n) + ': ' + str(np.mean(J)))
         print('dist H:', dist1.get_parameters())
@@ -181,7 +181,7 @@ if __name__ == '__main__':
     eps_high = 0.05
     eps_low = 0.05
     beta_high = 0.01
-    beta_low = 0.01
+    beta_low = 5e-3
 
     algs_params = [
             #(REPS, REPS, {'eps': eps_high}, {'eps': eps_low}),
@@ -194,7 +194,7 @@ if __name__ == '__main__':
 
     n_jobs = 1
     how_many = 1
-    n_epochs = 20
+    n_epochs = 10
     n_iterations = 4
     n_ep_per_fit = 25
     eval_run = 10

@@ -60,8 +60,10 @@ def experiment(n_epochs, n_iteration, n_ep_per_fit, n_eval_run):
     sigma = 2e-0*np.ones(input_dim)
     policy = SegwayControlPolicy(mu)
     dist = GaussianDiagonalDistribution(mu, sigma)
+    beta = 5e-3
 
-    agent = RWR(dist, policy, mdp.info, 0.01)
+
+    agent = RWR(dist, policy, mdp.info, beta)
 
 
     # Train
@@ -75,7 +77,7 @@ def experiment(n_epochs, n_iteration, n_ep_per_fit, n_eval_run):
         core.learn(n_episodes=n_iteration*n_ep_per_fit,
                    n_episodes_per_fit=n_ep_per_fit, render=False)
 
-        dataset_eval = core.evaluate(n_episodes=n_eval_run, render=True)
+        dataset_eval = core.evaluate(n_episodes=n_eval_run, render=False)
         J = compute_J(dataset_eval, gamma=mdp.info.gamma)
 
         p = dist.get_parameters()
