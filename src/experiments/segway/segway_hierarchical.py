@@ -25,6 +25,7 @@ from lqr_cost_segway import lqr_cost_segway
 from angle_to_angle_diff_complete_state import *
 from pick_first_state import pick_first_state
 
+
 def fall_reward(inputs):
     state = inputs[0]
     if abs(state[1]) > np.pi / 2:
@@ -122,7 +123,7 @@ def segway_experiment(alg_high, alg_low, params_high, params_low):
     # Control Block 1
     parameter_callback1 = CollectDistributionParameter(dist1)
     control_block1 = ControlBlock(name='Control Block High', agent=agent_high,
-                                  n_eps_per_fit=n_ep_per_fit,
+                                  n_eps_per_fit=n_ep_per_fit*2,
                                   callbacks=[parameter_callback1])
 
     # Control Block 2
@@ -181,7 +182,7 @@ if __name__ == '__main__':
     eps_high = 0.05
     eps_low = 0.05
     beta_high = 0.01
-    beta_low = 5e-3
+    beta_low = 2e-3
 
     algs_params = [
             #(REPS, REPS, {'eps': eps_high}, {'eps': eps_low}),
@@ -197,7 +198,7 @@ if __name__ == '__main__':
     n_epochs = 10
     n_iterations = 4
     n_ep_per_fit = 25
-    eval_run = 10
+    eval_run = 20
 
 
     experiment_params = {'how_many': how_many,

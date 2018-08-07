@@ -1,15 +1,9 @@
 import numpy as np
 
 from mushroom.core import Core
-from mushroom.algorithms.policy_search import *
 from mushroom.distributions import GaussianDiagonalDistribution
-from mushroom.utils.dataset import compute_J
+from mushroom.utils.dataset import compute_J, episodes_length
 from mushroom.utils.angles import shortest_angular_distance
-from mushroom_hierarchical.environments.segway_linear_motion import SegwayLinearMotion
-
-from tqdm import tqdm
-tqdm.monitor_interval = 0
-
 
 class SegwayControlPolicy:
     def __init__(self, weights):
@@ -49,52 +43,38 @@ class SegwayControlPolicy:
         return self.__name__
 
 
-def experiment(n_epochs, n_iteration, n_ep_per_fit, n_eval_run):
-    np.random.seed()
-
-    # MDP
-    mdp = SegwayLinearMotion()
-
+def build_bbo_agent(alg, params, std, mdp):
     input_dim = mdp.info.observation_space.shape[0]
     mu = np.zeros(input_dim)
-    sigma = 2e-0*np.ones(input_dim)
+    sigma = std * np.ones(input_dim)
     policy = SegwayControlPolicy(mu)
     dist = GaussianDiagonalDistribution(mu, sigma)
-    beta = 2e-3
+    agent = alg(dist, policy, mdp.info, **params)
+
+    return agent
 
 
-    agent = RWR(dist, policy, mdp.info, beta)
+def flat_experiment(mdp, agent, n_epochs, n_episodes,
+                    ep_per_fit, ep_per_eval):
+    np.random.seed()
 
-
-    # Train
+    J_list = list()
+    L_list = list()
     core = Core(agent, mdp)
 
-    dataset_eval = core.evaluate(n_episodes=n_eval_run, render=False)
-    J = compute_J(dataset_eval, gamma=mdp.info.gamma)
-    print('J at start ', np.mean(J))
+    dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
+    J = compute_J(dataset, gamma=mdp.info.gamma)
+    J_list.append(np.mean(J))
+    L = episodes_length(dataset)
+    L_list.append(np.mean(L))
 
-    for i in range(n_epochs):
-        core.learn(n_episodes=n_iteration*n_ep_per_fit,
-                   n_episodes_per_fit=n_ep_per_fit, render=False)
+    for n in range(n_epochs):
+        core.learn(n_episodes=n_episodes,
+                   n_episodes_per_fit=ep_per_fit, quiet=True)
+        dataset = core.evaluate(n_episodes=ep_per_eval, quiet=True)
+        J = compute_J(dataset, gamma=mdp.info.gamma)
+        J_list.append(np.mean(J))
+        L = episodes_length(dataset)
+        L_list.append(np.mean(L))
 
-        dataset_eval = core.evaluate(n_episodes=n_eval_run, render=False)
-        J = compute_J(dataset_eval, gamma=mdp.info.gamma)
-
-        p = dist.get_parameters()
-
-        print('mu:    ', p[:input_dim])
-        print('sigma: ', p[input_dim:])
-        print('J at iteration ' + str(i) + ': ' +
-              str(np.mean(J)))
-
-    print('Press a button to visualize the segway...')
-    input()
-    core.evaluate(n_episodes=3, render=True)
-
-
-if __name__ == '__main__':
-    experiment(n_epochs=20,
-               n_iteration=4,
-               n_ep_per_fit=25,
-               n_eval_run=10)
-
+    return J_list, L_list

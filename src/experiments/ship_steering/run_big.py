@@ -18,7 +18,6 @@ if __name__ == '__main__':
     n_jobs = -1
 
     how_many = 100
-    ep_per_eval = 40
     n_epochs = 50
     ep_per_epoch = 800
     ep_per_eval = 50
