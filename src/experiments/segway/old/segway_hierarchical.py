@@ -21,9 +21,9 @@ from mushroom_hierarchical.utils.callbacks.collect_distribution_parameter import
     CollectDistributionParameter
 from mushroom_hierarchical.policy.deterministic_control_policy import DeterministicControlPolicy
 
-from lqr_cost_segway import lqr_cost_segway
-from angle_to_angle_diff_complete_state import *
-from pick_first_state import pick_first_state
+from experiments.segway.lqr_cost_segway import lqr_cost_segway
+from experiments.segway.angle_to_angle_diff_complete_state import *
+from experiments.segway.pick_first_state import pick_first_state
 
 
 def fall_reward(inputs):

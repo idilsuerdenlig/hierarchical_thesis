@@ -70,31 +70,31 @@ def build_computational_graph(mdp, agent_low, agent_high, ep_per_fit_low,
 
     # Control Block 1
     parameter_callback1 = CollectDistributionParameter(agent_high.distribution)
-    control_block1 = ControlBlock(name='Control Block High', agent=agent_high,
-                                  n_eps_per_fit=ep_per_fit_high,
-                                  callbacks=[parameter_callback1])
+    control_block_h = ControlBlock(name='Control Block High', agent=agent_high,
+                                   n_eps_per_fit=ep_per_fit_high,
+                                   callbacks=[parameter_callback1])
 
     # Control Block 2
     parameter_callback2 = CollectDistributionParameter(agent_low.distribution)
-    control_block2 = ControlBlock(name='Control Block Low', agent=agent_low,
-                                  n_eps_per_fit=ep_per_fit_low,
-                                  callbacks=[parameter_callback2])
-    control_block1.set_mask()
+    control_block_l = ControlBlock(name='Control Block Low', agent=agent_low,
+                                   n_eps_per_fit=ep_per_fit_low,
+                                   callbacks=[parameter_callback2])
+    control_block_h.set_mask()
 
     # Graph
-    blocks = [state_ph, reward_ph, lastaction_ph, control_block1,
-              control_block2, function_block1, function_block2,
+    blocks = [state_ph, reward_ph, lastaction_ph, control_block_h,
+              control_block_l, function_block1, function_block2,
               function_block3, function_block4, function_block5]
 
-    state_ph.add_input(control_block2)
-    reward_ph.add_input(control_block2)
-    lastaction_ph.add_input(control_block2)
-    control_block1.add_input(function_block1)
-    control_block1.add_reward(reward_ph)
-    control_block2.add_input(function_block2)
-    control_block2.add_reward(function_block4)
+    state_ph.add_input(control_block_l)
+    reward_ph.add_input(control_block_l)
+    lastaction_ph.add_input(control_block_l)
+    control_block_h.add_input(function_block1)
+    control_block_h.add_reward(reward_ph)
+    control_block_l.add_input(function_block2)
+    control_block_l.add_reward(function_block4)
     function_block1.add_input(state_ph)
-    function_block2.add_input(control_block1)
+    function_block2.add_input(control_block_h)
 
     function_block2.add_input(state_ph)
     function_block3.add_input(function_block2)
@@ -103,7 +103,7 @@ def build_computational_graph(mdp, agent_low, agent_high, ep_per_fit_low,
     function_block4.add_input(function_block5)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
 
-    return computational_graph
+    return computational_graph, control_block_h
 
 
 def build_agent_high(alg, params, std, mdp):

@@ -27,9 +27,9 @@ from mushroom_hierarchical.blocks.reward_accumulator import reward_accumulator_b
 from mushroom_hierarchical.utils.callbacks.collect_distribution_parameter import\
     CollectDistributionParameter
 
-from angle_to_angle_diff_complete_state import *
-from lqr_cost_segway import lqr_cost_segway
-from pick_first_state import pick_first_state
+from experiments.segway.angle_to_angle_diff_complete_state import *
+from experiments.segway.lqr_cost_segway import lqr_cost_segway
+from experiments.segway.pick_first_state import pick_first_state
 
 
 def server_experiment_small(alg_high, alg_low, params, subdir, i):
