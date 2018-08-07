@@ -16,7 +16,7 @@ from hierarchical import *
 if __name__ == '__main__':
     n_jobs = -1
 
-    how_many = 2#100
+    how_many = 100
     n_epochs = 25
     n_episodes = 100
     ep_per_eval = 100
@@ -38,9 +38,8 @@ if __name__ == '__main__':
     # FLAT BBO
     std_bbo = 2e-0
     algs_and_params_bbo = [
-        (REPS, {'eps': 1.0e-3}),
-        (RWR, {'beta': 2e-3}),
-        (PGPE, {'learning_rate': AdaptiveParameter(value=1e-3)}),
+        (REPS, {'eps': 5e-2}),
+        (RWR, {'beta': 2e-3})
     ]
 
     for alg, params in algs_and_params_bbo:
@@ -59,7 +58,9 @@ if __name__ == '__main__':
 
     # HIERARCHICAL
     algs_and_params_hier = [
-        (RWR, RWR, {'beta': 1e-2}, {'beta': 2e-3})
+        (RWR, RWR, {'beta': 1e-2}, {'beta': 2e-3}),
+        (RWR, REPS, {'beta': 1e-2}, {'eps': 5e-2}),
+        (REPS, RWR, {'eps': 5e-2}, {'beta': 2e-3})
     ]
 
     std_high = 2.0e-2
