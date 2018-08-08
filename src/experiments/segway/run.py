@@ -2,7 +2,6 @@ import datetime
 from joblib import Parallel, delayed
 
 from mushroom.algorithms.policy_search import *
-from mushroom.utils.parameters import AdaptiveParameter
 
 from mushroom.utils.folder import *
 
@@ -58,9 +57,9 @@ if __name__ == '__main__':
 
     # HIERARCHICAL
     algs_and_params_hier = [
-        (RWR, RWR, {'beta': 1e-2}, {'beta': 2e-3}),
-        (RWR, REPS, {'beta': 1e-2}, {'eps': 5e-2}),
-        (REPS, RWR, {'eps': 5e-2}, {'beta': 2e-3})
+        (RWR, {'beta': 1e-2}, RWR, {'beta': 2e-3}),
+        (RWR, {'beta': 1e-2}, REPS, {'eps': 5e-2}),
+        (REPS, {'eps': 5e-2}, RWR, {'beta': 2e-3})
     ]
 
     std_high = 2.0e-2

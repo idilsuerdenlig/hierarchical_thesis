@@ -123,7 +123,7 @@ def build_agent_high(alg, params, std, mdp):
     low = mdp.info.observation_space.low[0:1]
     high = mdp.info.observation_space.high[0:1]
     mdp_info = MDPInfo(observation_space=spaces.Box(low, high),
-                       action_space=spaces.Box(-lim, lim),
+                       action_space=spaces.Box(-lim, lim, (1,)),
                        gamma=mdp.info.gamma,
                        horizon=mdp.info.horizon)
     return alg(dist, pi, mdp_info, **params)

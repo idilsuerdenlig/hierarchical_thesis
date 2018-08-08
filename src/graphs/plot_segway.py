@@ -4,11 +4,11 @@ import numpy as np
 from common import *
 
 
-base_dir = '../experiments/segway/segway_latest'
-algs = [#'GPOMDP',
-        #'PGPE',
-        'REPS']#,
-        #'RWR',
+base_dir = '../experiments/segway/segway_2018-08-07_20-32-34'
+algs = [
+        'REPS',
+        'RWR',
+        'H_RWR_RWR']
         #'H_GPOMDP_PGPE']
 
 colors = ['b', 'r', 'g', 'c', 'm']
