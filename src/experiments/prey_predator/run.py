@@ -44,7 +44,7 @@ if __name__ == '__main__':
         clip_reward=False,
         initial_replay_size=5000,
         max_replay_size=50000,
-        target_update_frequency=100,
+        target_update_frequency=200,
         batch_size=500,
         n_approximators=1,
     )
