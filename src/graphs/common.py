@@ -14,8 +14,12 @@ def get_mean_and_confidence(data):
 
 
 def create_plot(algs, colors, dictionary, y_label, legend=False,
-                    x_label='epoch'):
+                x_label='epoch', logarithmic=False):
     plt.figure()
+
+    if logarithmic:
+        plt.yscale('symlog')
+
     for alg, c in zip(algs, colors):
         (mean, err) = dictionary[alg]
         plt.errorbar(x=np.arange(len(mean)), y=mean, yerr=err, color=c)
@@ -25,6 +29,7 @@ def create_plot(algs, colors, dictionary, y_label, legend=False,
 
     plt.xlabel(x_label)
     plt.ylabel(y_label)
+
 
     '''
     tikz_save(output_dir + '/' + plot_name + '.tex',
