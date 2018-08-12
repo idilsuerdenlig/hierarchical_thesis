@@ -15,6 +15,8 @@ from mushroom_hierarchical.utils.parse_joblib import parse_joblib
 import torch.optim as optim
 import torch.nn.functional as F
 
+from torch.nn import SmoothL1Loss
+
 from hierarchical import *
 
 
@@ -63,7 +65,7 @@ if __name__ == '__main__':
     lr = 1e-3
     for alg_h, params_h, alg_l, params_l in algs_and_params_hier:
         agent_h = build_high_level_agent(alg_h, params_h, optimizer,
-                                         F.smooth_l1_loss, mdp, eps)
+                                         SmoothL1Loss(), mdp, eps)
         agent_l = build_low_level_agent(alg_l, params_l, mdp, horizon, std_low)
 
         print('High: ', alg_h.__name__, ' Low: ', alg_l.__name__)
