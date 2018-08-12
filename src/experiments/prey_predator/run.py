@@ -1,6 +1,8 @@
 import datetime
 from joblib import Parallel, delayed
 
+from tqdm import trange
+
 from mushroom.algorithms.policy_search import *
 from mushroom.algorithms.value import *
 from mushroom.utils.parameters import *
@@ -8,6 +10,7 @@ from mushroom.utils.parameters import *
 from mushroom.utils.folder import *
 
 from mushroom_hierarchical.environments.prey_predator import PreyPredator
+from mushroom_hierarchical.utils.parse_joblib import parse_joblib
 
 import torch.optim as optim
 import torch.nn.functional as F
@@ -16,12 +19,12 @@ from hierarchical import *
 
 
 if __name__ == '__main__':
-    n_jobs = 1
+    n_jobs = -1
 
-    how_many = 1
-    n_epochs = 40
+    how_many = 20
+    n_epochs = 50
     ep_per_epoch = 1000
-    ep_per_eval = 100
+    ep_per_eval = 500
 
     ep_per_fit_low = 10
 
@@ -64,11 +67,16 @@ if __name__ == '__main__':
         agent_l = build_low_level_agent(alg_l, params_l, mdp, horizon, std_low)
 
         print('High: ', alg_h.__name__, ' Low: ', alg_l.__name__)
-        J = Parallel(n_jobs=n_jobs)(delayed(experiment)
-                                    (mdp, agent_h, agent_l,
-                                     n_epochs,
-                                     ep_per_epoch,
-                                     ep_per_eval,
-                                     ep_per_fit_low)
-                                    for _ in range(how_many))
-        np.save(subdir + '/H_' + alg_h.__name__ + '_' + alg_l.__name__, J)
+        res = Parallel(n_jobs=n_jobs)(delayed(experiment)
+                                      (mdp, agent_h, agent_l,
+                                       n_epochs,
+                                       ep_per_epoch,
+                                       ep_per_eval,
+                                       ep_per_fit_low)
+                                      for _ in trange(how_many))
+
+        J, L, Jlow = parse_joblib(res)
+        np.save(subdir + '/J_H_' + alg_h.__name__ + '_' + alg_l.__name__, J)
+        np.save(subdir + '/L_H_' + alg_h.__name__ + '_' + alg_l.__name__, L)
+        np.save(subdir + '/Jlow_H_' + alg_h.__name__ + '_' + alg_l.__name__,
+                Jlow)

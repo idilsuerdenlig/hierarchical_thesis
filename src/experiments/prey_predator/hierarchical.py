@@ -1,5 +1,4 @@
 from mushroom.environments import MDPInfo
-from mushroom.features.tiles import Tiles
 from mushroom.features.features import *
 from mushroom.features.basis import *
 from mushroom.policy.gaussian_policy import *
@@ -7,7 +6,7 @@ from mushroom.policy.td_policy import EpsGreedy, Boltzmann
 from mushroom.approximators.parametric import LinearApproximator, PyTorchApproximator
 from mushroom.approximators.regressor import Regressor
 from mushroom.utils.callbacks import CollectDataset
-from mushroom.utils.dataset import compute_J
+from mushroom.utils.dataset import compute_J, episodes_length
 from mushroom.utils import spaces
 from mushroom.utils.angles import *
 
@@ -188,6 +187,7 @@ def experiment(mdp, agent_high, agent_low,
                n_epochs, n_episodes, ep_per_eval,
                ep_per_fit_low):
     np.random.seed()
+    quiet = True
 
     dataset_callback = CollectDataset()
 
@@ -197,34 +197,41 @@ def experiment(mdp, agent_high, agent_low,
 
     core = HierarchicalCore(computational_graph)
     J_list = list()
+    L_list = list()
 
-    dataset = core.evaluate(n_episodes=ep_per_eval, quiet=False)
+    dataset = core.evaluate(n_episodes=ep_per_eval, quiet=quiet)
     J = compute_J(dataset, gamma=mdp.info.gamma)
-    print('Reward at start :', np.mean(J))
     J_list.append(np.mean(J))
+    J_low_list = list()
+    L = episodes_length(dataset)
+    L_list.append(L)
+    # print('Reward at start :', J_list[-1])
 
     #print('Press a key to run visualization')
     #input()
     #core.evaluate(n_episodes=1, render=True)
 
     for n in range(n_epochs):
-        core.learn(n_episodes=n_episodes, skip=True, quiet=False)
+        core.learn(n_episodes=n_episodes, skip=True, quiet=quiet)
 
         ll_dataset = dataset_callback.get()
         dataset_callback.clean()
         J_low = compute_J(ll_dataset, mdp.info.gamma)
-        print('Low level reward at epoch', n, ':', np.mean(J_low))
+        J_low_list += J_low
+        #print('Low level reward at epoch', n, ':', np.mean(J_low))
 
-        dataset = core.evaluate(n_episodes=ep_per_eval, quiet=False)
+        dataset = core.evaluate(n_episodes=ep_per_eval, quiet=quiet)
         J = compute_J(dataset, gamma=mdp.info.gamma)
         J_list.append(np.mean(J))
-        print('Reward at epoch ', n, ':', np.mean(J))
+        L = episodes_length(dataset)
+        L_list.append(L)
+        #print('Reward at epoch ', n, ':',  J_list[-1])
 
         #print('Press a key to run visualization')
         #input()
-        core.evaluate(n_episodes=1, render=True)
+        #core.evaluate(n_episodes=1, render=True)
 
-    print('Press a key to run visualization')
-    input()
-    core.evaluate(n_episodes=1, render=True)
-    return J_list
+    #print('Press a key to run visualization')
+    #input()
+    #core.evaluate(n_episodes=1, render=True)
+    return J_list, L_list, J_low_list
