@@ -17,7 +17,7 @@ class reward_accumulator_block(Block):
     def __call__(self, inputs, reward, absorbing, last, learn_flag, alarms):
         if isinstance(inputs, list):
             inputs = inputs[0]
-        self.accumulator = self.df*inputs[0] + self.accumulator
+        self.accumulator += self.df*inputs[0]
         self.df *= self.gamma
         self.last_output = np.array([self.accumulator])
 
