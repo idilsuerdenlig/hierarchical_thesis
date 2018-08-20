@@ -71,7 +71,7 @@ def build_high_level_ghavamzadeh(alg, params, mdp):
 
     mdp_info_agentH = MDPInfo(
         observation_space=spaces.Discrete(400),
-        action_space=spaces.Discrete(8), gamma=mdp.info.gamma, horizon=10000)
+        action_space=spaces.Discrete(8), gamma=0.9, horizon=10000)
 
     agent = alg(policy=pi,
                 mdp_info=mdp_info_agentH,
@@ -175,7 +175,7 @@ def build_ghavamzadeh_graph(mdp, agent_plus, agent_cross, agent_high,
     function_block7 = fBlock(phi=G_low, name='f7 G_lo')
 
     # Reward Accumulator H:
-    reward_acc_H = reward_accumulator_block(gamma=mdp.info.gamma,
+    reward_acc_H = reward_accumulator_block(gamma=1.0,
                                             name='reward_acc_H')
 
     # Selector Block
