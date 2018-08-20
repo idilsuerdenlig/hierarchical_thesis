@@ -38,7 +38,7 @@ if __name__ == '__main__':
     force_symlink('./' + subdir, name + '_latest')
 
     # FLAT PG
-    algs_and_params_pg = [
+    '''algs_and_params_pg = [
         (GPOMDP, {'learning_rate': AdaptiveParameter(value=1e-5)})
     ]
     for alg, params in algs_and_params_pg:
@@ -80,7 +80,7 @@ if __name__ == '__main__':
                                       for _ in range(how_many))
         J, L = parse_joblib(res)
         np.save(subdir + '/J_' + alg.__name__, J)
-        np.save(subdir + '/L_' + alg.__name__, L)
+        np.save(subdir + '/L_' + alg.__name__, L)'''
 
     # HIERARCHICAL
     algs_and_params_hier = [

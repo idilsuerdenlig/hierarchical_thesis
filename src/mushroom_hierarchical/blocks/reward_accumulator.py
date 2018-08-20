@@ -23,7 +23,7 @@ class reward_accumulator_block(Block):
 
         if np.any(alarms):
             self.accumulator = 0.
-            self.df = 1.
+            #self.df = 1.
 
     def reset(self, inputs):
         self.accumulator = 0.

@@ -33,7 +33,7 @@ def build_high_level_agent(alg, params, mdp, mu, sigma):
     lim = mdp.info.observation_space.high[0]
     mdp_info_agent = MDPInfo(observation_space=mdp.info.observation_space,
                               action_space=spaces.Box(0, lim, (2,)),
-                              gamma=mdp.info.gamma, horizon=100)
+                              gamma=1.0, horizon=100)
     agent = alg(pi1, mdp_info_agent, features=features, **params)
 
     return agent
