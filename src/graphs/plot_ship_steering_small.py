@@ -4,14 +4,14 @@ import numpy as np
 from common import *
 
 
-base_dir = '../results/ship_steering_small_2018-08-05_16-06-24'
+base_dir = '../results/ship_steering_small'
 algs = ['GPOMDP',
         'PGPE',
         'REPS',
         'RWR',
         'H_GPOMDP_PGPE']
 
-colors = ['b', 'r', 'g', 'c', 'm']
+colors = ['b', 'r', 'g', 'c', 'm', 'k']
 
 J_results = dict()
 L_results = dict()
