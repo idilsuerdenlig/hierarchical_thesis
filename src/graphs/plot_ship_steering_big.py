@@ -4,9 +4,10 @@ import numpy as np
 from common import *
 
 
-base_dir = '../results/ship_steering_big_2018-08-06_16-23-52'
+base_dir = '../results/ship_steering_big'
 algs = ['H_GPOMDP_PGPE',
-        'ghavamzadeh']
+        'ghavamzadeh'
+        ]
 
 colors = ['b', 'r', 'g', 'c', 'm']
 
