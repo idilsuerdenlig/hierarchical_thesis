@@ -38,7 +38,7 @@ if __name__ == '__main__':
     # Hierarchical
     algs_and_params_hier = [
         (QLearning, {'learning_rate': Parameter(value=0.6)},
-        GPOMDP, {'learning_rate': AdaptiveParameter(value=50)},
+        GPOMDP, {'learning_rate': AdaptiveParameter(value=50) if mdp.small else AdaptiveParameter(value=12.5)},
         PGPE, {'learning_rate': AdaptiveParameter(value=5e-4)})
          ]
 

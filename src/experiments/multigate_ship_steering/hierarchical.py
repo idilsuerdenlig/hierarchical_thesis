@@ -17,8 +17,7 @@ from mushroom_hierarchical.functions.feature_angle_diff_ship_steering\
     import *
 from mushroom_hierarchical.blocks.basic_operation_block import *
 from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
-from mushroom_hierarchical.blocks.reward_accumulator import \
-    reward_accumulator_block
+from mushroom_hierarchical.blocks.reward_accumulator import *
 from mushroom_hierarchical.functions.cost_cosine import cost_cosine
 from mushroom_hierarchical.policy.deterministic_control_policy \
     import DeterministicControlPolicy
@@ -193,16 +192,15 @@ def build_computational_graph(mdp, agent_low, agent_m0,
     mux_block.add_block_list([control_block_m3])
 
     # Reward Accumulators
-    reward_acc = reward_accumulator_block(gamma=mdp.info.gamma,
-                                          name='reward_acc_h')
-    reward_acc_m0 = reward_accumulator_block(gamma=mdp.info.gamma,
+    reward_acc = mean_reward_block(name='reward_acc_h')
+    reward_acc_m0 = reward_accumulator_block(gamma=1,
                                              name='reward_acc_m0')
-    reward_acc_m1 = reward_accumulator_block(gamma=mdp.info.gamma,
+    reward_acc_m1 = reward_accumulator_block(gamma=1,
                                              name='reward_acc_m1')
-    reward_acc_m2 = reward_accumulator_block(gamma=mdp.info.gamma,
+    reward_acc_m2 = reward_accumulator_block(gamma=1,
                                              name='reward_acc_m2')
-    reward_acc_m3 = reward_accumulator_block(gamma=mdp.info.gamma,
-                                             name='reward_acc_m3')
+    reward_acc_m3 = reward_accumulator_block(gamma=1,
+                                             name='1')
 
     # Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_block_h, reward_acc,
