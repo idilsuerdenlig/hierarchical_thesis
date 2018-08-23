@@ -200,7 +200,7 @@ def build_computational_graph(mdp, agent_low, agent_m0,
     reward_acc_m2 = reward_accumulator_block(gamma=1,
                                              name='reward_acc_m2')
     reward_acc_m3 = reward_accumulator_block(gamma=1,
-                                             name='1')
+                                             name='reward_acc_m3')
 
     # Algorithm
     blocks = [state_ph, reward_ph, lastaction_ph, control_block_h, reward_acc,
