@@ -25,7 +25,7 @@ if __name__ == '__main__':
     ep_per_fit_mid = 10
 
     # MDP
-    mdp = ShipSteeringMultiGate(n_steps_action=3)
+    mdp = ShipSteeringMultiGate(n_steps_action=3, small=True)
 
     # directory
     name = 'multigate_ship_steering'
@@ -37,18 +37,18 @@ if __name__ == '__main__':
 
     # Hierarchical
     algs_and_params_hier = [
-        (QLearning, {'learning_rate': Parameter(value=0.1)},
+        (QLearning, {'learning_rate': Parameter(value=0.6)},
         GPOMDP, {'learning_rate': AdaptiveParameter(value=50)},
         PGPE, {'learning_rate': AdaptiveParameter(value=5e-4)})
          ]
 
     for alg_h, params_h, alg_m, params_m, alg_l, params_l in algs_and_params_hier:
 
-        epsilon = Parameter(value=0.5)
+        epsilon = Parameter(value=0.05)
         agent_h = build_high_level_agent(alg_h, params_h, mdp, epsilon)
 
-        mu = 500
-        sigma = 250
+        mu = 250 if mdp.small else 500
+        sigma = 50 if mdp.small else 250
         agent_m1 = build_mid_level_agent(alg_m, params_m, mdp, mu, sigma)
         agent_m2 = build_mid_level_agent(alg_m, params_m, mdp, mu, sigma)
         agent_m3 = build_mid_level_agent(alg_m, params_m, mdp, mu, sigma)
