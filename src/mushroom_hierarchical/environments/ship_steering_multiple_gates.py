@@ -14,7 +14,7 @@ class ShipSteeringMultiGate(Environment):
     2013 with multiple gates.
 
     """
-    def __init__(self, n_steps_action=3, viz_speed=100):
+    def __init__(self, n_steps_action=3, viz_speed=100, small=False):
 
         self.__name__ = 'ShipSteeringMultiGate'
         self.n_steps_action = n_steps_action
@@ -23,7 +23,9 @@ class ShipSteeringMultiGate(Environment):
         # MDP parameters
         self.no_of_gates = 4
 
-        self.field_size = 1000
+        self.small = small
+
+        self.field_size = 500 if small else 1000
         low = np.array([0, 0, -np.pi, -np.pi / 12., 0])
         high = np.array([self.field_size, self.field_size, np.pi, np.pi / 12.,
                          self.no_of_gates])
@@ -32,23 +34,23 @@ class ShipSteeringMultiGate(Environment):
         self._T = 5.
         self._dt = .2
 
-        gate_1s = np.array([150, 350])
-        gate_1e = np.array([250, 350])
+        gate_1s = np.array([75, 175]) if small else np.array([150, 350])
+        gate_1e = np.array([125, 175]) if small else np.array([250, 350])
 
         gate_1 = np.array([gate_1s, gate_1e])
 
-        gate_2s = np.array([300, 600])
-        gate_2e = np.array([400, 600])
+        gate_2s = np.array([150, 300]) if small else np.array([300, 600])
+        gate_2e = np.array([200, 300]) if small else np.array([400, 600])
 
         gate_2 = np.array([gate_2s, gate_2e])
 
-        gate_3s = np.array([500, 700])
-        gate_3e = np.array([600, 700])
+        gate_3s = np.array([250, 350]) if small else np.array([500, 700])
+        gate_3e = np.array([300, 350]) if small else np.array([600, 700])
 
         gate_3 = np.array([gate_3s, gate_3e])
 
-        gate_4s = np.array([300, 850])
-        gate_4e = np.array([400, 850])
+        gate_4s = np.array([150, 425]) if small else np.array([300, 850])
+        gate_4e = np.array([200, 425]) if small else np.array([400, 850])
 
         gate_4 = np.array([gate_4s, gate_4e])
 
