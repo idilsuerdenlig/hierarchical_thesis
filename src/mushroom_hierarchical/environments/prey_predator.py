@@ -70,9 +70,9 @@ class PreyPredator(Environment):
         gamma = 0.99
 
         observation_space = spaces.Box(low=-high, high=high)
-        action_space = spaces.Box(low=np.array([#0,
+        action_space = spaces.Box(low=np.array([0,
                                                 -self._omega_predator]),
-                                  high=np.array([#self._v_predator,
+                                  high=np.array([self._v_predator,
                                                  self._omega_predator]))
         mdp_info = MDPInfo(observation_space, action_space, gamma, horizon)
 
@@ -112,7 +112,6 @@ class PreyPredator(Environment):
         u = self._bound(action,
                         self.info.action_space.low,
                         self.info.action_space.high)
-        u = np.array([self._v_predator, u])
 
         state_predator = self._state[:3]
         state_predator = self._differential_drive_dynamics(state_predator, u)

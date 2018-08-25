@@ -17,6 +17,7 @@ from mushroom_hierarchical.blocks.control_block import ControlBlock
 from mushroom_hierarchical.blocks.basic_operation_block import *
 from mushroom_hierarchical.blocks.model_placeholder import PlaceHolder
 from mushroom_hierarchical.blocks.reward_accumulator import *
+from mushroom_hierarchical.blocks.hold_state import hold_state
 
 from network import Network
 
@@ -24,11 +25,11 @@ from network import Network
 def reward_low_level(ins):
     state = ins[0]
 
-    value = np.cos(state[0])
+    value = np.cos(state[1]) - state[0]
     return np.array([value])
 
 
-def compute_angle(ins):
+'''def compute_angle(ins):
     n_actions = 8
 
     state = ins[0]
@@ -46,7 +47,28 @@ def compute_angle(ins):
     else:
         theta_target = 2*np.pi/n_actions*action-np.pi
 
-    return np.array([theta_target])
+    return np.array([theta_target])'''
+
+def compute_stepoint(ins):
+    n_actions = 8
+    distance = 1.0
+
+    state = ins[0]
+    old_state = ins[1]
+    action = int(np.asscalar(ins[2]))
+    #return state[3:5]
+
+    if action == n_actions:
+        return state[3:5]
+    else:
+        theta_target = 2 * np.pi / n_actions * action - np.pi
+
+        del_x = np.cos(theta_target)*distance
+        del_y = np.sin(theta_target)*distance
+
+        del_vect = np.array([del_x, del_y])
+
+        return old_state + del_vect
 
 
 def pick_position(ins):
@@ -55,17 +77,22 @@ def pick_position(ins):
     return np.concatenate([state[0:2], state[3:5]], 0)
 
 
-def angle_error(ins):
-    theta = ins[0][2]
-    theta_ref = np.asscalar(ins[1])
+def polar_error(ins):
+    state = ins[0]
+    ref = ins[1]
+    delta_pos = ref - state[:2]
 
-    error = shortest_angular_distance(from_angle=theta,
-                                      to_angle=theta_ref)
-
-    return np.array([error])
+    rho = np.linalg.norm(delta_pos)
+    theta_ref = np.arctan2(delta_pos[1], delta_pos[0])
 
 
-def build_high_level_agent(alg, params, optim, loss, mdp, eps):
+    delta_theta = shortest_angular_distance(from_angle=state[2],
+                                            to_angle=theta_ref)
+
+    return np.array([rho, delta_theta])
+
+
+def build_high_level_agent(alg, params, optim, loss, mdp, horizon_low, eps):
     high = np.ones(4)
     low = np.zeros(4)
 
@@ -80,9 +107,9 @@ def build_high_level_agent(alg, params, optim, loss, mdp, eps):
     action_space = spaces.Discrete(n_actions)
 
     mdp_info = MDPInfo(observation_space=observation_space,
-                             action_space=action_space,
-                             gamma=mdp.info.gamma,
-                             horizon=mdp.info.horizon)
+                       action_space=action_space,
+                       gamma=mdp.info.gamma**horizon_low,
+                       horizon=mdp.info.horizon)
 
     pi = Boltzmann(eps)
 
@@ -101,17 +128,24 @@ def build_high_level_agent(alg, params, optim, loss, mdp, eps):
 
 
 def build_low_level_agent(alg, params, mdp, horizon, std):
-    basis = PolynomialBasis.generate(1, 2)
+    rho_max = np.linalg.norm(mdp.info.observation_space.high[:2] -
+                               mdp.info.observation_space.low[:2])
+    low = np.array([-np.pi, 0])
+    high = np.array([np.pi, rho_max])
+
+    basis = FourierBasis.generate(low, high, 10)
     features = Features(basis_list=basis)
-    features = None
-    approximator = Regressor(LinearApproximator, input_shape=(1,),
+
+    approximator = Regressor(LinearApproximator,
+                             input_shape=(features.size,),
                              output_shape=mdp.info.action_space.shape)
 
     pi = DiagonalGaussianPolicy(approximator, std)
 
-    mdp_info_agent = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
+    mdp_info_agent = MDPInfo(observation_space=spaces.Box(low, high),
                              action_space=mdp.info.action_space,
-                             gamma=mdp.info.gamma, horizon=horizon)
+                             gamma=mdp.info.gamma,
+                             horizon=horizon)
     agent = alg(pi, mdp_info_agent, features=features, **params)
 
     return agent
@@ -132,15 +166,16 @@ def build_computational_graph(mdp, agent_low, agent_high,
     function_block1 = fBlock(name='pick position',
                              phi=pick_position)
 
-    function_block2 = fBlock(name='compute angle',
-                             phi=compute_angle)
+    hold_block = hold_state(name='holdstate')
+
+    function_block2 = fBlock(name='compute setpoint',
+                             phi=compute_stepoint)
 
     function_block3 = fBlock(name='angle and distance',
-                             phi=angle_error)
-    function_block4 = fBlock(name='cost cosine', phi=reward_low_level)
+                             phi=polar_error)
+    function_block4 = fBlock(name='reward low level', phi=reward_low_level)
 
-    reward_acc = reward_accumulator_block(mdp.info.gamma,
-                                          name='reward accumulator')
+    reward_acc = mean_reward_block(name='mean reward')
 
     control_block_h = ControlBlock(name='Control Block H', agent=agent_high,
                                    n_steps_per_fit=1)
@@ -168,7 +203,11 @@ def build_computational_graph(mdp, agent_low, agent_high,
     control_block_h.add_reward(reward_acc)
     control_block_h.add_alarm_connection(control_block_l)
 
+    hold_block.add_input(state_ph)
+    hold_block.add_alarm_connection(control_block_l)
+
     function_block2.add_input(state_ph)
+    function_block2.add_input(hold_block)
     function_block2.add_input(control_block_h)
 
     function_block3.add_input(state_ph)
@@ -187,7 +226,7 @@ def experiment(mdp, agent_high, agent_low,
                n_epochs, n_episodes, ep_per_eval,
                ep_per_fit_low):
     np.random.seed()
-    quiet = True
+    quiet = False
 
     dataset_callback = CollectDataset()
 
@@ -205,7 +244,7 @@ def experiment(mdp, agent_high, agent_low,
     J_low_list = list()
     L = episodes_length(dataset)
     L_list.append(L)
-    # print('Reward at start :', J_list[-1])
+    print('Reward at start :', J_list[-1])
 
     #print('Press a key to run visualization')
     #input()
@@ -218,18 +257,18 @@ def experiment(mdp, agent_high, agent_low,
         dataset_callback.clean()
         J_low = compute_J(ll_dataset, mdp.info.gamma)
         J_low_list += J_low
-        #print('Low level reward at epoch', n, ':', np.mean(J_low))
+        print('Low level reward at epoch', n, ':', np.mean(J_low))
 
         dataset = core.evaluate(n_episodes=ep_per_eval, quiet=quiet)
         J = compute_J(dataset, gamma=mdp.info.gamma)
         J_list.append(np.mean(J))
         L = episodes_length(dataset)
         L_list.append(L)
-        #print('Reward at epoch ', n, ':',  J_list[-1])
+        print('Reward at epoch ', n, ':',  J_list[-1])
 
         #print('Press a key to run visualization')
         #input()
-        #core.evaluate(n_episodes=1, render=True)
+        core.evaluate(n_episodes=1, render=True)
 
     #print('Press a key to run visualization')
     #input()
