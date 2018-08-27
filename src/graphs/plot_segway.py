@@ -4,7 +4,7 @@ import numpy as np
 from common import *
 
 
-base_dir = '../results/segway_2018-08-08_14-13-16'
+base_dir = '../results/segway'
 algs = [
         'REPS',
         'RWR',
