@@ -226,7 +226,7 @@ def build_computational_graph(mdp, agent_low, agent_high,
 
 def experiment(mdp, agent_high, agent_low,
                n_epochs, n_episodes, ep_per_eval,
-               ep_per_fit_low):
+               ep_per_fit_low, display, print_j):
     np.random.seed()
     quiet = False
 
@@ -246,7 +246,8 @@ def experiment(mdp, agent_high, agent_low,
     J_low_list = list()
     L = episodes_length(dataset)
     L_list.append(L)
-    print('Reward at start :', J_list[-1])
+    if print_j:
+        print('Reward at start :', J_list[-1])
 
     #print('Press a key to run visualization')
     #input()
@@ -259,18 +260,20 @@ def experiment(mdp, agent_high, agent_low,
         dataset_callback.clean()
         J_low = compute_J(ll_dataset, mdp.info.gamma)
         J_low_list += J_low
-        print('Low level reward at epoch', n, ':', np.mean(J_low))
+        if print_j:
+            print('Low level reward at epoch', n, ':', np.mean(J_low))
 
         dataset = core.evaluate(n_episodes=ep_per_eval, quiet=quiet)
         J = compute_J(dataset, gamma=mdp.info.gamma)
         J_list.append(np.mean(J))
         L = episodes_length(dataset)
         L_list.append(L)
-        print('Reward at epoch ', n, ':',  J_list[-1])
 
-        #print('Press a key to run visualization')
-        #input()
-        core.evaluate(n_episodes=1, render=True)
+        if print_j:
+            print('Reward at epoch ', n, ':',  J_list[-1])
+
+        if display:
+            core.evaluate(n_episodes=1, render=True)
 
     #print('Press a key to run visualization')
     #input()

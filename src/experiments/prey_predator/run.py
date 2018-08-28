@@ -30,6 +30,8 @@ if __name__ == '__main__':
     #n_features = 200
     n_features = 300
     use_cuda = False
+    display = False
+    print_j = True
 
     mdp = PreyPredator()
 
@@ -83,7 +85,8 @@ if __name__ == '__main__':
                                        n_epochs,
                                        ep_per_epoch,
                                        ep_per_eval,
-                                       ep_per_fit_low)
+                                       ep_per_fit_low,
+                                       display, print_j)
                                       for _ in range(how_many))
 
         J, L, Jlow = parse_joblib(res)
