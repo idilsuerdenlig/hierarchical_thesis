@@ -226,9 +226,8 @@ def build_computational_graph(mdp, agent_low, agent_high,
 
 def experiment(mdp, agent_high, agent_low,
                n_epochs, n_episodes, ep_per_eval,
-               ep_per_fit_low, display, print_j):
+               ep_per_fit_low, display, print_j, quiet):
     np.random.seed()
-    quiet = False
 
     dataset_callback = CollectDataset()
 
