@@ -92,7 +92,8 @@ def polar_error(ins):
     return np.array([rho, delta_theta])
 
 
-def build_high_level_agent(alg, params, optim, loss, mdp, horizon_low, eps):
+def build_high_level_agent(alg, params, optim, loss, mdp, horizon_low, eps,
+                           n_features, use_cuda):
     high = np.ones(4)
     low = np.zeros(4)
 
@@ -116,10 +117,11 @@ def build_high_level_agent(alg, params, optim, loss, mdp, horizon_low, eps):
     approximator_params = dict(network=Network,
                                optimizer=optim,
                                loss=loss,
-                               n_features=200,
+                               n_features=n_features,
                                input_shape=mdp_info.observation_space.shape,
                                output_shape=mdp_info.action_space.size,
-                               n_actions=mdp_info.action_space.n)
+                               n_actions=mdp_info.action_space.n,
+                               use_cuda=use_cuda)
 
     agent = alg(PyTorchApproximator, pi, mdp_info,
                 approximator_params=approximator_params, **params)

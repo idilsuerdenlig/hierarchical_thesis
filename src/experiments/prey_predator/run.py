@@ -27,6 +27,10 @@ if __name__ == '__main__':
 
     ep_per_fit_low = 10
 
+    #n_features = 200
+    n_features = 300
+    use_cuda = False
+
     mdp = PreyPredator()
 
     # directory
@@ -42,7 +46,7 @@ if __name__ == '__main__':
                  'params': {'lr': 1e-3,
                             'centered': True}}
 
-    p = dict(
+    p_dqn = dict(
         clip_reward=False,
         initial_replay_size=5000,
         max_replay_size=100000,
@@ -51,21 +55,29 @@ if __name__ == '__main__':
         n_approximators=1,
     )
 
+    p_gpomdp = dict(
+        #learning_rate=AdaptiveParameter(value=5e-5)
+        learning_rate=Parameter(value=1e-3)
+    )
+
     algs_and_params_hier = [
-        (DQN, p, GPOMDP, {'learning_rate': AdaptiveParameter(value=1e-3)})
+        (DQN, p_dqn, GPOMDP, p_gpomdp)
     ]
 
     eps = ExponentialDecayParameter(1, -0.2)
     #eps = Parameter(1.0)
     std_low = 1e-1*np.ones(2)
     horizon = 10
-    lr = 1e-3
+
     for alg_h, params_h, alg_l, params_l in algs_and_params_hier:
         agent_h = build_high_level_agent(alg_h, params_h, optimizer,
-                                         SmoothL1Loss(), mdp, horizon, eps)
+                                         SmoothL1Loss(), mdp, horizon, eps,
+                                         n_features, use_cuda)
         agent_l = build_low_level_agent(alg_l, params_l, mdp, horizon, std_low)
 
         print('High: ', alg_h.__name__, ' Low: ', alg_l.__name__)
+        print('lr: ', p_gpomdp['learning_rate'].__class__.__name__, p_gpomdp[
+            'learning_rate']._initial_value)
         res = Parallel(n_jobs=n_jobs)(delayed(experiment)
                                       (mdp, agent_h, agent_l,
                                        n_epochs,
