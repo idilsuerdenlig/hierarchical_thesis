@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.stats as st
 import matplotlib.pyplot as plt
+from matplotlib2tikz import save as tikz_save
 
 
 def get_mean_and_confidence(data):
@@ -14,7 +15,8 @@ def get_mean_and_confidence(data):
 
 
 def create_plot(algs, colors, dictionary, y_label, legend=False,
-                x_label='epoch', logarithmic=False):
+                x_label='epoch', logarithmic=False, output_dir='',
+                plot_name='figure'):
     plt.figure()
 
     if logarithmic:
@@ -31,8 +33,7 @@ def create_plot(algs, colors, dictionary, y_label, legend=False,
     plt.ylabel(y_label)
 
 
-    '''
-    tikz_save(output_dir + '/' + plot_name + '.tex',
+    if output_dir:
+        tikz_save(output_dir + '/' + plot_name + '.tex',
                   figureheight='\\figureheight',
                   figurewidth='\\figurewidth')
-    '''

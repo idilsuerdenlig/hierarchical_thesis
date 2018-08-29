@@ -1,16 +1,16 @@
-import matplotlib.pyplot as plt
-import numpy as np
-
+from mushroom.utils.folder import mk_dir_recursive
 from common import *
 
 
 base_dir = '../results/segway'
+output_dir = '/home/dave/phd_thesis/images/hierarchical/segway'
+mk_dir_recursive(output_dir)
+
 algs = [
         'REPS',
         'RWR',
         'H_RWR_RWR',
         'H_REPS_RWR']
-        #'H_GPOMDP_PGPE']
 
 colors = ['b', 'r', 'g', 'c', 'm']
 
@@ -25,8 +25,10 @@ for alg in algs:
     L = np.load(base_dir + '/L_' + alg + '.npy')
     L_results[alg] = get_mean_and_confidence(L)
 
-create_plot(algs, colors, J_results, 'J', legend=True, logarithmic=True)
-create_plot(algs, colors, L_results, 'L', legend=True)
+create_plot(algs, colors, J_results, 'J', legend=True, logarithmic=True,
+            output_dir=output_dir, plot_name='J')
+create_plot(algs, colors, L_results, 'L', legend=False,
+            output_dir=output_dir, plot_name='L')
 
 plt.show()
 
