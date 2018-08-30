@@ -68,10 +68,10 @@ def pick_state(inputs):
 def build_high_level_ghavamzadeh(alg, params, mdp):
     epsilon = Parameter(value=0.1)
     pi = EpsGreedy(epsilon=epsilon)
-
+    gamma = 1.0
     mdp_info_agentH = MDPInfo(
         observation_space=spaces.Discrete(400),
-        action_space=spaces.Discrete(8), gamma=0.9, horizon=10000)
+        action_space=spaces.Discrete(8), gamma=gamma, horizon=10000)
 
     agent = alg(policy=pi,
                 mdp_info=mdp_info_agentH,

@@ -39,7 +39,7 @@ if __name__ == '__main__':
     force_symlink('./' + subdir, name + '_latest')
 
     # HIERARCHICAL
-    algs_and_params_hier = [
+    '''algs_and_params_hier = [
         (GPOMDP, {'learning_rate': AdaptiveParameter(value=50)},
          PGPE, {'learning_rate': AdaptiveParameter(value=5e-4)})
     ]
@@ -62,7 +62,7 @@ if __name__ == '__main__':
                                       for _ in range(how_many))
         J, L = parse_joblib(res)
         np.save(subdir + '/J_H_' + alg_h.__name__ + '_' + alg_l.__name__, J)
-        np.save(subdir + '/L_H_' + alg_h.__name__ + '_' + alg_l.__name__, L)
+        np.save(subdir + '/L_H_' + alg_h.__name__ + '_' + alg_l.__name__, L)'''
 
     # GHAVAMZADEH
     params_high = {'learning_rate': Parameter(value=8e-2), 'lambda_coeff': 0.9}
