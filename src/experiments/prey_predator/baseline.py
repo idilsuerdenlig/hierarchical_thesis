@@ -30,24 +30,8 @@ def reward_low_level(ins):
 
 
 def compute_stepoint(ins):
-    n_actions = 8
-    distance = 1.0
-
     state = ins[0]
-    old_state = ins[1]
-    action = int(np.asscalar(ins[2]))
-
-    if action == n_actions:
-        return state[3:5]
-    else:
-        theta_target = 2 * np.pi / n_actions * action - np.pi
-
-        del_x = np.cos(theta_target)*distance
-        del_y = np.sin(theta_target)*distance
-
-        del_vect = np.array([del_x, del_y])
-
-        return old_state + del_vect
+    return state[3:5]
 
 
 def pick_position(ins):
@@ -64,53 +48,15 @@ def polar_error(ins):
     rho = np.linalg.norm(delta_pos)
     theta_ref = np.arctan2(delta_pos[1], delta_pos[0])
 
-
     delta_theta = shortest_angular_distance(from_angle=state[2],
                                             to_angle=theta_ref)
 
     return np.array([rho, delta_theta])
 
 
-def build_high_level_agent(alg, params, optim, loss, mdp, horizon_low, eps,
-                           n_features, use_cuda):
-    high = np.ones(4)
-    low = np.zeros(4)
-
-    high[:2] = mdp.info.observation_space.high[:2]
-    low[:2] = mdp.info.observation_space.low[:2]
-
-    high[2:] = mdp.info.observation_space.high[3:5]
-    low[2:] = mdp.info.observation_space.low[3:5]
-
-    n_actions = 9
-    observation_space = spaces.Box(low=low, high=high)
-    action_space = spaces.Discrete(n_actions)
-
-    mdp_info = MDPInfo(observation_space=observation_space,
-                       action_space=action_space,
-                       gamma=mdp.info.gamma**horizon_low,
-                       horizon=mdp.info.horizon)
-
-    pi = Boltzmann(eps)
-
-    approximator_params = dict(network=Network,
-                               optimizer=optim,
-                               loss=loss,
-                               n_features=n_features,
-                               input_shape=mdp_info.observation_space.shape,
-                               output_shape=mdp_info.action_space.size,
-                               n_actions=mdp_info.action_space.n,
-                               use_cuda=use_cuda)
-
-    agent = alg(PyTorchApproximator, pi, mdp_info,
-                approximator_params=approximator_params, **params)
-
-    return agent
-
-
-def build_low_level_agent(alg, params, mdp, horizon, std):
+def build_baseline_agent(alg, params, mdp, horizon, std):
     rho_max = np.linalg.norm(mdp.info.observation_space.high[:2] -
-                               mdp.info.observation_space.low[:2])
+                             mdp.info.observation_space.low[:2])
     low = np.array([-np.pi, 0])
     high = np.array([np.pi, rho_max])
 
@@ -132,8 +78,8 @@ def build_low_level_agent(alg, params, mdp, horizon, std):
     return agent
 
 
-def build_computational_graph(mdp, agent_low, agent_high,
-                              ep_per_fit_low, low_level_callbacks=[]):
+def build_computational_graph_baseline(mdp, agent, ep_per_fit,
+                                       low_level_callbacks=[]):
 
     # State Placeholder
     state_ph = PlaceHolder(name='state_ph')
@@ -144,75 +90,49 @@ def build_computational_graph(mdp, agent_low, agent_high,
     # Last_In Placeholder
     lastaction_ph = PlaceHolder(name='lastaction_ph')
 
-    function_block1 = fBlock(name='pick position',
-                             phi=pick_position)
-
-    hold_block = hold_state(name='holdstate')
-
-    function_block2 = fBlock(name='compute setpoint',
+    function_block1 = fBlock(name='compute setpoint',
                              phi=compute_stepoint)
 
-    function_block3 = fBlock(name='angle and distance',
+    function_block2 = fBlock(name='angle and distance',
                              phi=polar_error)
-    function_block4 = fBlock(name='reward low level', phi=reward_low_level)
+    function_block3 = fBlock(name='reward low level', phi=reward_low_level)
 
-    reward_acc = mean_reward_block(name='mean reward')
-
-    control_block_h = ControlBlock(name='Control Block H', agent=agent_high,
-                                   n_steps_per_fit=1)
-
-    control_block_l = ControlBlock(name='Control Block L', agent=agent_low,
-                                   n_eps_per_fit=ep_per_fit_low,
-                                   callbacks=low_level_callbacks)
+    control_block = ControlBlock(name='Control Block', agent=agent,
+                                 n_eps_per_fit=ep_per_fit,
+                                 callbacks=low_level_callbacks)
 
     blocks = [state_ph, reward_ph, lastaction_ph,
-              control_block_h, control_block_l,
-              function_block1, function_block2,
-              function_block3, function_block4,
-              reward_acc]
+              function_block1,
+              function_block2, function_block3,
+              control_block]
 
-    state_ph.add_input(control_block_l)
-    reward_ph.add_input(control_block_l)
-    lastaction_ph.add_input(control_block_l)
+    state_ph.add_input(control_block)
+    reward_ph.add_input(control_block)
+    lastaction_ph.add_input(control_block)
 
     function_block1.add_input(state_ph)
 
-    reward_acc.add_input(reward_ph)
-    reward_acc.add_alarm_connection(control_block_l)
-
-    control_block_h.add_input(function_block1)
-    control_block_h.add_reward(reward_acc)
-    control_block_h.add_alarm_connection(control_block_l)
-
-    hold_block.add_input(state_ph)
-    hold_block.add_alarm_connection(control_block_l)
-
     function_block2.add_input(state_ph)
-    function_block2.add_input(hold_block)
-    function_block2.add_input(control_block_h)
+    function_block2.add_input(function_block1)
 
-    function_block3.add_input(state_ph)
     function_block3.add_input(function_block2)
 
-    function_block4.add_input(function_block3)
-
-    control_block_l.add_input(function_block3)
-    control_block_l.add_reward(function_block4)
+    control_block.add_input(function_block2)
+    control_block.add_reward(function_block3)
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
 
     return computational_graph
 
 
-def experiment(mdp, agent_high, agent_low,
-               n_epochs, n_episodes, ep_per_eval,
-               ep_per_fit_low, display, print_j, quiet):
+def baseline_experiment(mdp, agent,
+                        n_epochs, n_episodes, ep_per_eval,
+                        ep_per_fit, display, print_j, quiet):
     np.random.seed()
 
     dataset_callback = CollectDataset()
 
-    computational_graph = build_computational_graph(
-        mdp, agent_low, agent_high, ep_per_fit_low,
-        [dataset_callback])
+    computational_graph = build_computational_graph_baseline(
+        mdp, agent, ep_per_fit, [dataset_callback])
 
     core = HierarchicalCore(computational_graph)
     J_list = list()
