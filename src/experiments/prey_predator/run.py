@@ -95,7 +95,8 @@ if __name__ == '__main__':
         n_approximators=1,
     )
     algs_and_params_discretized = [
-            (DQN, p_dqn_d)
+        (DQN, p_dqn_d),
+        (DoubleDQN, p_dqn_d)
     ]
 
     n_actions = [4, 4]
