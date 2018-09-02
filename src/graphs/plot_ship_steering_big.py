@@ -6,9 +6,12 @@ from common import *
 base_dir = '../results/ship_steering_big'
 output_dir = '/home/dave/phd_thesis/images/hierarchical/ship_steering_big'
 mk_dir_recursive(output_dir)
+output_dir = ''
 
 algs = ['H_GPOMDP_PGPE',
-        'ghavamzadeh'
+        'ghavamzadeh',
+        'ghavamzadeh_99',
+        'ghavamzadeh_1'
         ]
 
 colors = ['b', 'r', 'g', 'c', 'm']
