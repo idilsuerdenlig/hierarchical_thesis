@@ -133,7 +133,7 @@ def discretized_experiment(mdp, agent, n_actions, n_epochs, n_episodes,
     J = compute_J(dataset, gamma=mdp.info.gamma)
     J_list.append(np.mean(J))
     L = episodes_length(dataset)
-    L_list.append(L)
+    L_list.append(np.mean(L))
     if print_j:
         print('Reward at start :', J_list[-1])
 
