@@ -45,9 +45,9 @@ class ActionConverter:
         actions = itertools.product(*value_list)
         self._actions = [np.array(x) for x in actions]
 
-        print('Actions used:')
-        for i, a in enumerate(self._actions):
-            print(i, ':', a)
+        #print('Actions used:')
+        #for i, a in enumerate(self._actions):
+        #    print(i, ':', a)
 
     def __call__(self, ins):
         i = int(np.asscalar(ins[0]))
