@@ -8,6 +8,8 @@ from mushroom.utils.dataset import compute_J
 from mushroom.utils import spaces
 from mushroom.features.features import *
 from mushroom.features.basis import PolynomialBasis
+from mushroom.utils.parameters import AdaptiveParameter, Parameter
+
 
 from mushroom_hierarchical.core.hierarchical_core import HierarchicalCore
 from mushroom_hierarchical.blocks.computational_graph import ComputationalGraph
@@ -81,6 +83,25 @@ class TerminationCondition(object):
             self.gate_state_old = gate_state
             return False
 
+class TerminationConditionLow(object):
+
+    def __init__(self, small):
+        self.small = small
+
+    def __call__(self, state):
+
+        if self.small:
+            lim = 0.5
+        else:
+            lim = 2
+        #goal_pos = np.array([state[0], state[1]])
+        #pos = np.array([state[2], state[3]])
+        #if np.linalg.norm(pos-goal_pos) <= lim:
+        if state[1] <= lim:
+            return True
+        else:
+            return False
+
 def build_high_level_agent(alg, params, mdp, epsilon):
     pi = EpsGreedy(epsilon=epsilon, )
     mdp_info_high = MDPInfo(observation_space=spaces.Discrete(16),
@@ -108,7 +129,7 @@ def build_mid_level_agent(alg, params, mdp, mu, std):
     features = BasisFeatures(basis=[basis])
     mdp_info_agent1 = MDPInfo(observation_space=spaces.Box(0, 1, (1,)),
                               action_space=spaces.Box(0, lim, (2,)),
-                              gamma=mdp.info.gamma,
+                              gamma=1,
                               horizon=10)
     agent = alg(policy=pi, mdp_info=mdp_info_agent1, features=features, **params)
 
@@ -116,6 +137,8 @@ def build_mid_level_agent(alg, params, mdp, mu, std):
 
 
 def build_low_level_agent(alg, params, mdp):
+    features = Features(basis_list=[PolynomialBasis(dimensions=[0], degrees=[1])])
+
     pi = DeterministicControlPolicy(weights=np.array([0]))
     mu = np.zeros(pi.weights_size)
     sigma = 1e-3 * np.ones(pi.weights_size)
@@ -124,7 +147,7 @@ def build_low_level_agent(alg, params, mdp):
     mdp_info_agent2 = MDPInfo(observation_space=spaces.Box(-np.pi, np.pi, (1,)),
                               action_space=mdp.info.action_space,
                               gamma=mdp.info.gamma, horizon=100)
-    agent = alg(distribution,pi, mdp_info_agent2, **params)
+    agent = alg(distribution,pi, mdp_info_agent2, features=features, **params)
 
     return agent
 
@@ -182,8 +205,9 @@ def build_computational_graph(mdp, agent_low, agent_m0,
     control_block_m3 = ControlBlock(name='Control Block M3', agent=agent_m3,
                                     n_eps_per_fit=ep_per_fit_mid, termination_condition=termination_condition_m4)
     # Control Block L
+    termination_condition_low = TerminationConditionLow(mdp.small)
     control_block_l = ControlBlock(name='Control Block L', agent=agent_low,
-                                   n_eps_per_fit=ep_per_fit_low)
+                                   n_eps_per_fit=ep_per_fit_low, termination_condition=termination_condition_low)
     # Selector Block
     mux_block = MuxBlock(name='Mux Block')
     mux_block.add_block_list([control_block_m0])
@@ -193,13 +217,13 @@ def build_computational_graph(mdp, agent_low, agent_m0,
 
     # Reward Accumulators
     reward_acc = mean_reward_block(name='reward_acc_h')
-    reward_acc_m0 = reward_accumulator_block(gamma=1,
+    reward_acc_m0 = reward_accumulator_block(gamma=mdp.info.gamma,
                                              name='reward_acc_m0')
-    reward_acc_m1 = reward_accumulator_block(gamma=1,
+    reward_acc_m1 = reward_accumulator_block(gamma=mdp.info.gamma,
                                              name='reward_acc_m1')
-    reward_acc_m2 = reward_accumulator_block(gamma=1,
+    reward_acc_m2 = reward_accumulator_block(gamma=mdp.info.gamma,
                                              name='reward_acc_m2')
-    reward_acc_m3 = reward_accumulator_block(gamma=1,
+    reward_acc_m3 = reward_accumulator_block(gamma=mdp.info.gamma,
                                              name='reward_acc_m3')
 
     # Algorithm
@@ -292,7 +316,13 @@ def hierarchical_experiment(mdp, agent_l, agent_m1,
     J_list.append(np.mean(J))
     print('J at start: ', np.mean(J))
     print('Mean gates passed: ', count_gates(dataset))
+
+
     for n in range(n_epochs):
+
+        curr_learning_rate = agent_h.alpha
+
+        agent_h.alpha = Parameter(value=0.0)
         core.learn(n_episodes=n_iterations * ep_per_epoch_train, skip=True,
                    quiet=False)
         dataset = core.evaluate(n_episodes=ep_per_epoch_eval, quiet=True, render=True)
@@ -300,6 +330,14 @@ def hierarchical_experiment(mdp, agent_l, agent_m1,
         J_list.append(np.mean(J))
         print('J at iteration ', n, ': ', np.mean(J))
         print('Mean gates passed: ', count_gates(dataset))
+
+        print('Policy Parameters M1', agent_m1.policy.get_weights())
+        print('Policy Parameters M2', agent_m2.policy.get_weights())
+        print('Policy Parameters M3', agent_m3.policy.get_weights())
+        print('Policy Parameters M4', agent_m4.policy.get_weights())
+
+        agent_h.alpha = curr_learning_rate
+
 
     return J_list
 

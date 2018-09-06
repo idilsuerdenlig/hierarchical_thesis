@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     how_many = 1#00
     n_epochs = 50
-    ep_per_epoch_train = 100
+    ep_per_epoch_train = 20
     ep_per_epoch_eval = 5
     n_iterations = 10
 
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     # Hierarchical
     algs_and_params_hier = [
         (QLearning, {'learning_rate': Parameter(value=0.6)},
-        GPOMDP, {'learning_rate': AdaptiveParameter(value=50) if mdp.small else AdaptiveParameter(value=12.5)},
+        GPOMDP, {'learning_rate': AdaptiveParameter(value=50) if mdp.small else AdaptiveParameter(value=25)},
         PGPE, {'learning_rate': AdaptiveParameter(value=5e-4)})
          ]
 
@@ -48,7 +48,7 @@ if __name__ == '__main__':
         agent_h = build_high_level_agent(alg_h, params_h, mdp, epsilon)
 
         mu = 250 if mdp.small else 500
-        sigma = 50 if mdp.small else 250
+        sigma = 125 if mdp.small else 250
         agent_m1 = build_mid_level_agent(alg_m, params_m, mdp, mu, sigma)
         agent_m2 = build_mid_level_agent(alg_m, params_m, mdp, mu, sigma)
         agent_m3 = build_mid_level_agent(alg_m, params_m, mdp, mu, sigma)
