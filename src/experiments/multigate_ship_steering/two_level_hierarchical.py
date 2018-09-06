@@ -8,6 +8,7 @@ from mushroom.utils.dataset import compute_J
 from mushroom.utils import spaces
 from mushroom.features.features import *
 from mushroom.features.basis import PolynomialBasis
+from mushroom.features.tiles import Tiles
 from mushroom.utils.parameters import AdaptiveParameter, Parameter
 
 
@@ -37,18 +38,18 @@ def count_gates(dataset):
 
 def hi_lev_state(ins):
     state = np.concatenate(ins)
-    res = 0
+    #res = 0
 
-    for i in [4, 5, 6, 7]:
-        if state[i] > 0:
-            res += 2**(i-4)
+    #for i in [4, 5, 6, 7]:
+    #    if state[i] > 0:
+    #        res += 2**(i-4)
 
-    return np.array([state[0], state[1], res])
+    return np.array([state[0], state[1]])
 
 
 def compute_pos_ref(ins):
     theta_ref = ins[0]
-    state = np.concatenate(ins[1])
+    state = ins[1]
     x = state[0]
     y = state[1]
     x_ref = x + 2*np.cos(theta_ref)
@@ -68,29 +69,39 @@ class TerminationConditionLow(object):
             lim = 0.25
         else:
             lim = 1
-        goal_pos = np.array([state[1], state[2]])
-        pos = np.array([state[3][0], state[3][1]])
-        if np.linalg.norm(pos-goal_pos) <= lim:
+        pos_diff = state[1]
+        if pos_diff <= lim:
             return True
         else:
             return False
 
 
 def build_high_level_agent(alg, params, mdp, mu, std):
+    tilings = Tiles.generate(n_tilings=3, n_tiles=[10, 10], low=[0, 500], high=[0, 500])
+    features = Features(tilings=tilings)
 
-    mu_approximator = Regressor(LinearApproximator, input_shape=(2,),
+    input_shape = (features.size,)
+
+
+    mu_approximator = Regressor(LinearApproximator, input_shape=input_shape,
                                 output_shape=(1,))
+    std_approximator = Regressor(LinearApproximator, input_shape=input_shape,
+                                 output_shape=(1,))
 
     w_mu = mu*np.ones(mu_approximator.weights_size)
     mu_approximator.set_weights(w_mu)
 
-    pi = StateLogStdGaussianPolicy(mu=mu_approximator,
-                                log_std=std*np.ones(1))
+    w_std = std * np.ones(std_approximator.weights_size)
+    mu_approximator.set_weights(w_std)
 
-    basis = PolynomialBasis()
-    features = BasisFeatures(basis=[basis])
-    mdp_info_agent1 = MDPInfo(observation_space=spaces.Box(mdp.info.observation_space.low[0:1],
-                                                           mdp.info.observation_space.high[0:1],
+    pi = StateLogStdGaussianPolicy(mu=mu_approximator,
+                                log_std=std_approximator)
+
+
+    obs_low = np.array([mdp.info.observation_space.low[0], mdp.info.observation_space.low[1]])
+    obs_high = np.array([mdp.info.observation_space.high[0], mdp.info.observation_space.high[1]])
+    mdp_info_agent1 = MDPInfo(observation_space=spaces.Box(obs_low,
+                                                           obs_high,
                                                            shape=(2,)),
                               action_space=spaces.Box(mdp.info.observation_space.low[2],
                                                       mdp.info.observation_space.high[2],
@@ -185,7 +196,6 @@ def build_computational_graph(mdp, agent_low, agent_high,
     function_block3.add_alarm_connection(control_block_l)
 
     control_block_l.add_input(function_block1)
-    control_block_l.add_input(state_ph)
     control_block_l.add_reward(function_block2)
 
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
