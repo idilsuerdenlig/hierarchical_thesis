@@ -37,14 +37,14 @@ if __name__ == '__main__':
 
     # Hierarchical
     algs_and_params_hier = [
-        (GPOMDP, {'learning_rate': AdaptiveParameter(value=25) if mdp.small else AdaptiveParameter(value=50)},
+        (GPOMDP, {'learning_rate': AdaptiveParameter(value=1)},
         PGPE, {'learning_rate': AdaptiveParameter(value=5e-4)})
          ]
 
     for alg_h, params_h, alg_l, params_l in algs_and_params_hier:
 
         mu = 0
-        sigma = 1
+        sigma = 0.15
         agent_h = build_high_level_agent(alg_h, params_h, mdp, mu, sigma)
 
 
