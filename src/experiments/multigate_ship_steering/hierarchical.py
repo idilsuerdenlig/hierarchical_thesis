@@ -37,12 +37,10 @@ def count_gates(dataset):
 
 def hi_lev_state(ins):
     x = np.concatenate(ins)
-    out = np.zeros(4)
     res = 0
 
     for i in [4, 5, 6, 7]:
         if x[i] > 0:
-            out[i-4] = 1
             res += 2**(i-4)
 
     return np.array([res])
@@ -72,8 +70,7 @@ class TerminationCondition(object):
         self.gate_no = gate_no
         self.gate_state_old = 0
 
-    def __call__(self, ins):
-        state = ins
+    def __call__(self, state):
         gate_state = state[self.gate_no+4]
 
         if gate_state > self.gate_state_old:
