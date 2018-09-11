@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     how_many = 1#00
     n_epochs = 50
-    ep_per_epoch_train = 20
+    ep_per_epoch_train = 100
     ep_per_epoch_eval = 5
     n_iterations = 10
 
@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
     # Hierarchical
     algs_and_params_hier = [
-        (GPOMDP, {'learning_rate': AdaptiveParameter(value=1)},
+        (GPOMDP, {'learning_rate': Parameter(value=0.33)},
         PGPE, {'learning_rate': AdaptiveParameter(value=5e-4)})
          ]
 

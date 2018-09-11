@@ -77,7 +77,7 @@ class TerminationConditionLow(object):
 
 
 def build_high_level_agent(alg, params, mdp, mu, std):
-    tilings = Tiles.generate(n_tilings=3, n_tiles=[10, 10], low=[0, 500], high=[0, 500])
+    tilings = Tiles.generate(n_tilings=1, n_tiles=[5, 5], low=[0, 500], high=[0, 500])
     features = Features(tilings=tilings)
 
     input_shape = (features.size,)
