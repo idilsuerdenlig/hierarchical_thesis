@@ -44,7 +44,7 @@ if __name__ == '__main__':
     for alg_h, params_h, alg_l, params_l in algs_and_params_hier:
 
         mu = 0
-        sigma = 0.15
+        sigma = 0.45
         agent_h = build_high_level_agent(alg_h, params_h, mdp, mu, sigma)
 
 
