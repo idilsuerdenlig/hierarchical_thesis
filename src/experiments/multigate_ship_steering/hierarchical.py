@@ -291,7 +291,7 @@ def build_computational_graph(mdp, agent_low, agent_m0,
 
     computational_graph = ComputationalGraph(blocks=blocks, model=mdp)
 
-    return computational_graph
+    return computational_graph, control_block_h
 
 
 def hierarchical_experiment(mdp, agent_l, agent_m1,
@@ -301,7 +301,7 @@ def hierarchical_experiment(mdp, agent_l, agent_m1,
                             ep_per_epoch_eval, ep_per_fit_low, ep_per_fit_mid):
     np.random.seed()
 
-    computational_graph = build_computational_graph(mdp, agent_l, agent_m1,
+    computational_graph, control_block_h = build_computational_graph(mdp, agent_l, agent_m1,
                                                     agent_m2, agent_m3, agent_m4,
                                                     agent_h,
                                                     ep_per_fit_low, ep_per_fit_mid)
